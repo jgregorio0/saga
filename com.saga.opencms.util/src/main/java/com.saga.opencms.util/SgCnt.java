@@ -473,6 +473,27 @@ public class SgCnt {
 	}
 
 	/**
+	 * Add value to content definition
+	 * @param element
+	 * @return
+	 */
+	public I_CmsXmlContentValue addValue(String element) {
+		return xmlContent.addValue(cmso, element, locale, count(element));
+	}
+
+	/**
+	 * Add value to content definition
+	 * @param element
+	 * @param value
+	 * @return
+	 */
+	public SgCnt addValue(String element, String value) throws Exception {
+		I_CmsXmlContentValue xmlValue = addValue(element);
+		setStringValue(element, value, xmlValue.getIndex());
+		return this;
+	}
+
+	/**
 	 * Check if the content has value for element in the position
 	 * @param element
 	 * @param pos
