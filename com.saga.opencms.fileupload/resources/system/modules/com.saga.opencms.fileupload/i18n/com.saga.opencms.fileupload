@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<XmlVfsBundles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/org.opencms.ade.config/schemas/xmlvfsbundle.xsd">
+  <Bundle language="es">
+    <Message>
+      <Key><![CDATA[upload.folder]]></Key>
+      <Value><![CDATA[/.galleries/upload-files]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.max.size.kbytes]]></Key>
+      <Value><![CDATA[3MB]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.header]]></Key>
+      <Value><![CDATA[Seleccione el documento y pulse subir]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.intro]]></Key>
+      <Value><![CDATA[Seleccione el documento y pulse subir]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.button]]></Key>
+      <Value><![CDATA[Subir]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.formats]]></Key>
+      <Value><![CDATA[pdf|jpg]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.bottomtext]]></Key>
+      <Value><![CDATA[Asegúrese de que el fichero es menor de 3MB y en formato PDF o JPG]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.button.text]]></Key>
+      <Value><![CDATA[Subir documentos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.button.icon]]></Key>
+      <Value><![CDATA[fa fa-cloud-upload]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.path]]></Key>
+      <Value><![CDATA[/uploadfile/]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.label]]></Key>
+      <Value><![CDATA[Fichero:]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.header]]></Key>
+      <Value><![CDATA[Subir documentación]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.form.buttontext]]></Key>
+      <Value><![CDATA[Subir]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.success.1]]></Key>
+      <Value><![CDATA[El fichero se ha subido correctamente]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[upload.success.2]]></Key>
+      <Value><![CDATA[Los ficheros se han subido correctamente]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.upload.none]]></Key>
+      <Value><![CDATA[Debe añadir un fichero]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.size.format]]></Key>
+      <Value><![CDATA[El tamaño máximo debe indicarse con GB, MB, KB o B.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.upload.generic]]></Key>
+      <Value><![CDATA[Error realizando la subida. Si el error persiste pongase en contacto con el administrador]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.upload.oversize]]></Key>
+      <Value><![CDATA[El fichero excede el tamaño máximo]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.upload.file]]></Key>
+      <Value><![CDATA[Error subiendo fichero]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.publish.file]]></Key>
+      <Value><![CDATA[Error publicando el fichero]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.filetype.notfound]]></Key>
+      <Value><![CDATA[Error buscando type para la subida del fichero]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.validation]]></Key>
+      <Value><![CDATA[Los datos no son válidos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.permission]]></Key>
+      <Value><![CDATA[No tiene permisos para subir ficheros]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.user]]></Key>
+      <Value><![CDATA[No tiene permisos para subir ficheros]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.db.generate.id]]></Key>
+      <Value><![CDATA[Error al generar id para la base de datos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.db.connection]]></Key>
+      <Value><![CDATA[Error al conectarse con la base de datos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.db.save]]></Key>
+      <Value><![CDATA[Error al insertar fichero en la base de datos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.site.none]]></Key>
+      <Value><![CDATA[Error al insertar fichero en la base de datos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.no.encuesta.realizada]]></Key>
+      <Value><![CDATA[Antes de subir la documentación debe realizar la encuesta de satisfacción]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[error.validation.format]]></Key>
+      <Value><![CDATA[El formato del fichero no se acepta. Por favor, asegúrese de que el fichero se encuentra en un formato permitido.]]></Value>
+    </Message>
+  </Bundle>
+</XmlVfsBundles>

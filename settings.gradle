@@ -1,0 +1,16 @@
+rootProject.name = 'saga'
+
+include 'com.saga.opencms.excel'
+
+include 'com.saga.opencms.fileupload'
+
+include 'com.saga.opencms.scripts'
+
+include 'com.saga.opencms.util'
+
+include 'com.saga.opencms.vue'
+
+include 'com.saga.sagasuite.webform'
+
+include 'com.saga.opencms.sigmagrid'
+

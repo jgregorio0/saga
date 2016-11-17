@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.apache.lucene:lucene-memory:5.1.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.lucene/lucene-memory/5.1.0/5cacd886d1d94ba77400e6023f4a2aa0d758e89/lucene-memory-5.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.lucene/lucene-memory/5.1.0/1dcd766141d1f191ee301432bde2014bd6fc4c00/lucene-memory-5.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

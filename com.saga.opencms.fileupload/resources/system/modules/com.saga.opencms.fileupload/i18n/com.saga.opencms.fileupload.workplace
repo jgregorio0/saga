@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<XmlVfsBundles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/org.opencms.ade.config/schemas/xmlvfsbundle.xsd">
+  <Bundle language="en">
+    <Message>
+      <Key><![CDATA[fileicon.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[desc.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[title.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Title]]></Key>
+      <Value><![CDATA[Title]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Title.help]]></Key>
+      <Value><![CDATA[Title property.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Header]]></Key>
+      <Value><![CDATA[Header]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Header.help]]></Key>
+      <Value><![CDATA[Header form.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Intro]]></Key>
+      <Value><![CDATA[Intro]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Intro.help]]></Key>
+      <Value><![CDATA[Introduction paragraph.]]></Value>
+    </Message>
+    <Message>
+        <Key><![CDATA[label.UploadConfig.Button]]></Key>
+        <Value><![CDATA[Button]]></Value>
+      </Message>
+      <Message>
+        <Key><![CDATA[label.UploadConfig.Button.help]]></Key>
+        <Value><![CDATA[Button text.]]></Value>
+      </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Footer]]></Key>
+      <Value><![CDATA[Footer]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Footer.help]]></Key>
+      <Value><![CDATA[Ending paragraph.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.UploadFolder]]></Key>
+      <Value><![CDATA[Upload folder]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.UploadFolder.help]]></Key>
+      <Value><![CDATA[Folder where files are uploaded.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Format]]></Key>
+      <Value><![CDATA[Format]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Format.help]]></Key>
+      <Value><![CDATA[File Format accepted.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.MaxSize]]></Key>
+      <Value><![CDATA[Max Size]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.MaxSize.help]]></Key>
+      <Value><![CDATA[Maximun file size.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.General]]></Key>
+      <Value><![CDATA[General]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.Form]]></Key>
+      <Value><![CDATA[Form]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.Config]]></Key>
+      <Value><![CDATA[Configuration]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.format.required]]></Key>
+      <Value><![CDATA[Must be a set of strings separated by |.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.maxsize.required]]></Key>
+      <Value><![CDATA[Must be an integer followed by B, KB, MB or GB]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.header]]></Key>
+      <Value><![CDATA[Upload form]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.intro]]></Key>
+      <Value><![CDATA[Find the file and press upload]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.button]]></Key>
+      <Value><![CDATA[Upload]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.footer]]></Key>
+      <Value><![CDATA[File size must be up to 3MB. Only pdf or png format is accepted.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.uploadfolder]]></Key>
+      <Value><![CDATA[/.galleries/uploads/]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.maxsize]]></Key>
+      <Value><![CDATA[3MB]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.format]]></Key>
+      <Value><![CDATA[pdf|png]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.template]]></Key>
+      <Value><![CDATA[/system/modules/com.saga.opencms.fileupload/templates/template.jsp]]></Value>
+    </Message>
+  </Bundle>
+  <Bundle language="es">
+    <Message>
+      <Key><![CDATA[fileicon.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[desc.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[title.uploadconfig]]></Key>
+      <Value><![CDATA[UploadConfig]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Title]]></Key>
+      <Value><![CDATA[Título]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Title.help]]></Key>
+      <Value><![CDATA[Título que muestra el formulario.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Header]]></Key>
+      <Value><![CDATA[Cabecera]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Header.help]]></Key>
+      <Value><![CDATA[Párrafo a modo de cabecera.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Intro]]></Key>
+      <Value><![CDATA[Introducción]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Intro.help]]></Key>
+      <Value><![CDATA[Párrafo a modo de introducción.]]></Value>
+    </Message>
+    <Message>
+        <Key><![CDATA[label.UploadConfig.Button]]></Key>
+        <Value><![CDATA[Botón]]></Value>
+      </Message>
+      <Message>
+        <Key><![CDATA[label.UploadConfig.Button.help]]></Key>
+        <Value><![CDATA[Texto del botón.]]></Value>
+      </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Footer]]></Key>
+      <Value><![CDATA[Pie]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Footer.help]]></Key>
+      <Value><![CDATA[Párrafo al pie del formulario.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.UploadFolder]]></Key>
+      <Value><![CDATA[Carpeta de subida]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.UploadFolder.help]]></Key>
+      <Value><![CDATA[Carpeta donde se suben los ficheros.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Format]]></Key>
+      <Value><![CDATA[Formatos]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Format.help]]></Key>
+      <Value><![CDATA[Formatos que son aceptados.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.MaxSize]]></Key>
+      <Value><![CDATA[Tamaño máximo]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.MaxSize.help]]></Key>
+      <Value><![CDATA[Tamaño máximo del fichero.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.General]]></Key>
+      <Value><![CDATA[General]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.Form]]></Key>
+      <Value><![CDATA[Formulario]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[label.UploadConfig.Tab.Config]]></Key>
+      <Value><![CDATA[Configuración]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.format.required]]></Key>
+      <Value><![CDATA[Debe ser un conjunto de cadenas de texto separadas por | y sin espacios.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.maxsize.required]]></Key>
+      <Value><![CDATA[Debe ser un entero seguido de B, KB, MB o GB sin espacios.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.header]]></Key>
+      <Value><![CDATA[Formulario de subida.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.intro]]></Key>
+      <Value><![CDATA[Seleccione el fichero y pulse subir.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.button]]></Key>
+      <Value><![CDATA[Subir]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.form.footer]]></Key>
+      <Value><![CDATA[El fichero debe ser menor de 3MB y en formato pdf o png.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.uploadfolder]]></Key>
+      <Value><![CDATA[/.galleries/uploads/]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.maxsize]]></Key>
+      <Value><![CDATA[3MB]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.format]]></Key>
+      <Value><![CDATA[pdf|png]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.default.template]]></Key>
+      <Value><![CDATA[/system/modules/com.saga.opencms.fileupload/templates/template.jsp]]></Value>
+    </Message>
+
+  </Bundle>
+
+</XmlVfsBundles>

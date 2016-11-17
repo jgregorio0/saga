@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: org.hibernate:jtidy:r8-20060801">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/jtidy/r8-20060801/jtidy-r8-20060801.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

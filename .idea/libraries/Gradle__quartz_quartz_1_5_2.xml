@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: quartz:quartz:1.5.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/quartz/quartz/1.5.2/quartz-1.5.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

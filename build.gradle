@@ -1,0 +1,19 @@
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    sourceCompatibility = java_target_version
+    targetCompatibility = java_target_version
+    version = version_number
+    group = group_saga
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+        compile group: 'org.opencms', name: 'opencms-core', version: opencms_version
+        compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    }
+}

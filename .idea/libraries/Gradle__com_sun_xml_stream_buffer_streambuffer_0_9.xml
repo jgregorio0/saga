@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: com.sun.xml.stream.buffer:streambuffer:0.9">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/stream/buffer/streambuffer/0.9/streambuffer-0.9.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

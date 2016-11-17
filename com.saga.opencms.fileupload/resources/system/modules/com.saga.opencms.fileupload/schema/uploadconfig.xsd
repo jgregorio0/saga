@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+    <xsd:include schemaLocation="opencms://opencms-xmlcontent.xsd"/>
+
+    <xsd:element name="UploadConfigs" type="OpenCmsUploadConfigs"/>
+
+    <xsd:complexType name="OpenCmsUploadConfigs">
+        <xsd:sequence>
+            <xsd:element name="UploadConfig" type="OpenCmsUploadConfig" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="OpenCmsUploadConfig">
+        <xsd:sequence>
+            <xsd:element name="Title" type="OpenCmsString" />
+            <xsd:element name="Date" type="OpenCmsDateTime" />
+            <xsd:element name="Teaser" type="OpenCmsString" />
+            <xsd:element name="Keywords" type="OpenCmsString" />
+            <xsd:element name="CssClass" type="OpenCmsString" minOccurs="0"/>
+            <xsd:element name="Header" type="OpenCmsString" minOccurs="0" />
+            <xsd:element name="Intro" type="OpenCmsString" minOccurs="0" />
+            <xsd:element name="Button" type="OpenCmsString" />
+            <xsd:element name="Footer" type="OpenCmsString" minOccurs="0" />
+            <xsd:element name="UploadFolder" type="OpenCmsVfsFile" />
+            <xsd:element name="MaxSize" type="OpenCmsString" />
+            <xsd:element name="Format" type="OpenCmsString"  minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="Template" type="OpenCmsVfsFile"  minOccurs="0" />
+        </xsd:sequence>
+        <xsd:attribute name="language" type="OpenCmsLocale" use="required"/>
+    </xsd:complexType>
+    <xsd:annotation>
+        <xsd:appinfo>
+            <resourcebundle name="com.saga.opencms.fileupload.workplace"/>
+            <tabs>
+                <tab element="Title" name="Tab.General" collapse="false" />
+                <tab element="Header" name="Tab.Form" collapse="false" />
+                <tab element="UploadFolder" name="Tab.Config" collapse="false" />
+            </tabs>
+
+            <mappings>
+                <mapping element="Title" mapto="property:Title" />
+                <mapping element="Title" mapto="urlName"/>
+                <mapping element="Teaser" mapto="property:Description" />
+                <mapping element="Keywords" mapto="property:Keywords" />
+                <mapping element="Date" mapto="property:collector.date" />
+                <mapping element="Template" mapto="property:template" />
+            </mappings>
+            <layouts>
+                <layout element="Teaser" widget="TextareaWidget" />
+                <layout element="Header" widget="HtmlWidget"
+                        configuration="height:200px,link,anchor"/>
+                <layout element="Intro" widget="HtmlWidget"
+                        configuration="height:200px,link,anchor"/>
+                <layout element="Footer" widget="HtmlWidget"
+                        configuration="height:200px,link,anchor"/>
+                <layout element="UploadFolder" widget="VfsFileWidget"/>
+                <layout element="Format" widget="ComboWidget"
+                        configuration="pdf|png" />
+                <layout element="Template" widget="VfsFileWidget"
+                        configuration="startfolder=/system/modules/com.saga.opencms.fileupload/templates/" />
+            </layouts>
+            <validationrules>
+                <rule element="MaxSize" regex="\d+(KB|MB|GB)?" type="error" message="${key.fileupload.maxsize.required}"  />
+                <rule element="Format" regex="[\w\d\|]+" type="error" message="${key.fileupload.format.required]}"  />
+            </validationrules>
+            <defaults>
+                <default element="Date" value="${currenttime}"/>
+                <default element="Header" value="%(key.fileupload.form.header)"/>
+                <default element="Intro" value="%(key.fileupload.form.intro)"/>
+                <default element="Button" value="%(key.fileupload.form.button)"/>
+                <default element="Footer" value="%(key.fileupload.form.footer)"/>
+                <default element="UploadFolder" value="%(key.fileupload.default.uploadfolder)"/>
+                <default element="MaxSize" value="%(key.fileupload.default.maxsize)"/>
+                <default element="Format" value="%(key.fileupload.default.format)"/>
+                <default element="Template" value="%(key.fileupload.default.template)"/>
+            </defaults>
+            <searchsettings>
+                <searchsetting element="Date" searchcontent="false" >
+                    <solrfield targetfield="xmldate" sourcefield="*_dt"/>
+                </searchsetting>
+                <searchsetting element="Title" searchcontent="true" >
+                    <solrfield targetfield="xmltitle" sourcefield="*_s"/>
+                </searchsetting>
+                <searchsetting element="CssClass" searchcontent="false" />
+                <searchsetting element="Header" searchcontent="false" />
+                <searchsetting element="Intro" searchcontent="false" />
+                <searchsetting element="Button" searchcontent="false" />
+                <searchsetting element="Footer" searchcontent="false" />
+                <searchsetting element="UploadFolder" searchcontent="false" />
+                <searchsetting element="MaxSize" searchcontent="false" />
+                <searchsetting element="Format" searchcontent="false" />
+                <searchsetting element="Template" searchcontent="false" />
+            </searchsettings>
+        </xsd:appinfo>
+    </xsd:annotation>
+</xsd:schema>

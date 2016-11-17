@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:include schemaLocation="opencms://opencms-xmlcontent.xsd"/>
+
+	<xsd:element name="SigmaGridTables" type="OpenCmsSigmaGridTables"/>
+
+	<xsd:complexType name="OpenCmsSigmaGridTables">
+		<xsd:sequence>
+			<xsd:element name="SigmaGridTable" type="OpenCmsSigmaGridTable" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="OpenCmsSigmaGridTable">
+		<xsd:sequence>
+			<xsd:element name="Title" type="OpenCmsString"/>
+			<xsd:element name="JSPList" type="OpenCmsVfsFile"/>
+			<xsd:element name="JSPController" type="OpenCmsVfsFile"/>
+			<xsd:element name="JSPResources" type="OpenCmsVfsFile"/>
+			<xsd:element name="DateFormat" type="OpenCmsString"/>
+			<xsd:element name="OpenCmsPool" type="OpenCmsString"/>
+		</xsd:sequence>
+		<xsd:attribute name="language" type="OpenCmsLocale" use="required"/>
+	</xsd:complexType>
+	<xsd:annotation>
+		<xsd:appinfo>
+
+			<resourcebundles>
+				<xmlbundle name="com.saga.sigmagrid.table.workplace">
+					<bundle locale="es">
+						<resource key="text.default.Title">Introduzca un título</resource>
+					</bundle>
+				</xmlbundle>
+			</resourcebundles>
+
+			<defaults>
+				<default element="JSPList" value="${key.sigmagridtable.default.list}"/>
+				<default element="JSPController" value="${key.sigmagridtable.default.controller}"/>
+				<default element="JSPResources" value="${key.sigmagridtable.default.resources}"/>
+				<default element="DateFormat" value="${key.sigmagridtable.default.dateformat}"/>
+				<default element="OpenCmsPool" value="${key.sigmagridtable.default.pool}"/>
+			</defaults>
+			<validationrules>
+				<rule element="JSPList" regex=".{1,}" type="error" message="${key.sigmagridtable.error.required}"  />
+				<rule element="JSPController" regex=".{1,}" type="error" message="${key.sigmagridtable.error.required}"  />
+				<rule element="JSPResources" regex=".{1,}" type="error" message="${key.sigmagridtable.error.required}"  />
+				<rule element="DateFormat" regex=".{1,}" type="error" message="${key.sigmagridtable.error.required}"  />
+				<rule element="OpenCmsPool" regex=".{1,}" type="error" message="${key.sigmagridtable.error.required}"  />
+			</validationrules>
+		</xsd:appinfo>
+	</xsd:annotation>
+</xsd:schema>

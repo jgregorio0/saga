@@ -1,0 +1,26 @@
+[
+  {
+    "fieldMapping": {
+      "Title*": "Title*",
+      "Choice/Text*": "Cuerpo*"
+    },
+    "defaultValues": {},
+    "valueMappings": {},
+    "staticValues": {},
+    "valueTransformers": {},
+    "exportUri": "http://192.168.1.61:8080/opencms953/opencms/system/modules/com.saga.sagasuite.scriptgroovy/elements/export-content.jsp",
+    "dynamicNodeMappings": {},
+    "dynamicResourceProcessors": {},
+    "imageGallery": "/sites/default/.galleries/images/",
+    "downloadGallery": "/sites/default/.galleries/downloads/",
+    "linkGallery": "",
+    "categoryFolder": "/sites/default/.categories/",
+    "targetFolder": "/sites/default/.content/upocicexpediente",
+    "targetType": "upocicexpediente",
+    "sourceType": "bs-flexible",
+    "sourceFolder": "/sites/default/.content/fccontent/",
+    "maxResults": "",
+    "since": "",
+    "namePattern": "expediente%(number:5).xml"
+  }
+]

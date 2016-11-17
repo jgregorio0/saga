@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<XmlVfsBundles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/org.opencms.ade.config/schemas/xmlvfsbundle.xsd">
+  <Bundle language="en">
+    <Message>
+      <Key><![CDATA[fileupload.error.type]]></Key>
+      <Value><![CDATA[Type parameter configured in resource unespected. It must be Simple o Advanced.]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.button.label]]></Key>
+      <Value><![CDATA[File]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.button.placeholder]]></Key>
+      <Value><![CDATA[Select file...]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[fileupload.button]]></Key>
+      <Value><![CDATA[Upload]]></Value>
+    </Message>
+  </Bundle>
+  <Bundle language="es">
+    <Message>
+      <Key><![CDATA[fileupload.error.type]]></Key>
+      <Value><![CDATA[Parametro Tipo configurado en el recurso inesperado. Debe ser Simple o Advanced.]]></Value>
+    </Message>
+    <Message>
+          <Key><![CDATA[fileupload.button.label]]></Key>
+          <Value><![CDATA[Fichero]]></Value>
+        </Message>
+        <Message>
+          <Key><![CDATA[fileupload.button.placeholder]]></Key>
+          <Value><![CDATA[Selecciona el fichero...]]></Value>
+        </Message>
+        <Message>
+          <Key><![CDATA[fileupload.button]]></Key>
+          <Value><![CDATA[Subir]]></Value>
+        </Message>
+  </Bundle>
+</XmlVfsBundles>

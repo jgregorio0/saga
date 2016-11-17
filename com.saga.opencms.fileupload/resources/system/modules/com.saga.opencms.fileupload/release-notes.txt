@@ -1,0 +1,14 @@
+Autor: Jesús Gregorio Pérez. Saga Soluciones Tecnológicas
+Email: jesus.gregorio@sagasoluciones.com
+
+Módulo: File Upload
+Descripción: Módulo que gestiona la subida de ficheros al servidor, incluyendo un tratamiento especial para la replicación en distintos servidores.
+
+Release 1.0 (02/12/2015)
+- Desarrollo inicial del módulo donde tenemos:
+    - Formulario de subida simple y con replicación para varios servidores.
+    - Fichero de mensajes de error e información para el usuario.
+    - Para utilizar la replicación debemos:
+        1- Configurar el module action del módulo con la clase com.saga.opencms.fileupload.replication.ModuleAction
+        2- Cargar el formulario replication-form.jsp
+        3- Crear la tarea programada com.saga.opencms.fileupload.replication.SyncFileUploadJob

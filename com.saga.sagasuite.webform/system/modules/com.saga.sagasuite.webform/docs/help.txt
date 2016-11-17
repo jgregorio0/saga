@@ -1,0 +1,51 @@
+### USO DEL "EMPTY FIELD" PARA CREAR BLOQUES AGRUPADORES DE CAMPOS DEL FORMULARIO
+En la pestaña de edición de campos del formulario damos de alta un campo "empty field" para iniciar/abrir el bloque agrupador que queremos crear.
+- Si queremos crear un fieldset debemos incluir en "parámetros" del campo: openfieldset=true
+- Si queremos crear un div class row (bootstrap) para crear filas de campos debemos incluir en "parámetros" del campo: openrow=true
+Una vez hayamos dado de alta los campos que queremos que se agrupen debemos dar de alta otro "empty field" para cerrar el bloque:
+- Si queremos cerrar el fieldset debemos incluir en "parámetros" del campo: closefieldset=true
+- Si queremos cerrar el div class row (bootstrap) debemos incluir en "parámetros" del campo: closerow=true
+
+
+### USO DE PARÁMETROS DEL CAMPO PARA ASIGNARLES UN ANCHO (SÓLO SI SE HA USADO EL AGRUPADOR DE DIV CLASS ROW)
+Cuando demos de alta campos dentro de un agrupador de tipo div class row (el que hemos visto antes) podemos asignarles anchos a cada uno de ellos basados
+en las clases propias de Bootstrap, por ejemplo "col-sm-3" para un ancho del 25% de la fila. Sólo debemos incluir en "Parámetros": width=col-sm-3
+
+
+### USO DEL "EMAIL FIELD" PARA CREAR CAMPO CONFIRMACION DE EMAIL
+En un formulario, para que un campo de tipo "Email field" incluya campo de confirmación debemos añadir los parametros:
+confirmation=Confirma E-mail:|confirmationError=Por favor verifica que el email coincide
+
+1- confirmation es la etiqueta del campo.
+2- confirmationError es el error que muestra mientras los campos no coinciden.
+
+Su funcionamiento depende del fichero:
+/system/modules/com.saga.sagasuite.core.script/resources/sagasuite/webform-confirmationemail.js
+
+
+### USO DEL "TEXT FIELD" PARA CREAR CAMPO DATEPICKER
+En un formulario, para que un campo de tipo "Text field" sea un campo de fecha usando datepicker debemos añadir
+el parametros datepickerid con valor entre 0-9 (ej. datepickerid=0). Cada campo debe tener un valor distinto.
+
+Su funcionamiento depende de los siguientes ficheros:
+/system/modules/com.saga.sagasuite.core.script/resources/jquery-ui/1.10.3/css/ui-grey/jquery-ui-1.10.3.custom.min.css
+/system/modules/com.saga.sagasuite.core.script/resources/jquery-ui/1.10.3/js/jquery-ui-1.10.3.Datepicker.js
+/system/modules/com.saga.sagasuite.core.script/resources/jquery-ui/1.10.3/js/jquery.ui.datepicker-es.js
+/system/modules/com.saga.sagasuite.core.script/resources/sagasuite/webform-datepicker.js
+
+
+### USO DE RECAPTCHA DE GOOGLE
+Depende de:
+La librería com.saga.opencms.webform-1.0.jar
+Una cuenta de google asociada al dominio para disponer de clave del sitio y clave secreta.
+
+Para usar el recaptcha debemos:
+ 1- Crear un campo de tipo Empty field con los parametros:
+  1.1- Clave del sitio: recaptcha=6Lc70BwTAAAAAAwnDJq9ZE7_Sg3Q2YSQML09ooxg (Obligatorio)
+  1.2- Idioma: hl=es (Opcional)
+  1.3- Tipo: type=audio (Opcional)
+ 2- Configurar el mensaje de error de validación en el campo Emprty field creado, que se usa cuando el captcha es incorrecto (Obligatorio)
+ 3- Configurar como HTML template: /system/modules/com.saga.sagasuite.webform/resources/form-template/only-bs3-form-template.st
+ 4- Configurar como Action class: com.saga.sagasuite.webform.RecaptchaValidationActionHandler
+ 5- El formatter a usar es /system/modules/com.saga.sagasuite.core/formatters/form-recaptcha.jsp
+ 6- El themeconfig del site debe contener la clave secreta asociada al dominio y facilitada por la API Recaptcha de google

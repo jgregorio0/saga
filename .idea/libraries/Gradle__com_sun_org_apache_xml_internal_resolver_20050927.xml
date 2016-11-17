@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: com.sun.org.apache.xml.internal:resolver:20050927">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/org/apache/xml/internal/resolver/20050927/resolver-20050927.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

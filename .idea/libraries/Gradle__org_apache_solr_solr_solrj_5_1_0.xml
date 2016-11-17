@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.apache.solr:solr-solrj:5.1.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.solr/solr-solrj/5.1.0/2277260f57c5b7a054bb1671a97b976f5e29798d/solr-solrj-5.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.solr/solr-solrj/5.1.0/b67675ea18ee5909649de9ec2c27ee8ec07fad18/solr-solrj-5.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

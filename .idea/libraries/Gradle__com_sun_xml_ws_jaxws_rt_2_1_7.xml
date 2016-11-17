@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: com.sun.xml.ws:jaxws-rt:2.1.7">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/ws/jaxws-rt/2.1.7/jaxws-rt-2.1.7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

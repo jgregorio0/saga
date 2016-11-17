@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.opencms:opencms-core:10.0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.opencms/opencms-core/10.0.1/74a2e3efd077c0467e5c477e0f77ae0f337161d1/opencms-core-10.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.opencms/opencms-core/10.0.1/cded1d10af988725944fc6e2596b6392bc80140b/opencms-core-10.0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
