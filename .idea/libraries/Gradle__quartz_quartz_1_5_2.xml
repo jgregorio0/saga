@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: quartz:quartz:1.5.2">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/quartz/quartz/1.5.2/quartz-1.5.2.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/quartz/quartz/1.5.2/c617fee7f7b97c1081b1b963293fc853abb62ff7/quartz-1.5.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/quartz/quartz/1.5.2/7e414533099e19c247dd6ae3a057cef4cda8ae4/quartz-1.5.2-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
