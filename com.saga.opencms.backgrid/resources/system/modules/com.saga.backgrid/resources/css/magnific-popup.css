@@ -1,0 +1,9 @@
+/* Custom Magnific Popup CSS for AUSAPE */
+.white-popup-block {
+  background: #fff none repeat scroll 0 0;
+  margin: 40px auto;
+  max-width: 650px;
+  padding: 20px 30px;
+  position: relative;
+  text-align: left;
+}

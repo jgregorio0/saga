@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: net.arnx:jsonic:1.2.7">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/net/arnx/jsonic/1.2.7/jsonic-1.2.7.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.arnx/jsonic/1.2.7/9efb491fa27424c5e4773db449e8a2c551a75de5/jsonic-1.2.7.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.arnx/jsonic/1.2.7/f18e22269ea3c174290814301b505509ca3b2993/jsonic-1.2.7-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

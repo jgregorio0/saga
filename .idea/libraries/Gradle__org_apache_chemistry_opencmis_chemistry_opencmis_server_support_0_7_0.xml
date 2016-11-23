@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: org.apache.chemistry.opencmis:chemistry-opencmis-server-support:0.7.0">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/apache/chemistry/opencmis/chemistry-opencmis-server-support/0.7.0/chemistry-opencmis-server-support-0.7.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.chemistry.opencmis/chemistry-opencmis-server-support/0.7.0/d703f649d712e044df4404cc6d38da3c5e71b06a/chemistry-opencmis-server-support-0.7.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.chemistry.opencmis/chemistry-opencmis-server-support/0.7.0/d8c7bcb0fe67f8dd6ab61cbb1de71d9b5578fd09/chemistry-opencmis-server-support-0.7.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
