@@ -1,135 +1,223 @@
 package com.saga.opencms.util
-
+import org.apache.commons.logging.Log
 import org.apache.http.HttpEntity
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.utils.URIBuilder
+import org.apache.http.NameValuePair
+import org.apache.http.auth.AuthenticationException
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.methods.*
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.auth.BasicScheme
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.HttpClients
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
-import org.apache.ivy.util.url.BasicURLHandler
+import org.opencms.main.CmsLog
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import java.nio.charset.Charset
 
 public class SgNet {
+    private static final Log LOG = CmsLog.getLog(SgNet.class);
 
+    public static String charset = "UTF-8";
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public static final String H_USER_AGENT = "User-Agent";
+    public static final String H_MOZILLA = "Mozilla/5.0";
+    public static final String H_CONTENT_TYPE = "Content-type";
+    public static final String H_ACCEPT = "Accept";
+    public static final String H_APP_JSON = "application/json";
+
+    String method;
     String url;
-    def params;
+    Map<String, String> params;
+    Map<String, String> headers;
+    int resCode;
+    String resStr;
 
 
-    public SgNet(String url){
-        this.url = url
-        params = [:]
+    public SgNet(){
+        headers = new HashMap<String, String>();
+        params = new HashMap<String, String>();
     }
 
-    String httpGetResponse(){
-        final CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        final URIBuilder uriBuilder = new URIBuilder(url)
-        addParams(uriBuilder)
-        final HttpGet httpGet = new HttpGet(uriBuilder.build());
-        final CloseableHttpResponse execute = httpClient.execute(httpGet);
-        if (execute.getStatusLine().getStatusCode() == BasicURLHandler.HttpStatus.SC_OK) {
-            try {
-                final HttpEntity entity = execute.getEntity();
-                return EntityUtils.toString(entity, "UTF-8");
-            } catch (Exception e) {
-                throw e;
-            } finally {
-                execute.close();
-            }
-        }
-        return null
+    public SgNet(String url, String method){
+        this();
+        setUrl(url);
+        setMethod(method);
     }
 
-    def addParams(URIBuilder uriBuilder) {
-        def nvps = []
-        params.each {
-            nvps.add(new BasicNameValuePair(it.key, it.value))
-        }
-        uriBuilder.addParameters(nvps)
+    public String getMethod() {
+        return method;
     }
 
-    String httpsResponse() {
-        URL myurl = new URL(url);
-        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-        InputStream ins = con.getInputStream();
-        InputStreamReader isr = new InputStreamReader(ins);
-        BufferedReader br = new BufferedReader(isr);
-        String input = "";
-        try {
-            String inputLine;
-            while ((inputLine = br.readLine()) != null) {
-                input = input + inputLine;
-            }
-
-
-        }catch(IOException e){
-            throw e;
-        } finally {
-            br.close();
-        }
+    public void setMethod(String method) {
+        this.method = method;
     }
 
-    public String https(double amount,double price){
-        // Create a trust manager that does not validate certificate chains
-        X509TrustManager trMan = new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        };
-        TrustManager[] trustAllCerts = [trMan].toArray();
-        // Install the all-trusting trust manager
-        final SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
+    public String getUrl() {
+        return url;
+    }
 
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        final URIBuilder uriBuilder = new URIBuilder(url)
-        addParams(uriBuilder)
-        URL url = new URL(uriBuilder.build());
-        URLConnection con = url.openConnection();
-        final Reader reader = new InputStreamReader(con.getInputStream());
-        final BufferedReader br = new BufferedReader(reader);
-        String input = "";
-        String line = "";
-        while ((line = br.readLine()) != null) {
-            input = input + line;
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public int getResCode() {
+        return resCode;
+    }
+
+    public void setResCode(int resCode) {
+        this.resCode = resCode;
+    }
+
+    public String getResStr() {
+        return resStr;
+    }
+
+    public void setResStr(String resStr) {
+        this.resStr = resStr;
+    }
+
+    private List<NameValuePair> listParams() {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        for (String key : params.keySet()) {
+            nvps.add(new BasicNameValuePair(key, params.get(key)));
         }
-        br.close();
+        return nvps;
+    }
 
-        return input;
+    /**
+     * Post request to url adding json parameter as String
+     * @param url
+     * @param jsonStr
+     * @throws java.io.IOException
+     */
+    public void post(String url, String jsonStr) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPost.setEntity(entity);
+        httpPost.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPost.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+
+        CloseableHttpResponse response = client.execute(httpPost);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void get(String url) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(url);
+        CloseableHttpResponse res = client.execute(httpGet);
+        resCode = res.getStatusLine().getStatusCode();
+        HttpEntity resEntity = res.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void postAuth(String url, String jsonStr, String user, String pass)
+            throws IOException, AuthenticationException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);
+
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPost.setEntity(entity);
+        httpPost.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPost.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+
+        UsernamePasswordCredentials creds =
+                new UsernamePasswordCredentials(user, pass);
+        httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+
+        CloseableHttpResponse response = client.execute(httpPost);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void getAuth(String url, String user, String pass)
+            throws IOException, AuthenticationException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(url);
+
+        UsernamePasswordCredentials creds =
+                new UsernamePasswordCredentials(user, pass);
+        httpGet.addHeader(new BasicScheme().authenticate(creds, httpGet, null));
+
+        CloseableHttpResponse response = client.execute(httpGet);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void put(String url, String jsonStr) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(url);
+
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPut.setEntity(entity);
+        httpPut.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPut.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void put(String url) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(url);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    /**
+     * Delete request to url
+     * @param url
+     * @throws java.io.IOException
+     */
+    public void delete(String url) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete(url);
+
+        CloseableHttpResponse response = client.execute(httpDelete);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
     }
 }

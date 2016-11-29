@@ -1,14 +1,11 @@
-apply plugin: 'java'
-
-sourceCompatibility = 1.5
-version = '1.0'
-
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: junit_version
     compile group: 'org.opencms', name: 'opencms-core', version: opencms_version
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: httpclient_version
+    compile files("${rootDir}/lib/com.alkacon.opencms.v8.formgenerator.jar")
 }

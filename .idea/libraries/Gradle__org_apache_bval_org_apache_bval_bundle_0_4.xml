@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle: org.apache.bval:org.apache.bval.bundle:0.4">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.bval/org.apache.bval.bundle/0.4/bf500456271e21538ef9ecb82716ebcdd14f77f7/org.apache.bval.bundle-0.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/bval/org.apache.bval.bundle/0.4/org.apache.bval.bundle-0.4.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
