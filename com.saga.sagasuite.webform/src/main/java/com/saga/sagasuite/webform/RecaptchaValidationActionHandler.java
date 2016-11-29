@@ -3,6 +3,7 @@ package com.saga.sagasuite.webform;
 import com.alkacon.opencms.v8.formgenerator.CmsFormHandler;
 import com.alkacon.opencms.v8.formgenerator.CmsWebformDefaultActionHandler;
 import com.alkacon.opencms.v8.formgenerator.I_CmsField;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.opencms.file.CmsObject;
@@ -25,8 +26,9 @@ public class RecaptchaValidationActionHandler extends CmsWebformDefaultActionHan
 
     private static final Log LOG = CmsLog.getLog(RecaptchaValidationActionHandler.class);
 
-    private final String THEME_CONFIG_PATH = "/.themeconfig";
+    private final String THEME_CONFIG_FILENAME = ".themeconfig";
     private final String THEME_CONFIG_RECAPTCHA_KEY = "ReCaptchaSecretKey";
+    private final String PROP_SECRET_KEY = "recaptcha.secretkey";
     private final String FORM_FIELD_RECAPTCHA_PARAM = "recaptcha";
     private final String RECAPTCHA_RESPONSE = "g-recaptcha-response";
     private final String RECAPTCHA_URL = "https://www.google.com/recaptcha/api/siteverify";
@@ -46,23 +48,26 @@ public class RecaptchaValidationActionHandler extends CmsWebformDefaultActionHan
     @Override
     public String beforeWebformAction(CmsObject cmsObject, CmsFormHandler formHandler) {
         boolean success = false;
+        try {
+            // Obtenemos la respuesta codificada
+            String recRes = formHandler.getRequest().getParameter(RECAPTCHA_RESPONSE);
 
-        // Obtenemos la respuesta codificada
-        String recRes = formHandler.getRequest().getParameter(RECAPTCHA_RESPONSE);
+            // Validamos el campo captcha
+            if (recRes != null && !recRes.isEmpty()) {
 
-        // Validamos el campo captcha
-        if (recRes != null && !recRes.isEmpty()) {
+                // Obtenemos un json como respuesta de validacion
+                String secValue = loadSecretKey(formHandler);
 
-            // Obtenemos un json como respuesta de validacion
-            String secValue = loadSecretKey(formHandler);
+                // Llamamos a la API de ReCaptcha para validar la respuesta del usuario
+                String resultRecaptcha = callReCaptcha(recRes, secValue);
+                JSONObject jsonRecaptcha = new JSONObject(resultRecaptcha);
 
-            // Llamamos a la API de ReCaptcha para validar la respuesta del usuario
-            String resultRecaptcha = callReCaptcha(recRes, secValue);
-            JSONObject jsonRecaptcha = new JSONObject(resultRecaptcha);
-
-            if (jsonRecaptcha != null) {
-                success = jsonRecaptcha.getBoolean("success");
+                if (jsonRecaptcha != null) {
+                    success = jsonRecaptcha.getBoolean("success");
+                }
             }
+        } catch (Exception e) {
+            LOG.error("ERROR beforeWebformAction", e);
         }
 
         // Verificamos si la respuesta ha sido correcta
@@ -72,7 +77,6 @@ public class RecaptchaValidationActionHandler extends CmsWebformDefaultActionHan
 
             // Creamos un link al formulario actual y cargamos los parametros
             String target = formHandler.getRequestContext().getUri();
-//            Map<String, String[]> paramsMap = prepareParamMap(formHandler);
 
             // Invalidamos el campo captcha y cargamos los parametros en la url
             prepareParamMap(formHandler);
@@ -81,16 +85,6 @@ public class RecaptchaValidationActionHandler extends CmsWebformDefaultActionHan
             return target;
         }
     }
-
-//    /**
-//     * Invalida el campo captcha
-//     * @param formHandler
-//     */
-//    private String invalidate(CmsFormHandler formHandler) {
-//        String recaptchaFieldName = getFieldName(formHandler);
-//        String errorValidation = recaptchaFieldName + ";" + formHandler.ERROR_VALIDATION;
-//        return CmsRequestUtil.URL_DELIMITER + ERROR_P + CmsRequestUtil.PARAMETER_ASSIGNMENT + errorValidation;
-//    }
 
     /**
      * Invalida el campo captcha
@@ -169,19 +163,51 @@ public class RecaptchaValidationActionHandler extends CmsWebformDefaultActionHan
     }
 
     /**
-     * Carga la clave secreta configurada en el loadconfig
+     * Carga la clave secreta configurada en el loadconfig o en las propiedades del site
      * @return
      * @param formHandler
      */
     private String loadSecretKey(CmsFormHandler formHandler) {
+        String secKey = null;
         HttpServletRequest request = formHandler.getRequest();
         CmsObject cmso = CmsFlexController.getCmsObject(request);
-        CmsXmlUtil xml = new CmsXmlUtil(cmso, THEME_CONFIG_PATH, "es");
+
+        // 1- Load secret key from .themeconfig
+        secKey = loadByThemeconfig(request, cmso);
+
+        // 2- If it does not exists load afrom property
+        if (StringUtils.isEmpty(secKey)) {
+            secKey = loadByProperty(cmso);
+        }
+
+        return secKey;
+    }
+
+    private String loadByProperty(CmsObject cmso) {
         String secKey = null;
+
+        // Read property recaptcha.secretkey
         try {
-            secKey = xml.getStringValue(THEME_CONFIG_RECAPTCHA_KEY);
+            secKey = cmso.readPropertyObject(
+                    cmso.getRequestContext().getUri(),
+                    PROP_SECRET_KEY, true)
+                    .getValue();
         } catch (Exception e) {
-            LOG.error("ERROR obteniendo secret key", e);
+            LOG.error("ERROR readPropertyObject secret key", e);
+        }
+        return secKey;
+    }
+
+    private String loadByThemeconfig(HttpServletRequest request, CmsObject cmso) {
+        String secKey = null;
+        String path = SgTag.resourcePathLookBackTag(request, THEME_CONFIG_FILENAME);
+        if (!StringUtils.isEmpty(path)) {
+            CmsXmlUtil xml = new CmsXmlUtil(cmso, path, "es");
+            try {
+                secKey = xml.getStringValue(THEME_CONFIG_RECAPTCHA_KEY);
+            } catch (Exception e) {
+                LOG.error("ERROR xml.getStringValue secret key", e);
+            }
         }
         return secKey;
     }
