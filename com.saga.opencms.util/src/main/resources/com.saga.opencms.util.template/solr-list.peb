@@ -1,0 +1,7 @@
+<div id="contenidos">
+    {% for results in result %}
+        <p>{{result.title}}</p>
+        <p>{{result.filename}}</p>
+        <p>{{result.path}}</p>
+    {% endfor %}
+</div>
