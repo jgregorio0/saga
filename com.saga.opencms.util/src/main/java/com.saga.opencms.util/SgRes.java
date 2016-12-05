@@ -1,5 +1,6 @@
 package com.saga.opencms.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.opencms.file.*;
 import org.opencms.file.types.I_CmsResourceType;
@@ -12,7 +13,6 @@ import org.opencms.xml.CmsXmlEntityResolver;
 import org.opencms.xml.content.CmsXmlContent;
 import org.opencms.xml.content.CmsXmlContentFactory;
 import org.opencms.xml.types.I_CmsXmlContentValue;
-import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;

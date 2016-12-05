@@ -13,7 +13,6 @@ import java.util.Map;
 
 /**
  * Created by jgregorio on 09/09/2016.
- * Ref: http://www.baeldung.com/httpclient-post-http-request
  */
 public class SgJSON {
 	private static final Logger logger = LoggerFactory.getLogger(SgJSON.class);
