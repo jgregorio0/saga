@@ -16,3 +16,12 @@ gradlew.bat
 /com.saga.sagasuite.webform/com.saga.sagasuite.webform.iml
 /com.saga.opencms.vue/com.saga.opencms.vue.iml
 /saga.iml
+
+com.saga.opencms.backgrid/backgrid.iml
+com.saga.opencms.excel/com.saga.opencms.excel.iml
+com.saga.opencms.util/com.saga.opencms.util.iml
+com.saga.opencms.scripts/com.saga.opencms.scripts.iml
+com.saga.opencms.sigmagrid/com.saga.opencms.sigmagrid.iml
+com.saga.opencms.vue/com.saga.opencms.vue.iml
+com.saga.sagasuite.webform/com.saga.sagasuite.webform.iml
+com.saga.opencms.fileupload/com.saga.opencms.fileupload.iml
