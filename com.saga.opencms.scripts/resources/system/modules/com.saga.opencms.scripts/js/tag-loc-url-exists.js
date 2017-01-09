@@ -34,6 +34,4 @@ function sitemapLocExists(){
             getUrl(link);
         }
     }
-
-
 }
