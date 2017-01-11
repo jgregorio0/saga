@@ -1,4 +1,6 @@
-<%@ page import="org.opencms.json.JSONObject" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.opencms.file.CmsObject" %>
+<%@ page import="org.opencms.flex.CmsFlexController" %>
 <%@page buffer="none" session="true" trimDirectiveWhitespaces="true"%>
 <%@ taglib prefix="cms" uri="http://www.opencms.org/taglib/cms"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -6,155 +8,132 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <%!
-    private String getJsonField(JSONObject json, String field) {
-        String s = null;
-        try {
-            s = json.getString(field);
-        } catch (Exception e) {}
-        return s;
-    }
+    // URL del controlador
+    public static final String url = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax.jsp";
 %>
 
 <%
-//    String url = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax.jsp";
-    String url = "/system/modules/com.saga.opencms.util/elements/solr-list-controller-ajax.jsp";
+    // Obtenemos locale
+    CmsObject cmso = CmsFlexController.getCmsObject(request);
+    String lang = cmso.getRequestContext().getLocale().getLanguage();
 
-    //q=((title_es:"crema")^2 OR (description_es:"crema"))&fq=type:("RecipeChef" OR "MixRecipeChef")&fq=parent-folders:"/shared/.content/"&fq=con_locales:es&rows=6&start=0
-//    String query = "q=((title_es:\\\"crema\\\")^2 OR (description_es:\\\"crema\\\"))" +
-//            "&fq=type:(\\\"RecipeChef\\\" OR \\\"MixRecipeChef\\\")" +
-//            "&fq=parent-folders:\\\"/shared/.content/\\\"" +
-//            "&fq=con_locales:es" +
-//            "&rows=6" +
-//            "&start=0";
+    // Obtenemos parametros
+    String resultsForPage = request.getParameter("resultsForPage");
+    if (StringUtils.isEmpty(resultsForPage)) {
+        resultsForPage = "6";
+    }
 
-    //TODO tener en cuenta el locale
-//    String fields = "[\"id\", \"title_es\", \"Title_prop\", \"path\", \"image_es\", \"xmlimage1_es\", \"type\"]";
-//    String jsonStr = "{" +
-//            "\"query\": \"" + query + "\"" +
-//            ", \"fields\": " + fields +
-//            "}";
+    String resourcetypes = request.getParameter("resourcetypes");
+    if (StringUtils.isEmpty(resourcetypes)) {
+        resourcetypes = "(\"RecipeChef\" OR \"MixRecipeChef\" OR \"PieceOfNews\" OR \"Workshop\")";
+    }
+    String resTypRep = resourcetypes.replace("\"", "'");
 
-//    String j = "{" +
-//            "\"query\": \"" + "q=((title_es:\\\"crema\\\")^2 OR (description_es:\\\"crema\\\"))" +
-//            "&fq=type:(\\\"RecipeChef\\\" OR \\\"MixRecipeChef\\\")" +
-//            "&fq=parent-folders:\\\"/shared/.content/\\\"" +
-//            "&fq=con_locales:es" +
-//            "&rows=6" +
-//            "&start=0" + "\"" +
-//            ", \"fields\": " + "[\"id\", \"title_es\", \"Title_prop\", \"path\", \"image_es\", \"xmlimage1_es\", \"type\"]" +
-//            "}";
+    String q = request.getParameter("q");
+    String qQuery = "";
+    if (!StringUtils.isEmpty(q)) {
+        // Usamos single quoted
+        String qRep = q.replace("\"", "'");
+        if (!qRep.startsWith("'")) {
+            qRep = "'" + qRep;
+        }
+        if (!qRep.endsWith("'")) {
+            qRep = qRep + "'";
+        }
+
+        qQuery = "q=((title_" + lang + ":" + qRep + ")^2 OR (description_" + lang + ":" + qRep + "))";
+    }
+
+    // Generamos query
+//    String query = "q=((title_es:'crema')^2 OR (description_es:'crema'))&fq=type:('RecipeChef' OR 'MixRecipeChef')&fq=parent-folders:'/shared/.content/'&fq=con_locales:es&rows=6&start=0";
+    String query = qQuery +
+            "&fq=type:" + resTypRep +
+            "&fq=parent-folders:'/shared/.content/'" +
+            "&fq=con_locales:" + lang +
+            "&rows=" + resultsForPage;
+    //"&start=0";
+
+    // Definimos los campos que queremos
+    String fields = "id,title_" + lang + ",Title_prop,path,image_" + lang + ",xmlimage1_" + lang + ",type";
 %>
 <html>
 <head>
-    <%--<script type="text/javascript" src="/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/resources/js/jquery-1.12.3.min.js"></script>--%>
-        <script
-                src="https://code.jquery.com/jquery-2.2.4.min.js"
-                integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
-                crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/resources/js/jquery-1.12.3.min.js"></script>
 </head>
 <body>
 <div>
     <button id="loadMore">MORE</button>
     <div id="results"></div>
-    <%--<p>jQuery <%=jQuery%></p>--%>
-    <%--<p>jFields <%=jFields%></p>--%>
-    <%--<p>jTemplate <%=jTemplate%></p>--%>
-    <%--<cms:include file="%(link.strong:/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax.jsp)">--%>
-    <%--<cms:param name="jsonStr"><%=jsonStr%></cms:param>--%>
-    <%--</cms:include>--%>
-    <%--<%--%>
-    <%--String jsonResults = "" + request.getAttribute("jsonResults");--%>
-    <%--JSONArray jsonArray = new JSONArray(jsonResults);--%>
-    <%--for (int i = 0; i < jsonArray.length(); i++) {--%>
-    <%--JSONObject json = jsonArray.getJSONObject(i);--%>
-    <%--String id = getJsonField(json, "id");--%>
-    <%--String title = getJsonField(json, "title_es");--%>
-    <%--String titleProp = getJsonField(json, "Title_prop");--%>
-    <%--String path = getJsonField(json, "path");--%>
-    <%--String image = getJsonField(json, "image_es");--%>
-    <%--String xmlimage1 = getJsonField(json, "xmlimage1_es");--%>
-    <%--String type = getJsonField(json, "type");--%>
-
-    <%--%>--%>
-    <%--<h1><%=i%> - <h6><%=title%> (<%=id%>)</h6></h1>--%>
-
-    <%--<dl>--%>
-    <%--<dt>id</dt>--%>
-    <%--<dd><%=id%></dd>--%>
-    <%--<dt>title</dt>--%>
-    <%--<dd><%=title%></dd>--%>
-    <%--<dt>titleProp</dt>--%>
-    <%--<dd><%=titleProp%></dd>--%>
-    <%--<dt>path</dt>--%>
-    <%--<dd><%=path%></dd>--%>
-    <%--<dt>image</dt>--%>
-    <%--<dd><%=image%></dd>--%>
-    <%--<dt>xmlimage1</dt>--%>
-    <%--<dd><%=xmlimage1%></dd>--%>
-    <%--<dt>type</dt>--%>
-    <%--<dd><%=type%></dd>--%>
-    <%--</dl>--%>
-    <%--<%--%>
-    <%--//        }--%>
-
-    <%--%>--%>
-
-    <%
-//        String query = "q=((title_es:\\\"crema\\\")^2 OR (description_es:\\\"crema\\\"))" +
-//            "&fq=type:(\\\"RecipeChef\\\" OR \\\"MixRecipeChef\\\")" +
-//            "&fq=parent-folders:\\\"/shared/.content/\\\"" +
-//            "&fq=con_locales:es" +
-//            "&rows=6" +
-//            "&start=0";
-        String query = "q=(title_es:'crema')";
-        String fields = "['id', 'title_es', 'Title_prop', 'path', 'image_es', 'xmlimage1_es', 'type']";
-//        String jsonStr =  "{jsonStr: " +
-//                "{query: \"" + query + "\"" +
-//                ", fields: " + fields +
-//                "}" +
-//        "}";
-
-
-    %>
 
     <script>
+        var start = 1;
+        var rows = <%=resultsForPage%>;
+        var url = '<cms:link><%=url%></cms:link>';
         function loadResults(){
-            var url = '<cms:link><%=url%></cms:link>';
-
-//            var data = {jsonStr: "{" +
-//                "\"query\": \"" + "q=((title_es:\\\"crema\\\")^2 OR (description_es:\\\"crema\\\"))" +
-//            "&fq=type:(\\\"RecipeChef\\\" OR \\\"MixRecipeChef\\\")" +
-//            "&fq=parent-folders:\\\"/shared/.content/\\\"" +
-//            "&fq=con_locales:es" +
-//            "&rows=6" +
-//            "&start=0" + "\"" +
-//                ", \"fields\": " + "[\"id\", \"title_es\", \"Title_prop\", \"path\", \"image_es\", \"xmlimage1_es\", \"type\"]" +
-//                "}"};
-
-            console.log("query1", "<%=query%>");
-            console.log("fields", "<%=fields%>");
-
             var data = {
-                query: "<%=query%>"
+                query: "<%=query%>" + "&start=" + start
                 , fields: "<%=fields%>"
+                , idx: start
             };
-            console.log("data", data);
+//            console.log("data", data);
 
             $.ajax({
                 type: "POST",
                 url: url,
                 data: data
             }).done(function(data){
-                console.log("done", data);
+//                console.log("done", data);
+                try {
+                    var json = JSON.parse(data);
+                    if (json.st === "error") {
+                        console.error("searching for results");
+                    } else {
+                        var results = json.results;
+//                        console.log(results);
+
+                        var $resultsDiv = $("#results");
+                        for(var iRes = 0; iRes < results.length; iRes++){
+                            var jResult = results[iRes];
+//                            console.log("jResult", jResult);
+
+                            $resultsDiv.append("<h6>" + (json.idx + iRes) + "</h6>");
+
+                            var $dl = $("<dl>");
+                            for (var key in jResult) {
+                                if (jResult.hasOwnProperty(key)) {
+                                    var val = jResult[key];
+//                                    console.log(key, val);
+
+                                    var $dt = $("<dt>");
+                                    $dt.text(key);
+                                    var $dd = $("<dd>");
+                                    $dd.text(val);
+
+                                    $dl.append($dt);
+                                    $dl.append($dd);
+                                }
+                            }
+
+                            $resultsDiv.append($dl);
+                        }
+                    }
+                } catch (err) {
+                    console.error("parsing data to json", data);
+                }
+
             }).fail(function(err){
-                console.log("fail", err);
+                console.error("fail", err);
             });
+
+            // Actualizamos start
+            start = start + rows;
         }
 
         $(function(){
             $("#loadMore").click(function(){
                 loadResults();
             });
+            loadResults();
         });
     </script>
 </div>
