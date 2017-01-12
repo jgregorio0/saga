@@ -1,5 +1,5 @@
 /**
- * Sort elements
+ * Sort elements. Element id must be a number that defines the order
  *
  * @param containerId Container selector (element-list)
  * @param elementType Element type (div)
