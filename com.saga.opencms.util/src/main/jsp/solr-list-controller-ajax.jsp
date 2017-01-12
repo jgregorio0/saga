@@ -3,13 +3,16 @@
 <%@ page import="org.opencms.flex.CmsFlexController" %>
 <%@ page import="org.opencms.json.JSONArray" %>
 <%@ page import="org.opencms.json.JSONException" %>
+<%@ page import="org.opencms.main.CmsException" %>
 <%@ page import="org.opencms.main.CmsLog" %>
 <%@ page import="org.opencms.main.OpenCms" %>
 <%@ page import="org.opencms.search.CmsSearchException" %>
 <%@ page import="org.opencms.search.CmsSearchResource" %>
 <%@ page import="org.opencms.search.solr.CmsSolrQuery" %>
 <%@ page import="org.opencms.search.solr.CmsSolrResultList" %>
+<%@ page import="org.opencms.staticexport.CmsLinkManager" %>
 <%@ page import="org.opencms.util.CmsRequestUtil" %>
+<%@ page import="org.opencms.util.CmsStringUtil" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
@@ -61,9 +64,48 @@
      *
      * @param results
      * @param fields
+     * @param baseUri
+     * @param start
      * @return
      */
-    public JSONArray getJsonResults(CmsSolrResultList results, String[] fields) throws JSONException {
+    public JSONArray getJsonResults(HttpServletRequest req, CmsSolrResultList results, String[] fields, String baseUri, Long start) throws JSONException {
+        List<Map<String, String>> contents = new ArrayList<Map<String, String>>();
+        for (int iRes = 0; iRes < results.size(); iRes++) {
+            Map<String, String> contenido = new HashMap<String, String>();
+            CmsSearchResource result = results.get(iRes);
+            for (int iField = 0; iField < fields.length; iField++) {
+                String field = fields[iField];
+                contenido.put(field, getSolrField(result, field));
+            }
+
+            // Add detail page
+            if (baseUri != null) {
+                String link = cmsLink(req, result.getRootPath(), baseUri);
+                contenido.put("link", link);
+            }
+
+            // Add resource idx
+            if (start != null) {
+                try {
+                    long idx = start + iRes;
+                    String idxStr = String.valueOf(idx);
+                    contenido.put("idx", idxStr);
+                } catch (Exception e) {
+                    LOG.debug("no ha sido posible calcular el indice para start: " + start + " iRes: " + iRes);
+                }
+            }
+            contents.add(contenido);
+        }
+        return new JSONArray(contents);
+    }
+
+    /**
+     *
+     * @param results
+     * @param fields
+     * @return
+     */
+    public List<Map<String, String>> getMapResults(CmsSolrResultList results, String[] fields) throws JSONException {
         List<Map<String, String>> contents = new ArrayList<Map<String, String>>();
         for (int iRes = 0; iRes < results.size(); iRes++) {
             Map<String, String> contenido = new HashMap<String, String>();
@@ -74,7 +116,7 @@
             }
             contents.add(contenido);
         }
-        return new JSONArray(contents);
+        return contents;
     }
 
     /**
@@ -88,6 +130,23 @@
         res = res == null ? "" : res;
         return res;
     }
+
+    private String cmsLink(HttpServletRequest req, String target, String baseUri){
+        CmsFlexController controller = CmsFlexController.getController(req);
+        // be sure the link is absolute
+        String uri = CmsLinkManager.getAbsoluteUri(target, controller.getCurrentRequest().getElementUri());
+        CmsObject cms = controller.getCmsObject();
+        if (CmsStringUtil.isNotEmptyOrWhitespaceOnly(baseUri)) {
+            try {
+                cms = OpenCms.initCmsObject(cms);
+                cms.getRequestContext().setUri(baseUri);
+            } catch (CmsException e) {
+                // should not happen, if it does we can't do anything useful and will just keep the original object
+            }
+        }
+        // generate the link
+        return OpenCms.getLinkManager().substituteLinkForUnknownTarget(cms, uri);
+    }
 %>
 
 <%
@@ -99,6 +158,7 @@
     String fieldsStr = request.getParameter("fields");
     String[] fields = fieldsStr.split(",");
     String idxStr = request.getParameter("idx");
+    String uri = request.getParameter("uri");
     LOG.debug("buscador tags query: " + query + " fields: " + fieldsStr);
 
     try {
@@ -113,16 +173,28 @@
         long total = results.getNumFound();
         LOG.debug("buscador tags resultados: " + results.size());
 
-        // Obtenemos los campos que necesitamos
+        Long idx = Long.valueOf(idxStr);
 
-        JSONArray jArrayResults = getJsonResults(results, fields);
-//        int total = jArrayResults.length();
-        String resultsArray = jArrayResults.toString();
-        jsonResults = "{" +
-                "\"st\":\"ok\"" +
-                ", \"total\": " + total +
-                ", \"results\": " + resultsArray +
-                ", \"idx\": " + idxStr + "}";
+        // Solo devolvemos resultados si el indice es menor que el maximo
+        if (idx > total) {
+            jsonResults = "{" +
+                    "\"st\":\"ok\"" +
+                    ", \"total\": " + total +
+                    ", \"numResults\": " + 0 +
+                    ", \"results\": []" +
+                    ", \"idx\": " + idxStr + "}";
+        } else {
+            // Obtenemos los campos que necesitamos
+            JSONArray jArrayResults = getJsonResults(request, results, fields, uri, idx);
+            int numResults = jArrayResults.length();
+            String resultsArray = jArrayResults.toString();
+            jsonResults = "{" +
+                    "\"st\":\"ok\"" +
+                    ", \"total\": " + total +
+                    ", \"numResults\": " + numResults +
+                    ", \"results\": " + resultsArray +
+                    ", \"idx\": " + idxStr + "}";
+        }
     } catch (Exception e) {
         LOG.error("searching or loading results for query: " + queryStr + " and fields: " + fieldsStr, e);
         jsonResults = "{\"st\":\"error\"}";
@@ -132,5 +204,3 @@
 //    }
 %>
 <%=jsonResults%>
-<%--<%=solrStr%>--%>
-<%--<%=queryStr%>||<%=fieldsStr%>--%>
