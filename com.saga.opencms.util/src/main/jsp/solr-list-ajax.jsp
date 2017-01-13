@@ -9,9 +9,8 @@
 
 <%!
     // URL del controlador
-    public static final String urlController = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax.jsp";
-    //    public static final String urlTemplate = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-template.jsp";
-    public static final String urlTemplate = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-template-multi.jsp";
+    public static final String urlController = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax-controller.jsp";
+    public static final String urlTemplate = "/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax-template.jsp";
 %>
 
 <%
@@ -19,6 +18,11 @@
     CmsObject cmso = CmsFlexController.getCmsObject(request);
     String lang = cmso.getRequestContext().getLocale().getLanguage();
     String uri = cmso.getRequestContext().getUri();
+
+    String gaCategory = "";
+    try {
+        gaCategory = cmso.readPropertyObject(uri, "google.analytics.category", true).getValue();
+    } catch (Exception e){}
 
     // Obtenemos parametros
     String idSearcher = request.getParameter("id");
@@ -39,8 +43,23 @@
     }
     String resTypRep = resourcetypes.replace("\"", "'");
 
+    // Generamos la query con tags y texto
+    String tag = request.getParameter("tag");
+    String qTag = "";
+    if (!StringUtils.isEmpty(tag)) {
+        // Usamos single quoted
+        String tagRep = tag.replace("\"", "'");
+        if (!tagRep.startsWith("'")) {
+            tagRep = "'" + tagRep;
+        }
+        if (!tagRep.endsWith("'")) {
+            tagRep = tagRep + "'";
+        }
+        qTag = "(tag_" + lang + ":" + tagRep + ")^3";
+    }
+
     String q = request.getParameter("q");
-    String qQuery = "";
+    String qText = "";
     if (!StringUtils.isEmpty(q)) {
         // Usamos single quoted
         String qRep = q.replace("\"", "'");
@@ -51,43 +70,68 @@
             qRep = qRep + "'";
         }
 
-        qQuery = "q=((title_" + lang + ":" + qRep + ")^2 OR (description_" + lang + ":" + qRep + "))";
+        qText = "(title_" + lang + ":" + qRep + ")^2 OR (description_" + lang + ":" + qRep + ")";
+    }
+
+    String qQuery = "";
+    if (!StringUtils.isEmpty(qTag)) {
+        qQuery = qTag;
+        if (!StringUtils.isEmpty(qText)) {
+            qQuery = qTag + " OR " + qText;
+        }
+        qQuery = "q=(" + qQuery + ")";
+    } else if (!StringUtils.isEmpty(qText)) {
+        qQuery = "q=(" + qText + ")";
     }
 
     // Generamos query
 //    String query = "q=((title_es:'crema')^2 OR (description_es:'crema'))&fq=type:('RecipeChef' OR 'MixRecipeChef')&fq=parent-folders:'/shared/.content/'&fq=con_locales:es&rows=6&start=0";
     String query = qQuery +
             "&fq=type:" + resTypRep +
+//            qTag +
             "&fq=parent-folders:'/shared/.content/'" +
             "&fq=con_locales:" + lang +
-            "&rows=" + resultsForPage;
+            "&rows=" + resultsForPage +
+            "&sort=released desc";
     //"&start=0";
 
     // Definimos los campos que queremos
-    String fields = "id,title_" + lang + ",Title_prop,path,image_" + lang + ",xmlimage1_" + lang + ",type";
+    String fields = "id,title_" + lang + ",Title_prop,path,image_" + lang + ",xmlimage_" + lang + ",type";
 %>
 
 <fmt:setLocale value="${cms.locale}"/>
 <cms:bundle basename="com.caprabo.mrmmccann.caprabochef.formatters.template">
     <cms:formatter var="content">
 
+
         <div class="container" style="margin-bottom:50px;">
 
 
                 <%--<p>id: <%=idSearcher%></p>--%>
-            <p>query: <%=query%></p>
+                <%--<p>query: <%=query%></p>--%>
                 <%--<p>fields: <%=fields%></p>--%>
 
-
+                <%--TITULO--%>
             <div class="row">
-                <div class="col-xs-12">
-                    <p class="resultados-busqueda-titulo">
-                            <%--TODO Maquetar titulo--%>
+                <div class="col-xs-12" id="buscador-tag-resultados-title">
+                    <h1 class="WS-Thin"><b class="WS-Medium">
                         <fmt:message key="BUSCADOR_TAGS_TITLE_${idSearcher}"/>
-                    </p>
+                    </b><span id="total-${idSearcher}" class="badge"></span></h1>
                 </div>
             </div>
+            <style>
+                #buscador-tag-resultados-title{
+                    color: #999999;
+                    border-bottom: 1px solid #dadada;
+                    margin-bottom: 30px;
+                }
+                #total-${idSearcher}{
+                    font-size: 25px;
+                    margin-left: 10px;
+                }
+            </style>
 
+                <%--CONTENIDO--%>
             <div class="resultados-busqueda-contenido">
                 <div class="row">
                     <div class="col-xs-12">
@@ -98,7 +142,7 @@
                                 <div class="row" id="results-${idSearcher}"></div>
 
 
-                                    <%--<cms:include file="%(link.strong:/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-template.jsp)">--%>
+                                    <%--<cms:include file="%(link.strong:/system/modules/com.caprabo.mrmmccann.caprabochef.formatters/functions/buscador-tags-resultados-ajax-template.jsp)">--%>
                                     <%--<cms:param name="id"><%=id%></cms:param>--%>
                                     <%--<cms:param name="title"><%=title%></cms:param>--%>
                                     <%--<cms:param name="path"><%=rootPath%></cms:param>--%>
@@ -107,7 +151,7 @@
                                     <%--</cms:include>--%>
 
                                     <%--BOTON MAS RESULTADOS--%>
-                                <div class="col-xs-12">
+                                <div class="col-xs-12" id="buscador-tag-resultados-more">
                                     <hr/>
                                         <%--TODO activar ga--%>
                                         <%--<a href="javascript:void(0)" onclick="ga('send', 'event', '${cms.vfs.propertySearch[cms.requestContext.uri]['google.analytics.code']}', 'ver mas', 'ver mas')">--%>
@@ -118,7 +162,12 @@
                                     </h6>
                                         <%--</a>--%>
                                 </div>
-
+                                <style>
+                                    #buscador-tag-resultados-more {
+                                        color: #999999;
+                                        margin-bottom: -40px;
+                                    }
+                                </style>
 
                             </div>
                         </div>
@@ -146,6 +195,8 @@
                 urlTemplate: '<cms:link><%=urlTemplate%></cms:link>',
                 idSearcher: '<%=idSearcher%>',
                 resultsId: 'results-<%=idSearcher%>',
+                emptyMsg: '<fmt:message key="BUSCADOR_TAGS_EMPTY"/>',
+                gaCategory: '<%=gaCategory%>',
                 rows: ${resultsForPage},
                 start: 1,
                 query: "<%=query%>",
@@ -189,10 +240,20 @@
                         if (json.st === "error") {
                             console.error("loading ajax results for tag searcher");
                         } else {
-                            var results = json.results;
-                            var idx = json.idx;
+                            var total = json.total;
+
+                            // Si hay algun resultado
+                            if (total) {
+                                // Mostramos total
+                                showTotal(ctx.idSearcher, total);
+                                var results = json.results;
+                                var idx = json.idx;
 //                        console.log(results);
-                            resourcesTemplate(results, idx, ctx.urlTemplate, ctx.resultsId)
+                                resourcesTemplate(results, idx, ctx.urlTemplate, ctx.resultsId, ctx.gaCategory)
+                            } else if (start === 1) {
+                                // Si no hay ningun resultado
+                                showEmpty(ctx.resultsId, ctx.emptyMsg);
+                            }
                         }
                     } catch (err) {
                         console.error("parsing data to json and formating with template", data);
@@ -203,35 +264,30 @@
                 });
             }
 
-            // Load html for single resource
-            function jsonTemplate(json, urlTemplate, resultsId){
-                // Ejecutamos la llamada para formatear cada resultado
-                $.ajax({
-                    type: "POST",
-                    url: urlTemplate,
-                    data: json
-                }).done(function(data){
-//                    var $resultsDiv = $("#" + resultsId);
-//                    $resultsDiv.append(data);
-                }).fail(function(err){
-                    console.error("fail jsonTemplate", err);
-                })
+            function showEmpty(resultsId, msg){
+                var $resultsDiv = $("#" + resultsId);
+                var msg = '<div class="alert alert-warning fade in alert-dismissable">' + msg + '</div>';
+                $resultsDiv.append(msg);
+            }
+
+            function showTotal(idSearcher, total){
+                var $total = $("#total-" + idSearcher);
+                $total.text(total);
             }
 
             // Load html for multi resources
-            function resourcesTemplate(results, idx, urlTemplate, resultsId){
+            function resourcesTemplate(results, idx, urlTemplate, resultsId, gaCategory){
 //                console.log("result", results);
 //                console.log("urlTemplate", urlTemplate);
 //                console.log("resultsId", resultsId);
-
                 for(var iRes = 0; iRes < results.length; iRes++){
                     var result = results[iRes];
                     var idxRes = idx + iRes;
-                    resourceTemplate(result, idxRes, urlTemplate, resultsId);
+                    resourceTemplate(result, idxRes, urlTemplate, resultsId, gaCategory);
                 }
             }
 
-            function resourceTemplate(result, idxRes, urlTemplate, resultsId){
+            function resourceTemplate(result, idxRes, urlTemplate, resultsId, gaCategory){
 //                console.log("result", result);
 //                console.log("idx", idxRes);
 
@@ -259,7 +315,8 @@
                     image: image,
                     type: type,
                     idx: idxRes,
-                    idGroup: resultsId
+                    idGroup: resultsId,
+                    gaCategory: gaCategory
                 }
 
                 // Ejecutamos la llamada para formatear cada resultado
@@ -272,21 +329,9 @@
                     // Agregamos el resultado al buscador
                     var $resultsDiv = $("#" + resultsId);
                     $resultsDiv.append(data);
-//                    sort("#" + resultsId);
                 }).fail(function(err){
                     console.error("fail resourceTemplate", err);
                 })
-            }
-
-            // Sort div
-            function sort(containerId){
-                $(containerId + " div").sort(function(a,b){
-                    return parseInt(a.id) > parseInt(b.id);
-                }).each(function(){
-                    var elem = $(this);
-                    elem.remove();
-                    $(elem).appendTo(containerId);
-                });
             }
         </script>
     </cms:formatter>
