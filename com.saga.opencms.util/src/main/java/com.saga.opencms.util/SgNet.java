@@ -1,10 +1,11 @@
-package com.saga.opencms.util;
+package com.saga.sagasuite.padron.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
@@ -24,6 +25,8 @@ import java.util.Map;
 /**
  * Created by jgregorio on 09/09/2016.
  * Ref: http://www.baeldung.com/httpclient-post-http-request
+ *
+ * Utility class for request using HTTP GET and POST methods
  */
 public class SgNet {
 	private static final Log LOG = CmsLog.getLog(SgNet.class);
@@ -37,39 +40,34 @@ public class SgNet {
 	public static final String H_ACCEPT = "Accept";
 	public static final String H_APP_JSON = "application/json";
 
-	String method;
-	String url;
+	CloseableHttpClient client;
+
 	Map<String, String> params;
 	Map<String, String> headers;
+
 	int resCode;
 	String resStr;
-
 
 	public SgNet(){
 		headers = new HashMap<String, String>();
 		params = new HashMap<String, String>();
+		client = HttpClients.createDefault();
 	}
 
-	public SgNet(String url, String method){
-		this();
-		setUrl(url);
-		setMethod(method);
+	public SgNet(RequestConfig config){
+		headers = new HashMap<String, String>();
+		params = new HashMap<String, String>();
+		client = HttpClients.custom()
+				.setDefaultRequestConfig(config)
+				.build();
 	}
 
-	public String getMethod() {
-		return method;
-	}
-
-	public void setMethod(String method) {
-		this.method = method;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
+	public SgNet(int timeout){
+		this(RequestConfig.custom()
+				.setConnectTimeout(timeout)
+				.setSocketTimeout(timeout)
+				.setConnectionRequestTimeout(timeout)
+				.build());
 	}
 
 	public Map<String, String> getParams() {
@@ -119,9 +117,7 @@ public class SgNet {
 	 * @throws java.io.IOException
 	 */
 	public void post(String url, String jsonStr) throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(url);
-
 		StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
 		httpPost.setEntity(entity);
 		httpPost.setHeader(H_ACCEPT, H_APP_JSON);
@@ -136,7 +132,6 @@ public class SgNet {
 	}
 
 	public void get(String url) throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(url);
 		CloseableHttpResponse res = client.execute(httpGet);
 		resCode = res.getStatusLine().getStatusCode();
@@ -148,7 +143,6 @@ public class SgNet {
 
 	public void postAuth(String url, String jsonStr, String user, String pass)
 			throws IOException, AuthenticationException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(url);
 
 		StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
@@ -170,7 +164,6 @@ public class SgNet {
 
 	public void getAuth(String url, String user, String pass)
 			throws IOException, AuthenticationException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpGet httpGet = new HttpGet(url);
 
 		UsernamePasswordCredentials creds =
@@ -186,7 +179,6 @@ public class SgNet {
 	}
 
 	public void put(String url, String jsonStr) throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPut httpPut = new HttpPut(url);
 
 		StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
@@ -203,7 +195,6 @@ public class SgNet {
 	}
 
 	public void put(String url) throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpPut httpPut = new HttpPut(url);
 
 		CloseableHttpResponse response = client.execute(httpPut);
@@ -220,7 +211,6 @@ public class SgNet {
 	 * @throws java.io.IOException
 	 */
 	public void delete(String url) throws IOException {
-		CloseableHttpClient client = HttpClients.createDefault();
 		HttpDelete httpDelete = new HttpDelete(url);
 
 		CloseableHttpResponse response = client.execute(httpDelete);
