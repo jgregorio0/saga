@@ -2,6 +2,7 @@ package com.saga.opencms.util;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
+import org.apache.http.HttpResponse;
 import org.opencms.main.CmsLog;
 
 import java.io.*;
@@ -57,5 +58,19 @@ public class SgFile {
 
 	public String catalinaHomePath(){
 		return System.getProperty("catalina.home");
+	}
+
+	public void downloadFile(
+			HttpServletResponse response, String contentType,
+			String contentDisposition, InputStream inputStream)
+				throws IOException {
+
+		final ServletOutputStream outputStream = response.getOutputStream();
+		response.setContentType(contentType);
+//                response.setHeader("Content-Disposition", "attachment;filename=\"" + e.getName().replaceAll("\\s+", " ").replaceAll("\\s+", "_") + "\"");
+		response.setHeader("Content-Disposition", contentDisposition);
+		IOUtils.copy(inputStream, outputStream);
+		outputStream.flush();
+		outputStream.close();
 	}
 }
