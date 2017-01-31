@@ -9,8 +9,10 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.opencms.main.CmsLog;
@@ -44,6 +46,7 @@ public class SgNet {
 
 	Map<String, String> params;
 	Map<String, String> headers;
+	BasicCookieStore cookieStore;
 
 	int resCode;
 	String resStr;
@@ -62,12 +65,29 @@ public class SgNet {
 				.build();
 	}
 
+	public SgNet(RequestConfig config, BasicCookieStore cookieStore){
+		headers = new HashMap<String, String>();
+		params = new HashMap<String, String>();
+		client = HttpClients.custom()
+				.setDefaultRequestConfig(config)
+				.setDefaultCookieStore(cookieStore)
+				.build();
+	}
+
 	public SgNet(int timeout){
 		this(RequestConfig.custom()
 				.setConnectTimeout(timeout)
 				.setSocketTimeout(timeout)
 				.setConnectionRequestTimeout(timeout)
 				.build());
+	}
+
+	public SgNet(int timeout, BasicCookieStore cookieStore){
+		this(RequestConfig.custom()
+				.setConnectTimeout(timeout)
+				.setSocketTimeout(timeout)
+				.setConnectionRequestTimeout(timeout)
+				.build(), cookieStore);
 	}
 
 	public Map<String, String> getParams() {
@@ -219,5 +239,12 @@ public class SgNet {
 		if (resEntity != null)
 			resStr = EntityUtils.toString(resEntity);
 		client.close();
+	}
+
+	public void addcookie(BasicCookieStore cookieStore, String name, String value, String domain, String path) {
+		BasicClientCookie cookie = new BasicClientCookie(name, value);
+		cookie.setDomain(domain);
+		cookie.setPath(path);
+		cookieStore.addCookie(cookie);
 	}
 }
