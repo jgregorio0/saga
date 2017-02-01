@@ -1,17 +1,16 @@
 package com.saga.opencms.util;
 
-import org.opencms.file.CmsFile;
-import org.opencms.file.CmsObject;
-import org.opencms.file.CmsResource;
-import org.opencms.file.CmsResourceFilter;
+import org.opencms.file.*;
 import org.opencms.file.types.I_CmsResourceType;
 import org.opencms.flex.CmsFlexController;
 import org.opencms.lock.CmsLock;
 import org.opencms.main.CmsException;
 import org.opencms.main.OpenCms;
+import org.opencms.security.CmsOrganizationalUnit;
 import org.opencms.security.I_CmsPrincipal;
 import org.opencms.staticexport.CmsLinkManager;
 import org.opencms.util.CmsStringUtil;
+import org.opencms.workplace.CmsWorkplaceAction;
 import org.opencms.xml.CmsXmlEntityResolver;
 import org.opencms.xml.CmsXmlException;
 import org.opencms.xml.content.CmsXmlContent;
@@ -29,6 +28,8 @@ public class SgCms {
 	static String folderImageType = "imagegallery";
 	static String folderDownloadType = "downloadgallery";
 	static String folderLinkType = "linkgallery";
+
+	public static CmsObject cmsoAdmin;
 
 	CmsObject cmso;
 
@@ -465,4 +466,56 @@ public class SgCms {
 		}
 	}
 
+	/**
+	 * Create user using fqn (ou/username)
+	 * @param cmso
+	 * @param fqn
+	 * @param pass
+	 * @return
+	 */
+	public CmsUser createUser(CmsObject cmso, String fqn, String pass, boolean add2Users)
+			throws CmsException {
+		CmsUser user = null;
+		user = cmso.createUser(fqn, pass, null, null);
+		LOG.debug("User created " + user);
+		if (add2Users) {
+			String usersGroup =
+					CmsOrganizationalUnit.getParentFqn(fqn)
+							+ CmsOrganizationalUnit.SEPARATOR
+							+ "Users";
+			add2Group(cmso, fqn, usersGroup);
+		}
+		return user;
+	}
+
+	/**
+	 * Add group using fqn (ou/username) and group (ou/groupname)
+	 * @param cmso
+	 * @param fqn
+	 * @param group
+	 * @return
+	 */
+	public void add2Group(CmsObject cmso, String fqn, String group)
+			throws CmsException {
+		cmso.addUserToGroup(fqn, group);
+		LOG.debug("Agregado a grupo " + group);
+	}
+
+	private CmsUser createUser(String fqn, String pass, boolean add2Users)
+			throws CmsException {
+		CmsUser user = null;
+		CmsObject cmsoAdmin = initCmsAdmin();
+		createUser(cmsoAdmin, fqn, pass, add2Users);
+
+		return user;
+	}
+
+	private static CmsObject initCmsAdmin()
+			throws CmsException {
+		if (cmsoAdmin == null) {
+			CmsWorkplaceAction action = CmsWorkplaceAction.getInstance();
+			cmsoAdmin = action.getCmsAdminObject();
+		}
+		return cmsoAdmin;
+	}
 }
