@@ -4,10 +4,11 @@
 <%@ page import="java.io.FileInputStream" %>
 
 <%
-    String filename = "com.saga.sagasuite.scriptjsp_1.5.4.zip";
-    String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
-    String filepath = webInfPath + "packages/";
-    filepath = filepath + "modules/";
+    String filename = "/com.saga.capraboid_1.0";
+//    String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
+    String webInfPath = OpenCms.getSystemInfo().getConfigFolder();
+    String filepath = webInfPath;
+//    filepath = filepath + "modules/";
     response.setContentType("application/zip");
     response.setHeader("Content-Disposition","attachment; filename=\"" + filename + "\"");
 

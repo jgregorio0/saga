@@ -1,4 +1,6 @@
 <%@ page import="java.io.File" %>
+<%@ page import="org.opencms.main.OpenCms" %>
+<%@ page import="java.util.Arrays" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -9,13 +11,15 @@
 <%
 
 	try {
-		String file = application.getRealPath("/WEB-INF/lib");
+		String file = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("lib/");
+
 		File f = new File(file);
 		String [] fileNames = f.list();
-		File [] fileObjects= f.listFiles();
-		for (int i = 0; i < fileObjects.length; i++) {
+		Arrays.sort(fileNames);
+//		File [] fileObjects= f.listFiles();
+		for (int i = 0; i < fileNames.length; i++) {
 //        if(!fileObjects[i].isDirectory()){
-			String fname = file+fileNames[i];
+//			String fname = file+fileNames[i];
 			out.println(fileNames[i]);
 //        }
 		}
