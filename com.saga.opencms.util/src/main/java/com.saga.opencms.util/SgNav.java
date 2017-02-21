@@ -1,6 +1,7 @@
 package com.saga.opencms.util;
 
 import org.apache.commons.logging.Log;
+import org.opencms.file.CmsResource;
 import org.opencms.jsp.CmsJspNavElement;
 import org.opencms.main.CmsLog;
 
@@ -25,5 +26,26 @@ public class SgNav {
 			resNameLvl += resNameLevels[i] + "/";
 		}
 		return resNameLvl;
+	}
+
+	public boolean isActiveSection(CmsJspNavElement elem, String uri){
+		String resNameLvl = resourceNameLvl(elem);
+		String parentFolderLvl = CmsResource.getParentFolder(resNameLvl);
+		boolean isActiveSection = uri.startsWith(parentFolderLvl);
+		return isActiveSection;
+	}
+
+	public boolean isParentItem(CmsJspNavElement elem, int startLvl){
+		boolean isParentItem = elem.getNavTreeLevel() == startLvl;
+		return isParentItem;
+	}
+
+	public boolean isMarkItem(CmsJspNavElement elem, String uri){
+		String resPath = elem.getResourceName();
+		if (elem.isNavigationLevel()) {
+			resPath = elem.getParentFolderName();
+		}
+		boolean isMarkItem = uri.startsWith(resPath);
+		return isMarkItem;
 	}
 }
