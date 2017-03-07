@@ -10,6 +10,7 @@ import org.opencms.security.CmsOrganizationalUnit;
 import org.opencms.security.I_CmsPrincipal;
 import org.opencms.staticexport.CmsLinkManager;
 import org.opencms.util.CmsStringUtil;
+import org.opencms.util.CmsUUID;
 import org.opencms.workplace.CmsWorkplaceAction;
 import org.opencms.xml.CmsXmlEntityResolver;
 import org.opencms.xml.CmsXmlException;
@@ -477,7 +478,7 @@ public class SgCms {
 			throws CmsException {
 		CmsUser user = null;
 		user = cmso.createUser(fqn, pass, null, null);
-		LOG.debug("User created " + user);
+//		LOG.debug("User created " + user);
 		if (add2Users) {
 			String usersGroup =
 					CmsOrganizationalUnit.getParentFqn(fqn)
@@ -498,7 +499,7 @@ public class SgCms {
 	public void add2Group(CmsObject cmso, String fqn, String group)
 			throws CmsException {
 		cmso.addUserToGroup(fqn, group);
-		LOG.debug("Agregado a grupo " + group);
+//		LOG.debug("Agregado a grupo " + group);
 	}
 
 	private CmsUser createUser(String fqn, String pass, boolean add2Users)
@@ -518,4 +519,28 @@ public class SgCms {
 		}
 		return cmsoAdmin;
 	}
+
+	public static CmsResource readResByDetailPath(CmsObject cmso, String detailPath)
+			throws CmsException {
+		String detailName = CmsResource.getName(detailPath);
+		CmsUUID strIdUUID = cmso.readIdForUrlName(detailName);
+		return cmso.readResource(strIdUUID);
+	}
+
+	public static CmsObject customCmsObject(CmsObject baseCms, String uri, String site)
+			throws CmsException {
+		CmsObject cmso = baseCms;
+		boolean isCustomSite = CmsStringUtil.isNotEmptyOrWhitespaceOnly(site);
+		boolean isCustomUri = CmsStringUtil.isNotEmptyOrWhitespaceOnly(uri);
+        if (isCustomSite || isCustomUri) {
+			cmso = OpenCms.initCmsObject(baseCms);
+			if (isCustomSite) {
+				cmso.getRequestContext().setSiteRoot(site);
+			}
+			if (isCustomUri) {
+				cmso.getRequestContext().setUri(uri);
+			}
+        }
+        return cmso;
+    }
 }
