@@ -11,18 +11,8 @@
 <%
 
 	try {
-		String file = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("lib/");
+		out.println(OpenCms.getSystemInfo().getWebInfRfsPath()
 
-		File f = new File(file);
-		String [] fileNames = f.list();
-		Arrays.sort(fileNames);
-//		File [] fileObjects= f.listFiles();
-		for (int i = 0; i < fileNames.length; i++) {
-//        if(!fileObjects[i].isDirectory()){
-//			String fname = file+fileNames[i];
-			out.println(fileNames[i]);
-//        }
-		}
 	} catch (Exception e) {
 		out.println("ERROR " + e);
 	}

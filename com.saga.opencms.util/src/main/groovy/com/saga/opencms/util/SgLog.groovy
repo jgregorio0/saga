@@ -1,5 +1,4 @@
-package com.saga.opencms.util
-
+package com.saga.sagasuite.scriptgroovy.util
 import com.saga.sagasuite.scripts.SgReportManager
 import org.opencms.main.CmsException
 
@@ -52,6 +51,13 @@ public class SgLog {
 		warn().add(msg)
 	}
 
+	def warn(Exception e) {
+		warn("<strong>${e.getMessage()}</strong><br/>"+
+				"Cause: ${e.getCause()}<br/>"+
+				CmsException.getStackTraceAsString(e))
+		this
+	}
+
 	def error() {
 		color = colorError
 		this
@@ -79,7 +85,7 @@ public class SgLog {
 		reportManager.addMessage(
 				idProceso,
 				user,
-				"<span style='color:${color};'><strong>${msg}</strong></span>".toString(),
+				"<div style='color:${color};'>${msg}</div>".toString(),
 				porcentaje);
 		cleanMsg();
 	}
@@ -97,5 +103,11 @@ public class SgLog {
 	def percentage(def i, def total){
 		porcentaje = (new Double(i) * 100d) / total;
 		this
+	}
+
+	def loop(def i, def total){
+		init();
+		percentage(i, total);
+		this;
 	}
 }

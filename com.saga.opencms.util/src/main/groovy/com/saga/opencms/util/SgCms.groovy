@@ -1,4 +1,4 @@
-package com.saga.opencms.util
+package com.saga.sagasuite.scriptgroovy.util
 
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
@@ -83,6 +83,27 @@ class SgCms {
     }
 
     /**
+     * Delete resource (including siblings)
+     * @param path
+     * @return
+     */
+    def delete(String path) {
+        cmso.deleteResource(path, CmsResource.CmsResourceDeleteMode.MODE_DELETE_REMOVE_SIBLINGS)
+        return this;
+    }
+
+    /**
+     * Delete resource (including siblings)
+     * @param path
+     * @return
+     */
+    static def delete(CmsObject cmso, String path) {
+        lock(cmso, path)
+        cmso.deleteResource(path, CmsResource.CmsResourceDeleteMode.MODE_DELETE_REMOVE_SIBLINGS)
+        return this;
+    }
+
+    /**
      * Unlock resource.
      * If resource is lock by inheritance try to unlock parent folder.
      * If lock owns to another user steal lock and unlock.
@@ -143,7 +164,7 @@ class SgCms {
      */
     def static lock(CmsObject cmso, String path) {
         CmsLock lock = cmso.getLock(path);
-        if (!lock.isUnlocked() && 
+        if (!lock.isUnlocked() &&
                 !lock.isOwnedBy(cmso.requestContext.currentUser)) {
             cmso.changeLock(path);
         }
@@ -153,8 +174,8 @@ class SgCms {
     /**
      * Dada una carpeta contenedora y un patron formado por el nombre y un índice,
      * genera la ruta en la que se debería crear el siguiente recurso.
-     * @param folder
-     * @param pattern
+     * @param folder "/system/modules/com.saga.sagasuite.scriptgroovy/test/blog/"
+     * @param pattern "blog-%(number:5).xml"
      * @return
      */
     String nextResoucePath(String folder, String pattern){
@@ -197,6 +218,32 @@ class SgCms {
         lock(path);
         cmso.chtype(path, type);
         unlock(path);
+        return this;
+    }
+
+    /**
+     * Change resource type
+     * @param path
+     * @param type
+     * @return
+     */
+    def changeType(String path, String type) {
+        I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type)
+        changeType(path, resType);
+        return this;
+    }
+
+    /**
+     * Change resource type
+     * @param path
+     * @param type
+     * @return
+     */
+    static def changeType(CmsObject cmso, String path, String type) {
+        lock(cmso, path)
+        I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type)
+        cmso.chtype(path, resType);
+        unlock(cmso, path);
         return this;
     }
 

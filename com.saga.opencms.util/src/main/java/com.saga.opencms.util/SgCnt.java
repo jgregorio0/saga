@@ -240,7 +240,12 @@ public class SgCnt {
 	 */
 	public SgCnt setStringValue(String path, String value)
 			throws Exception {
-		return setStringValue(path, value, 0);
+		if (path.contains("[")) {
+			setStringValueIdx(path, value);
+		} else {
+			setStringValue(path, value, 0);
+		}
+		return this;
 	}
 
 	/**
@@ -802,4 +807,18 @@ public class SgCnt {
 			return elemPath + "[" + idx + "]";
 		}
 	}
+
+
+
+
+
+	public SgCnt initLocale(Locale locale) throws CmsXmlException {
+		if (!xmlContent.hasLocale(locale)){
+			xmlContent.addLocale(cmso, locale);
+		}
+
+		return this;
+	}
+
+
 }

@@ -1,0 +1,20 @@
+{
+//    "sourceFolder": "/sites/Eps/info_acad_test/",
+//    "sourceFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
+    "sourceFolder": "/sites/Eps/docs/",
+//    "targetFolder": "/sites/Eps/info_acad_test/",
+//    "targetFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
+    "targetFolder": "/sites/Eps/docs/",
+    "sourceType": "xmlpage",
+    "targetType": "sggenericcontent",
+//    "targetPattern": "sggenericcontent-%(number:5).xml",
+    "targetPattern": "EQUALS",
+    "mapping": {
+        "ca": {
+            "contingut": "Content[1]/TextBlock[1]/Text[1]"
+        },
+        "es": {
+            "contenido": "Content[1]/TextBlock[1]/Text[1]"
+        }
+    }
+}
