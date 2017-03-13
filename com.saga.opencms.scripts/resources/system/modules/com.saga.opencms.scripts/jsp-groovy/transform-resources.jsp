@@ -162,13 +162,17 @@
                         <dd>
                             Json que indica los campos a mapear. Las claves son el locale y los valores son otro Json con las rutas XML a los valores.
                         </dd>
-
+                        <dt>properties</dt>
+                        <dd>Propiedades que migramos. Podemos copiar, mapear (mismo valor distinto nombre), añadir o eliminar propiedades.</dd>
+                        <dt>scripts</dt>
+                        <dd>Se permite ejecutar un script antes y otro después de la ejecución del propio script de transformación</dd>
                     </dl>
                     <p><strong>Ej.</strong>
                         <code>
                             {
-                            "sourceFolder": "/sites/Eps/info_acad_test/",
-                            "targetFolder": "/sites/Eps/info_acad_test/",
+                            "sourceFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
+                            "targetFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
+
                             "sourceType": "xmlpage",
                             "targetType": "sggenericcontent",
                             //    "targetPattern": "sggenericcontent-%(number:5).xml",
@@ -179,6 +183,27 @@
                             },
                             "es": {
                             "contenido": "Content[1]/TextBlock[1]/Text[1]"
+                            }
+                            },
+                            "properties": {
+                            "cp": ["Title"],
+                            "add": {
+                            "title.added": "hola"
+                            },
+                            "rm": ["template"],
+                            "map": {"Title" : "title.source"}
+                            },
+                            "scripts" : {
+                            //        "executeBefore": {
+                            //            "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/TransformResourcesExecuteBefore.groovy",
+                            //            "method": "init",
+                            //            "args": ["cmso", "idProceso", "jsonCnf"]
+                            //        },
+                            "executeAfter": {
+                            "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/AfterMapTitle.groovy",
+                            "method": "init",
+                            "args": ["cmso", "idProceso", "jsonCnf", "infos"]
+                            }
                             }
                             }
                         </code>
@@ -201,18 +226,18 @@
 
                         <div>
                             <label for="jsonFile">Fichero Json con la configuracion:</label>
-                            <input type="text" class="form-control" id="jsonFile" name="jsonFile" value="<c:out value='${param.jsonFile }'/>" placeholder="/.content/mapping.json">
+                            <input type="text" class="form-control" id="jsonFile" name="jsonFile" value="<c:out value='${param.jsonFile }'/>" placeholder="/system/modules/com.saga.sagasuite.scriptgroovy/jsp-groovy/transform-resources.json">
                         </div>
                         <%--<div class="checkbox">--%>
-                            <%--<label>--%>
-                                <%--<input type="checkbox" name="onlyCheck" id="onlyCheck" checked> Ejecutar SIN MODIFICAR recursos--%>
-                            <%--</label>--%>
+                        <%--<label>--%>
+                        <%--<input type="checkbox" name="onlyCheck" id="onlyCheck" checked> Ejecutar SIN MODIFICAR recursos--%>
+                        <%--</label>--%>
                         <%--</div>--%>
                         <button type="submit" id="submit" class="btn btn-success btn-lg">Ejecutar Script!!</button>
                         <%--<div class="checkbox">--%>
-                            <%--<label>--%>
-                                <%--<input type="checkbox" id="autoscroll" > Scroll automático--%>
-                            <%--</label>--%>
+                        <%--<label>--%>
+                        <%--<input type="checkbox" id="autoscroll" > Scroll automático--%>
+                        <%--</label>--%>
                         <%--</div>--%>
                     </form>
                 </div>

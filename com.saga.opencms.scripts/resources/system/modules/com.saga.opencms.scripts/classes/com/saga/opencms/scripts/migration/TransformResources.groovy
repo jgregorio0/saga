@@ -1,8 +1,6 @@
 package com.saga.sagasuite.scriptgroovy
-import com.saga.sagasuite.scriptgroovy.util.SgCms
-import com.saga.sagasuite.scriptgroovy.util.SgCnt
-import com.saga.sagasuite.scriptgroovy.util.SgLog
-import com.saga.sagasuite.scriptgroovy.util.SgProperties
+
+import com.saga.sagasuite.scriptgroovy.util.*
 import com.saga.sagasuite.scripts.SgReportManager
 import org.opencms.file.CmsFile
 import org.opencms.file.CmsObject
@@ -10,6 +8,7 @@ import org.opencms.file.CmsResource
 import org.opencms.file.CmsResourceFilter
 import org.opencms.file.types.I_CmsResourceType
 import org.opencms.i18n.CmsEncoder
+import org.opencms.json.JSONArray
 import org.opencms.json.JSONObject
 import org.opencms.main.OpenCms
 import org.opencms.util.CmsStringUtil
@@ -20,18 +19,21 @@ public class TransformResources {
 
 	static String AUX_FOLDER = "newTransformResources/"
 	static String EQUALS_TARGET_PATTERN = "EQUALS"
+	static String CP_ALL_PROPS = "ALL"
 
 	CmsObject cmso;
+	String idProceso;
+
 	String jsonPath;
 //	boolean modResources;
 	String siteRoot;
 	SgLog log;
-	def mapPaths;
-	def mapUUIDs;
 	def errors;
 	def warns;
 	def infos;
 
+	def mapPaths;
+	def mapUUIDs;
 	JSONObject jsonCnf;
 	String sourceFolder;
 	String targetFolder;
@@ -40,9 +42,16 @@ public class TransformResources {
 	String targetPattern;
 	boolean isSameResource;
 	def mappingsLoc;
+	def propsAdd = [:];
+	def propsRm = [];
+	def propsCp = [];
+	def propsMap = [:];
+	def jExBefore;
+	def jExAfter;
 
 	public void init(def cmso, def idProceso, def mapFile, def onlyCheck) {
 		this.cmso = cmso;
+		this.idProceso = idProceso;
 		this.jsonPath = mapFile;
 //		this.modResources = !onlyCheck;
 		this.mapPaths = [:]
@@ -68,6 +77,10 @@ public class TransformResources {
 
 			// Obtenemos los datos del fichero json de configuracion
 			loadConfig()
+			log.print().init()
+
+			// Ejecutamos scripts before
+			executeBefore()
 
 			// Obtenemos los recursos a modificar
 			def resources = obtainResources(cmso, sourceFolder)
@@ -84,7 +97,6 @@ public class TransformResources {
 					.add("Numero de elementos a tratar: $total")
 					.print()
 
-
 			resources.eachWithIndex{ res, i ->
 				try {
 					log.loop(i+1, total)
@@ -98,9 +110,7 @@ public class TransformResources {
 						log.add("Obtenemos contenido xml antiguo")
 
 						// Creamos el nuevo recurso
-						SgCms sgCms = new SgCms(cmso);
-						String newResPath = getNewResPath(sgCms, res, sourceFolder, targetFolder, targetPattern)
-						sgCms.createResource(newResPath, targetType)
+						String newResPath = createResource(res)
 						log.add("creado nuevo recurso: $newResPath");
 
 						// Inicializamos el contenido nuevo
@@ -121,14 +131,13 @@ public class TransformResources {
 									newCnt.setLocale(locale);
 									newCnt.initLocale(locale)
 
-
 									// Para cada campo mapeado
 									mappings.each { element, mapping ->
 
 										// Obtenemos el valor y lo guardamos
 										String valueStr = oldXml.getStringValue(cmso, element, locale)
 										newCnt.setStringValue(mapping, valueStr);
-										log.add("Copiamos el contenido $localeStr / $element del recurso antiguo al nuevo")
+										log.add("Copiamos el contenido $localeStr / $element -> $mapping")
 									}
 								}
 							} catch (WarnException e) {
@@ -147,10 +156,63 @@ public class TransformResources {
 						newCnt.saveXml();
 						log.add("Modificado contenido de $newResPath");
 
+						// Copiamos agregamos y eliminamos propiedades
+						cpProps(res.getRootPath(), newResPath)
+						mapProps(res.getRootPath(), newResPath)
+						addProps(newResPath)
+						rmProps(newResPath)
+						log.add("Copiamos las propiedades $propsCp")
+						log.add("Mapeamos las propiedades $propsMap")
+						log.add("Agregamos las propiedades $propsAdd")
+						log.add("Eliminamos las propiedades $propsRm")
+
+
 						// Relacionamos el antiguo con el nuevo
 						addMappingRelation(res.rootPath, newResPath);
 
-						infos.put(res,"Modificado recurso ${res.getRootPath()}")
+						// Mostramos info
+						infos.put(res,"Transformación completa del recurso ${res.getRootPath()} a $newResPath")
+						log.add("Transformación completa del recurso ${res.getRootPath()} a $newResPath");
+						log.print();
+
+						// Solo para patron EQUALS: Procedemos a copiar el recurso auxiliar en el original
+						if (isSameResource) {
+							log.add("EQUALS: Procedemos a copiar el recurso auxiliar  $newResPath en el original ${res.getRootPath()}");
+
+							try {
+								// Desde auxPath a res
+								String auxPath = newResPath;
+								String originPath = res.getRootPath();
+
+								// Cambiamos tipo y modificamos contenido
+								SgCms sgCms = new SgCms(cmso);
+								sgCms.changeType(originPath, targetType)
+								log.add("Cambiamos el tipo del recurso original $originPath a $targetType")
+
+								SgCnt oriCnt = new SgCnt(cmso, originPath)
+								SgCnt auxCnt = new SgCnt(cmso, auxPath)
+								oriCnt.saveStr(auxCnt.strContent)
+								log.add("Copiamos el contenido del recurso auxiliar $auxPath -> al recurso original $originPath")
+
+								// Agregamos y eliminamos propiedades
+								cpProps(auxPath, originPath)
+								// No mapeamos ya que se mapean propiedades erroneas produce un error
+//								addProps(originPath)
+								rmProps(originPath)
+								log.add("Mapeamos las propiedades $propsMap")
+								log.add("Agregamos las propiedades $propsAdd")
+								log.add("Eliminamos las propiedades $propsRm")
+
+								log.print();
+								infos.put(res,"Transformación completa del recurso $originPath sobre sí mismo")
+
+								// TODO eliminar auxiliares
+							} catch (Exception e) {
+								e.printStackTrace()
+								log.error("ERROR: ${e.getMessage()}").add("Cause: ${e.getCause()}").print();
+								errors.put(res, "ERROR: ${e.getMessage()} -- Cause: ${e.getCause()}")
+							}
+						}
 					}
 
 					log.print()
@@ -166,51 +228,138 @@ public class TransformResources {
 			}
 
 			// Si queremos transformar el mismo recurso y no generar uno nuevo (targetPattern == EQUALS y sourceFolder == targetFolder)
-			if (isSameResource) {
+//			if (isSameResource) {
+//
+//				log.init()
+//						.add("***EQUALS: PROCEDEMOS A COPIAR RECURSOS AUXILIARES EN ANTIGUOS***")
+//						.print();
+//				total = resources.size()
+//				resources.eachWithIndex { res, i ->
+//					try {
+//						log.loop(i + 1, total)
+//								.add("(${i + 1}/$total) -> ${res.getRootPath()}");
+//
+//						String auxPath = mapPaths.get(res.getRootPath())
+//						if (!auxPath) {
+//							log.warn("No ha sido transformado")
+//						} else {
+//
+//							// Cambiamos tipo y modificamos contenido
+//							SgCms sgCms = new SgCms(cmso);
+//							sgCms.changeType(cmso.getSitePath(res), targetType)
+//							log.add("Cambiamos el tipo del recurso antiguo ${res.getRootPath()} a $targetType")
+//
+//							SgCnt oldCnt = new SgCnt(cmso, res)
+//							SgCnt newCnt = new SgCnt(cmso, auxPath)
+//							oldCnt.saveStr(newCnt.strContent)
+//							log.add("Copiamos el contenido del recurso auxiliar $auxPath -> al recurso antiguo ${res.getRootPath()}")
+//
+//							// Copiamos propiedades
+//							mapProps(res.getRootPath(), newResPath)
+//							addProps(newResPath)
+//							rmProps(newResPath)
+//							log.add("Mapeamos las propiedades $propsMap")
+//							log.add("Agregamos las propiedades $propsAdd")
+//							log.add("Eliminamos las propiedades $propsRm")
+//						}
+//
+//						log.print()
+//
+//						// TODO eliminar auxiliares
+//					} catch (Exception e) {
+//						e.printStackTrace()
+//						log.error("ERROR: ${e.getMessage()}").add("Cause: ${e.getCause()}").print();
+//						errors.put(res, "ERROR: ${e.getMessage()} -- Cause: ${e.getCause()}")
+//					}
+//				}
+//			}
+//			log.print()
 
-				log.init()
-						.add("***EQUALS: PROCEDEMOS A COPIAR RECURSOS AUXILIARES EN ANTIGUOS***")
-						.print();
-				total = resources.size()
-				resources.eachWithIndex { res, i ->
-					try {
-						log.loop(i + 1, total)
-								.add("(${i + 1}/$total) -> ${res.getRootPath()}");
-
-						String auxPath = mapPaths.get(res.getRootPath())
-						if (!auxPath) {
-							log.warn("No ha sido migrado")
-						} else {
-
-							// Cambiamos tipo y modificamos contenido
-							SgCms sgCms = new SgCms(cmso);
-							sgCms.changeType(cmso.getSitePath(res), targetType)
-							log.add("Cambiamos el tipo del recurso antiguo ${res.getRootPath()} a $targetType")
-
-							SgCnt oldCnt = new SgCnt(cmso, res)
-							SgCnt newCnt = new SgCnt(cmso, auxPath)
-							oldCnt.saveStr(newCnt.strContent)
-
-							log.add("Copiamos el contenido del recurso auxiliar $auxPath -> al recurso antiguo ${res.getRootPath()}")
-						}
-
-						log.print()
-
-						// TODO eliminar auxiliares
-					} catch (Exception e) {
-						e.printStackTrace()
-						log.error("ERROR: ${e.getMessage()}").add("Cause: ${e.getCause()}").print();
-						errors.put(res, "ERROR: ${e.getMessage()} -- Cause: ${e.getCause()}")
-					}
-				}
-			}
-			log.print()
+			// Ejecutamos scripts before
+			executeAfter()
 
 			// Report final
 			showReport();
 		} catch (Exception e) {
 			log.print();
 			log.error("ERROR: ${e.getMessage()}").add("Cause: ${e.getCause()}").print();
+		}
+	}
+
+	/**
+	 * Create migration target resource
+	 * @param res
+	 * @return
+	 */
+	String createResource(CmsResource res) {
+		SgCms sgCms = new SgCms(cmso);
+		String newResPath = getNewResPath(sgCms, res, sourceFolder, targetFolder, targetPattern)
+		sgCms.createResource(newResPath, targetType)
+		return newResPath;
+	}
+
+	def addProps(String targetPath) {
+		// Agregamos propiedades
+		if (propsAdd.size() > 0) {
+			SgProperties sgProps = new SgProperties(cmso)
+			sgProps.addProperties(targetPath, propsAdd)
+		}
+		return this;
+	}
+
+	def mapProps(String sourcePath, String targetPath) {
+		// Mapeamos las propiedades
+		if (propsCp.size() > 0){
+			SgProperties sgProps = new SgProperties(cmso)
+			sgProps.mapProperties(sourcePath, targetPath, propsMap, false)
+		}
+		return this;
+	}
+
+	def rmProps(String targetPath) {
+		// Eliminamos propiedades
+		if (propsRm.size() > 0) {
+			SgProperties sgProps = new SgProperties(cmso)
+			sgProps.rmProperties(targetPath, propsRm);
+		}
+		return this;
+	}
+
+	def cpProps(String sourcePath, String targetPath) {
+		// Si contiene la clave ALL copiamos todas las propiedades. Sino copiamos solo el listado.
+		if (propsCp.size() > 0){
+			// Copiamos propiedades
+			SgProperties sgProps = new SgProperties(cmso)
+			if (propsCp.contains(CP_ALL_PROPS)) {
+				sgProps.copyAllProperties(sourcePath, targetPath, false)
+			} else {
+				sgProps.copyProperties(sourcePath, targetPath, propsCp, false)
+			}
+		}
+		return this;
+	}
+
+	def executeBefore() {
+		//TODO agregar script
+//		def scripts = jsonCnf.getJSONObject("scripts");
+//		scripts.getJSONArray("before")
+	}
+
+	def executeAfter() {
+		if (jExAfter){
+			String path = (String)getJSON(jExAfter, "path")
+//			if (!path.startsWith("/")) {
+//				String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath().replaceAll("\\\\", "/");
+//				path = webInfPath + path;
+//			}
+			String method = (String)getJSON(jExAfter, "method")
+			JSONArray jArgs = (JSONArray)getJSON(jExAfter, "args")
+			def args = [];
+			jArgs.m_myArrayList.each {
+				args.add(this.getProperty(it))
+			}
+
+			new SgScript().invokeScript(cmso, path, method, args.toArray())
 		}
 	}
 
@@ -238,6 +387,12 @@ public class TransformResources {
 		return true;
 	}
 
+	/**
+	 * Add relation path and uuid
+	 * @param oldPath
+	 * @param newPath
+	 * @return
+	 */
 	def addMappingRelation(String oldPath, String newPath){
 		try {
 			mapPaths.put(oldPath, newPath)
@@ -245,10 +400,13 @@ public class TransformResources {
 			String newUuid = cmso.readResource(newPath).getStructureId().toString()
 			mapUUIDs.put(newUuid, oldUuid)
 
-			// TODO add all properties cmso.readAllPropertyDefinitions() sgProps.copyProperties(oldPath)
+			//
 			SgProperties sgProps = new SgProperties(cmso)
-			def props = [oldPath: oldPath, newPath: newPath, newUuid: newUuid, oldUuid: oldUuid]
-			sgProps.addProperties(newPath, props)
+			def props = ["migration.sourcePath": oldPath,
+						 "migration.targetPath": newPath,
+						 "migration.sourceUUID": oldUuid,
+						 "migration.targetUUID": newUuid]
+			sgProps.addProperties(newPath, props).save(oldPath)
 		} catch (Exception e){
 			log.error("Error mapeando relacion entre el recurso viejo $oldPath y el nuevo $newPath")
 			log.error("ERROR: ${e.getMessage()}").add("Cause: ${e.getCause()}")
@@ -313,25 +471,6 @@ public class TransformResources {
 			log.error("(${idx + 1}/$warnsTotal - $key - $value)")
 		}
 		log.print()
-
-//		log.add("MODIFICADOS ($infosTotal)")
-//		infos.eachWithIndex{ key, value, idx ->
-//			log.add("($idx/$infosTotal - $key - $value)")
-//		}
-//		mapPaths.each{ key, value ->
-//			boolean isSameResource = isSameResource(json.get("targetFolder"), json.get("sourceFolder"), json.get("targetPattern"))
-//			if (isSameResource) {
-//				log.add("$key -> (Recurso auxiliar)$value")
-//			} else {
-//				log.add("$key -> $value")
-//			}
-//		}
-//		log.print();
-//		log.init().error("ERRORES (${errors.size()})")
-//		errors.eachWithIndex{key, value, idx ->
-//			log.add("$idx - $key -> $value")
-//		}
-//		log.print()
 	}
 
 	def loadConfig(){
@@ -341,22 +480,48 @@ public class TransformResources {
 		log.add("json de configuracion ${json.toString()}")
 
 		// Obtenemos los datos del json de configuracion
-		sourceFolder = json.getString("sourceFolder");
-		targetFolder = json.getString("targetFolder");
-		sourceType = json.getString("sourceType");
-		targetType = json.getString("targetType");
-		targetPattern = json.getString("targetPattern");
+		sourceFolder = (String)getJSON(json, "sourceFolder");
+		targetFolder = (String)getJSON(json, "targetFolder");
+		sourceType = (String)getJSON(json, "sourceType");
+		targetType = (String)getJSON(json, "targetType");
+		targetPattern = (String)getJSON(json, "targetPattern");
 		isSameResource = isSameResource(targetFolder, sourceFolder, targetPattern)
+
 		mappingsLoc = [:];
-		JSONObject jLocales = json.getJSONObject("mapping")
-		jLocales.keys().each {
+		JSONObject jLocales = (JSONObject)getJSON(json, "mapping")
+		jLocales?.keys().each {
 			def mappings = [:];
-			JSONObject jMappings = jLocales.getJSONObject(it)
+			JSONObject jMappings = (JSONObject)getJSON(jLocales, it)
 			jMappings.keys().each {
-				mappings.put(it, jMappings.get(it))
+				mappings.put(it, getJSON(jMappings,it))
 			}
 			mappingsLoc.put(it, mappings)
 		}
+
+		// Propiedades
+		JSONObject jProperties = (JSONObject)getJSON(json, "properties")
+
+		// Copiamos
+		JSONArray jArrayCp = (JSONArray)getJSON(jProperties, "cp");
+		propsCp = jArrayCp?.length() > 0 ? jArrayCp.m_myArrayList : [];
+
+		// Agregamos
+		JSONObject jAdds = (JSONObject)getJSON(jProperties, "add")
+		propsAdd = jAdds?.length() > 0 ? jAdds.m_map : [:];
+
+		// Eliminamos
+		JSONArray jArrayRm = (JSONArray)getJSON(jProperties, "rm")
+		propsRm = jArrayRm?.length() > 0 ? jArrayRm.m_myArrayList : [];
+
+		// Mapeamos
+		JSONObject jMaps = (JSONObject)getJSON(jProperties, "map")
+		propsMap = jMaps?.length() > 0 ? jMaps.m_map : [:];
+
+		// Obtenemos los scripts de ejecucion
+		JSONObject jScripts = (JSONObject)getJSON(json, "scripts");
+		jExBefore = jScripts == null ? null : (JSONObject)getJSON(jScripts, "executeBefore");
+		jExAfter = jScripts == null ? null : (JSONObject)getJSON(jScripts, "executeAfter");
+
 		log.add("Obtenemos datos:")
 		log.add("sourceFolder: $sourceFolder")
 		log.add("targetFolder: $targetFolder")
@@ -364,20 +529,16 @@ public class TransformResources {
 		log.add("targetType: $targetType")
 		log.add("targetPattern: $targetPattern")
 		log.add("mappings: $mappingsLoc")
+		log.add("Copy properties: $propsCp")
+		log.add("Map properties: $propsMap")
+		log.add("Add properties: $propsAdd")
+		log.add("Remove properties: $propsRm")
+		log.add("execute Before: $jExBefore")
+		log.add("execute After: $jExAfter")
 
 		log.print()
 
 		jsonCnf = json;
-	}
-
-	def getJSON(JSONObject json, String field){
-		Object o = null;
-		try {
-			o = json.get(field)
-		} catch (Exception e){
-			log.error("No existe el campo $field en el json de configuracion")
-		}
-		return o;
 	}
 
 	public class WarnException extends Exception {
@@ -394,5 +555,15 @@ public class TransformResources {
 			throw new WarnException("El recurso $res no tiene locale ${locale.getLanguage()}")
 		}
 		return true;
+	}
+
+	public Object getJSON(JSONObject json, String key){
+		Object o = null;
+		try {
+			 o = json.get(key)
+		} catch (Exception e){
+			log.warn("No existe valor $key en el json de configuracion")
+		}
+		return o;
 	}
 }
