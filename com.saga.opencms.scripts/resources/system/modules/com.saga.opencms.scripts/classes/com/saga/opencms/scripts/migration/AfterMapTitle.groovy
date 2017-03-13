@@ -1,4 +1,5 @@
-package com.saga.sagasuite.scriptgroovy.migration
+package com.saga.opencms.scripts
+
 import com.saga.sagasuite.scriptgroovy.util.SgCnt
 import com.saga.sagasuite.scriptgroovy.util.SgLog
 import com.saga.sagasuite.scripts.SgReportManager

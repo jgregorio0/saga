@@ -1,45 +1,43 @@
 {
-    "sourceFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
-    //        "sourceFolder": "/sites/Eps/docs/",
-    //	  "sourceFolder": "/sites/Eps/documents/",
-    //    "sourceFolder": "/sites/Eps/info_acad/",
-    "targetFolder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/",
-    //    "sourceFolder": "/sites/Eps/info_sobre/",
-    //        "targetFolder": "/sites/Eps/docs/",
-    //    "targetFolder": "/sites/Eps/documents/",
-    //    "targetFolder": "/sites/Eps/info_acad/",
-    //    "targetFolder": "/sites/Eps/info_sobre/",
-
-    "sourceType": "xmlpage",
-    "targetType": "sggenericcontent",
-    //    "targetPattern": "sggenericcontent-%(number:5).xml",
-    "targetPattern": "EQUALS",
-    "mapping": {
-        "ca": {
-            "contingut": "Content[1]/TextBlock[1]/Text[1]"
-        },
-        "es": {
-            "contenido": "Content[1]/TextBlock[1]/Text[1]"
-        }
-    },
-    "properties": {
-        //        "cp": ["Title"],
-        //        "add": {
-        //            "title.added": "hola"
-        //        },
-        "rm": ["template"],
-        "map": {"Title" : "title.source"}
-    },
-    "scripts" : {
-        //        "executeBefore": {
-        //            "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/TransformResourcesExecuteBefore.groovy",
-        //            "method": "init",
-        //            "args": ["cmso", "idProceso", "jsonCnf"]
-        //        },
-        "executeAfter": {
-            "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/AfterMapTitle.groovy",
-            "method": "init",
-            "args": ["cmso", "idProceso", "jsonCnf", "infos"]
-        }
-    }
+  "source": {
+    "path": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Puede ser carpeta o fichero
+    "type": "xmlpage" //TODO Obligatorio. Puede ser XmlContent, XmlPage, ContainerPage o Folder
+//        ,"filter": { //TODO Opcional. Permite configurar el tipo de filtro. En caso de no seleccionar nada carga ALL
+//          "base":"ALL", //TODO Opcional. Permite seleccionar el tipo de filtro. ALL | ALL_MODIFIED | DEFAULT | DEFAULT_FILES | DEFAULT_FOLDERS | DEFAULT_ONLY_VISIBLE | IGNORE_EXPIRATION | ONLY_VISIBLE | ONLY_VISIBLE_NO_DELETED
+//        }
+//        "onlyFile": "ALL" //TODO Opcional. Permite seleccionar el tipo de filtro
+  },
+  "target": {
+    "folder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Debe ser carpeta
+    "type": "xmlpage", //TODO Obligatorio.
+    "pattern": "SOURCE_EQ_TARGET"
+  },
+  "mapping": {
+      "ca": {
+          "contingut": "Content[1]/TextBlock[1]/Text[1]"
+      },
+      "es": {
+          "contenido": "Content[1]/TextBlock[1]/Text[1]"
+      }
+  },
+  "properties": {
+      //        "cp": ["Title"], //TODO Opcional. Puede ser ALL y se copian todas las propiedades
+      //        "add": {
+      //            "title.added": "hola"
+      //        },
+      "rm": ["template"],
+      "map": {"Title" : "title.source"}
+  },
+  "scripts" : {
+      //        "executeBefore": {
+      //            "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/TransformResourcesExecuteBefore.groovy",
+      //            "method": "init",
+      //            "args": ["cmso", "idProceso", "jsonCnf"]
+      //        },
+      "executeAfter": {
+          "path": "/system/modules/com.saga.sagasuite.scriptgroovy/classes/com/saga/sagasuite/scriptgroovy/migration/AfterMapTitle.groovy",
+          "method": "init",
+          "args": ["cmso", "idProceso", "jsonCnf", "infos"]
+      }
+  }
 }
