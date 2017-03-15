@@ -1,16 +1,16 @@
 {
   "source": {
-    "path": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Puede ser carpeta o fichero
-    "type": "xmlpage" //TODO Obligatorio. Puede ser XmlContent, XmlPage, ContainerPage o Folder
+      "path": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Puede ser carpeta o fichero
+      "type": "xmlpage" //TODO Obligatorio. Puede ser XmlContent, XmlPage, ContainerPage o Folder
 //        ,"filter": { //TODO Opcional. Permite configurar el tipo de filtro. En caso de no seleccionar nada carga ALL
 //          "base":"ALL", //TODO Opcional. Permite seleccionar el tipo de filtro. ALL | ALL_MODIFIED | DEFAULT | DEFAULT_FILES | DEFAULT_FOLDERS | DEFAULT_ONLY_VISIBLE | IGNORE_EXPIRATION | ONLY_VISIBLE | ONLY_VISIBLE_NO_DELETED
 //        }
 //        "onlyFile": "ALL" //TODO Opcional. Permite seleccionar el tipo de filtro
   },
   "target": {
-    "folder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Debe ser carpeta
-    "type": "xmlpage", //TODO Obligatorio.
-    "pattern": "SOURCE_EQ_TARGET"
+      "folder": "/system/modules/com.saga.sagasuite.scriptgroovy/test/xmlpage/", //TODO Obligatorio. Debe ser carpeta
+      "type": "xmlpage", //TODO Obligatorio.
+      "pattern": "SOURCE_EQ_TARGET"
   },
   "mapping": {
       "ca": {

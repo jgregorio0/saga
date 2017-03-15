@@ -1,11 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.cybozu.labs:langdetect:1.1-20120112">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.cybozu.labs/langdetect/1.1-20120112/99091df19fff62f815d56d23b412610baf38fe97/langdetect-1.1-20120112.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/cybozu/labs/langdetect/1.1-20120112/langdetect-1.1-20120112.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.cybozu.labs/langdetect/1.1-20120112/fe689e6307dbb4ec050fcea222867fdd36f42ecc/langdetect-1.1-20120112-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

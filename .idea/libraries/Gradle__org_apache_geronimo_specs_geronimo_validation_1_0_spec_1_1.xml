@@ -1,11 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: org.apache.geronimo.specs:geronimo-validation_1.0_spec:1.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-validation_1.0_spec/1.1/77d9bbac5d73ac09726aaa98862c5620c1f770ac/geronimo-validation_1.0_spec-1.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/geronimo/specs/geronimo-validation_1.0_spec/1.1/geronimo-validation_1.0_spec-1.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.geronimo.specs/geronimo-validation_1.0_spec/1.1/f6d1694bac9b3ee2e2a706b3ef8216490f5611a/geronimo-validation_1.0_spec-1.1-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

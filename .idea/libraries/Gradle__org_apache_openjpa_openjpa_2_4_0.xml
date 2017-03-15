@@ -1,11 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: org.apache.openjpa:openjpa:2.4.0">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.openjpa/openjpa/2.4.0/de806050bdcdafdfe3b6237bf6f6142fadd95c65/openjpa-2.4.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/openjpa/openjpa/2.4.0/openjpa-2.4.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.openjpa/openjpa/2.4.0/96cdbe2cd81bc24db2a4a963e5e9f84672925d6e/openjpa-2.4.0-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>
