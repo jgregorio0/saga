@@ -1,4 +1,4 @@
-package com.saga.sagasuite.scriptgroovy.util
+package com.saga.opencms.util
 import com.saga.sagasuite.scripts.SgReportManager
 import org.opencms.main.CmsException
 

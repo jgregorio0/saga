@@ -1,4 +1,4 @@
-package com.saga.sagasuite.scriptgroovy.util
+package com.saga.opencms.util
 
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.commons.lang3.StringUtils

@@ -1,4 +1,4 @@
-package com.saga.sagasuite.scriptgroovy.util
+package com.saga.opencms.util
 
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
@@ -278,5 +278,22 @@ class SgCms {
         unlock(pathTo)
 
         return this
+    }
+
+    static def findResources(CmsObject cmso, String path, CmsResourceFilter filter){
+        def resources = [];
+        if (CmsResource.isFolder(path)) {
+            resources = cmso.readResources(path, filter, true);
+        } else {
+            resources.add(cmso.readResource(path), filter);
+        }
+
+        return resources;
+    }
+
+    static def findResources(CmsObject cmso, String path, String type){
+        CmsResourceFilter filter = CmsResourceFilter.ALL.requireType(
+                OpenCms.getResourceManager().getResourceType(type));
+        return findResources(cmso, path, filter);
     }
 }
