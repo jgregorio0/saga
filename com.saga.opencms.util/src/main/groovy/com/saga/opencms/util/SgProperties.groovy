@@ -1,4 +1,4 @@
-package com.saga.opencms.util
+package com.saga.sagasuite.scriptgroovy.util
 
 import org.apache.commons.lang3.StringUtils
 import org.opencms.file.CmsObject
@@ -68,7 +68,8 @@ public class SgProperties {
 	}
 
 	public def copyProperties(
-			String oldResPath, List<String> propList, boolean recursive){
+			String oldResPath, String newResPath,
+			List<String> propList, boolean recursive){
 		propList.each {
 			CmsProperty prop = cmso.readPropertyObject(
 					oldResPath, it, recursive)
@@ -76,40 +77,71 @@ public class SgProperties {
 				properties.put(prop.getName(), prop)
 			}
 		}
-		save()
+		save(newResPath)
+		return this
+	}
+
+	public def copyAllProperties(
+			String oldResPath, String newResPath, boolean recursive){
+		def propList = cmso.readPropertyObjects(oldResPath, recursive);
+		propList.each {
+			properties.put(it.getName(), it)
+		}
+		save(newResPath)
 		return this
 	}
 
 	public def copyProperties(
-			String oldResPath, List<String> propList,
-			List<String> defPropList, boolean recursive){
+			String oldResPath, String newResPath,
+			List<String> propList, List<String> defPropList, boolean recursive){
 		propList.eachWithIndex { propName, i ->
 			CmsProperty prop = cmso.readPropertyObject(
 					oldResPath, propName, recursive)
 			addProperty(prop.getName(), prop, defPropList[i])
 		}
-		save()
+		save(newResPath)
+		return this;
 	}
 
-	public def copyProperty(
-			String oldResPath, String key, String defValue, boolean recursive){
-		CmsProperty prop = cmso.readPropertyObject(
-				oldResPath, key, recursive)
-		addProperty(prop.getName(), prop, defValue)
-		save()
-		return this
+	/**
+	 * Map properties
+	 * @param oldResPath
+	 * @param newResPath
+	 * @param mapping
+	 * @param recursive
+	 * @return
+	 */
+	public def mapProperties(
+			String oldResPath, String newResPath,
+			Map<String, String> mapping, boolean recursive){
+		mapping.each { oldName, newName ->
+			CmsProperty prop = cmso.readPropertyObject(
+					oldResPath, oldName, recursive)
+			addProperty(newName, prop.getValue())
+		}
+		save(newResPath)
+		return this;
 	}
 
-	public def copyProperty(
-			String oldResPath, String key, String defValue){
-		copyProperty(oldResPath, key, defValue, false)
-	}
-
-	public def copyProperty(
-			String oldResPath, String key, boolean recursive){
-		copyProperty(oldResPath, key, null, recursive)
-		return this
-	}
+//	public def copyProperty(
+//			String oldResPath, String key, String defValue, boolean recursive){
+//		CmsProperty prop = cmso.readPropertyObject(
+//				oldResPath, key, recursive)
+//		addProperty(prop.getName(), prop, defValue)
+//		save()
+//		return this
+//	}
+//
+//	public def copyProperty(
+//			String oldResPath, String key, String defValue){
+//		copyProperty(oldResPath, key, defValue, false)
+//	}
+//
+//	public def copyProperty(
+//			String oldResPath, String key, boolean recursive){
+//		copyProperty(oldResPath, key, null, recursive)
+//		return this
+//	}
 
 	/**
 	 * Adds Title property
@@ -128,6 +160,34 @@ public class SgProperties {
 		return this
 	}
 
+	/**
+	 * Remove properties
+	 * @param path
+	 * @param properties
+	 * @return
+	 */
+	public def rmProperty(String path, String propName){
+		CmsProperty rmProp = new CmsProperty(propName, "", null)
+		addProperty(rmProp);
+		save(path);
+		return this;
+	}
+
+	/**
+	 * Remove list of properties
+	 * @param path target resource path
+	 * @param properties list of properties to remove
+	 * @return
+	 */
+	public def rmProperties(String path, List<String> properties){
+		properties.each{
+			CmsProperty rmProp = new CmsProperty(it, "", null)
+			addProperty(rmProp);
+		}
+		save(path);
+		return this
+	}
+
 	public def save(String path){
 		cmso.lockResource(path)
 		cmso.writePropertyObjects(path, properties.values().asList())
@@ -143,5 +203,6 @@ public class SgProperties {
 
 	public def clear(){
 		properties.clear()
+		this;
 	}
 }

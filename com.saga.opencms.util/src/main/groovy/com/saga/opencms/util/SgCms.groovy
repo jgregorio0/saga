@@ -1,4 +1,4 @@
-package com.saga.opencms.util
+package com.saga.sagasuite.scriptgroovy.util
 
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
@@ -280,20 +280,68 @@ class SgCms {
         return this
     }
 
-    static def findResources(CmsObject cmso, String path, CmsResourceFilter filter){
+    /**
+     * Find resources of the given type
+     * @param path
+     * @param filter
+     * @return
+     */
+    def static findResources(CmsObject cmso, String path, String type){
+        CmsResourceFilter filter = CmsResourceFilter.ALL.addRequireType(
+                OpenCms.getResourceManager().getResourceType(type))
+        return findResources(cmso, path, filter);
+    }
+
+    /**
+     * Find resources allowed by filter
+     * @param path
+     * @param filter
+     * @return
+     */
+    def static findResources(CmsObject cmso, String path, CmsResourceFilter filter){
         def resources = [];
         if (CmsResource.isFolder(path)) {
             resources = cmso.readResources(path, filter, true);
         } else {
-            resources.add(cmso.readResource(path), filter);
+            resources.add(cmso.readResource(path, filter));
         }
 
         return resources;
     }
 
-    static def findResources(CmsObject cmso, String path, String type){
-        CmsResourceFilter filter = CmsResourceFilter.ALL.requireType(
-                OpenCms.getResourceManager().getResourceType(type));
-        return findResources(cmso, path, filter);
+    /**
+     * Find all files from path allowed by filter.
+     * If path is folder return all files contained for folder.
+     * If path is file return file
+     * @param path
+     * @return
+     */
+    def findFiles(String path){
+        def files = [];
+        if (CmsResource.isFolder(path)) {
+            files = cmso.readResources(path, CmsResourceFilter.ALL.addRequireFile(), true);
+        } else {
+            files.add(cmso.readResource(path));
+        }
+
+        return files;
+    }
+
+    /**
+     * Find all files from path allowed by filter.
+     * If path is folder return all files contained for folder.
+     * If path is file return file
+     * @param path
+     * @return
+     */
+    static def findFiles(CmsObject cmso, String path){
+        def files = [];
+        if (CmsResource.isFolder(path)) {
+            files = cmso.readResources(path, CmsResourceFilter.ALL.addRequireFile(), true);
+        } else {
+            files.add(cmso.readResource(path));
+        }
+
+        return files;
     }
 }

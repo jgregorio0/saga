@@ -1,4 +1,4 @@
-package com.saga.opencms.util
+package com.saga.sagasuite.scriptgroovy.util
 import com.saga.sagasuite.scripts.SgReportManager
 import org.opencms.main.CmsException
 
@@ -12,6 +12,10 @@ public class SgLog {
 	String msg;
 	String color;
 	String sep;
+
+	def infos;
+	def warns;
+	def errors;
 
 	SgReportManager reportManager;
 	def user;
@@ -30,6 +34,7 @@ public class SgLog {
 		this.idProceso = idProceso
 		this.user = user
 		this.porcentaje = new Double(0)
+
 		init()
 	}
 
@@ -81,13 +86,14 @@ public class SgLog {
 		this
 	}
 
-	String print() {
+	def print() {
 		reportManager.addMessage(
 				idProceso,
 				user,
 				"<div style='color:${color};'>${msg}</div>".toString(),
 				porcentaje);
 		cleanMsg();
+		this;
 	}
 
 	def cleanMsg(){
