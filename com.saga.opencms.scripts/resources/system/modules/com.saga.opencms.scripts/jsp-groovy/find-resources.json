@@ -1,0 +1,10 @@
+{
+    "source": {
+        "path": "/sites/default/",
+        "filter": {
+            "type": "containerpage",
+            "impl": "ALL"
+        },
+        "recursive": true
+    }
+}
