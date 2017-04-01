@@ -13,10 +13,10 @@ import org.opencms.main.OpenCms
  * Created by jesus on 24/03/2017.
  */
 @Log4j
-class GLog {
+class   GLog {
 
     private final static String LOG_FOLDER = "logs";
-    private final static String LOG_FILE= "script.log";
+//    private final static String LOG_FILE= "script.log";
     private final static String LOG_PATTERN = "%d{DATE} %5p [%30.30C:%4L] %m%n";
 
     def GLog() {
@@ -44,7 +44,7 @@ class GLog {
     }
 
     private static Appender getAppender(String name){
-        return getAppender(name, LOG_FILE);
+        return getAppender(name, name + ".log");
     }
 
     private static Appender getAppender(String name, String relFilePath){
