@@ -4,10 +4,10 @@
 <%@ page import="java.io.FileInputStream" %>
 
 <%
-    String filename = "/com.saga.caprabo.frontend_1.1.zip";
+    String filename = "com.saga.caprabo.frontend_1.1.zip";
     String folder = "packages/modules";
     String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
-    String filepath = webInfPath + folder + filename;
+    String filepath = webInfPath + folder + "/" + filename;
     response.setContentType("application/zip");
     response.setHeader("Content-Disposition","attachment; filename=\"" + filename + "\"");
 
