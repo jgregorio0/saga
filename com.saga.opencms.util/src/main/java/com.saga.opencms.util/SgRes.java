@@ -692,4 +692,50 @@ public class SgRes {
 
 		return b;
 	}
+
+
+
+	/**
+	 * Convert xml to map
+	 * @param strContent
+	 * @return
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
+	public static Map<String, Object> xml2Map(String strContent)
+			throws IOException, SAXException, ParserConfigurationException {
+		byte[] bytes = strContent.getBytes("UTF-8");
+		InputStream is = new ByteArrayInputStream(bytes);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.parse(is);
+		return createMap(document.getDocumentElement());
+	}
+
+	/**
+	 * Create map from node
+	 * @param node
+	 * @return
+	 */
+	public static Map<String, Object> createMap(Node node){
+		Map<String, Object> map = new HashMap<String, Object>();
+		NodeList nodeList = node.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node currentNode = nodeList.item(i);
+			if (currentNode.hasAttributes()) {
+				for (int j = 0; j < currentNode.getAttributes().getLength(); j++) {
+					Node item = currentNode.getAttributes().item(i);
+					map.put(item.getNodeName(), item.getTextContent());
+				}
+			}
+			if (node.getFirstChild() != null && node.getFirstChild().getNodeType() == Node.ELEMENT_NODE) {
+				map.putAll(createMap(currentNode));
+			} else if (node.getFirstChild().getNodeType() == Node.TEXT_NODE) {
+				map.put(node.getLocalName(), node.getTextContent());
+			}
+		}
+		return map;
+	}
 }
