@@ -1,11 +1,11 @@
 package com.saga.opencms.util
 
-import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.commons.lang3.StringUtils
 import org.opencms.file.CmsFile
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
 import org.opencms.file.CmsResourceFilter
+import org.opencms.file.types.CmsResourceTypeXmlContent
 import org.opencms.file.types.I_CmsResourceType
 import org.opencms.i18n.CmsEncoder
 import org.opencms.loader.CmsLoaderException
@@ -27,8 +27,6 @@ public class SgCnt {
 	CmsFile file;
 	String strContent;
 	CmsXmlContent xmlContent;
-	CmsXmlEntityResolver resolver;
-
 
 	public SgCnt(){
 	}
@@ -130,15 +128,43 @@ public class SgCnt {
 		//Leemos el recurso
 		file = cmso.readFile(path, CmsResourceFilter.ALL);
 		strContent = new String(file.getContents(), CmsEncoder.ENCODING_UTF_8);
-		resolver = new CmsXmlEntityResolver(cmso);
 		try {
 			unmarshall(file);
 		} catch (Exception e) {
-//			throw new Exception("unmarshalled failed for resource $path".toString())
 			xmlContent = null;
 		}
 	}
 
+	CmsObject getCmso() {
+		return cmso
+	}
+
+	String getPath() {
+		return path
+	}
+
+	Locale getLocale() {
+		return locale
+	}
+
+	CmsFile getFile() {
+		return file
+	}
+
+	String getStrContent() {
+		return strContent
+	}
+
+	CmsXmlContent getXmlContent() {
+		return xmlContent
+	}
+/**
+	 * Update control code content
+	 * @param strContent
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws CmsException
+     */
 	public SgCnt update(String strContent)
 			throws UnsupportedEncodingException, CmsException {
 		this.strContent = strContent;
@@ -150,24 +176,22 @@ public class SgCnt {
 		return this;
 	}
 
+	/**
+	 * Unmarshall xml content from file
+	 * @param file
+	 * @return
+	 * @throws CmsXmlException
+     */
 	public SgCnt unmarshall(CmsFile file) throws CmsXmlException {
 		xmlContent = CmsXmlContentFactory.unmarshal(cmso, file);
 		return this;
 	}
 
-	public SgCnt unmarshall()
-			throws CmsXmlException {
-		xmlContent = CmsXmlContentFactory
-				.unmarshal(cmso, strContent, CmsEncoder.ENCODING_UTF_8, resolver);
-		return this;
-	}
-
-	public SgCnt marshall()
-			throws CmsXmlException, UnsupportedEncodingException {
-		strContent = new String(xmlContent.marshal(), CmsEncoder.ENCODING_UTF_8);
-		return this;
-	}
-
+	/**
+	 * Create locale for xml content
+	 * @param locale
+	 * @return
+     */
 	public SgCnt initLocale(Locale locale) {
 		if (!xmlContent.hasLocale(locale)){
 			xmlContent.addLocale(cmso, locale);
@@ -177,12 +201,49 @@ public class SgCnt {
 	}
 
 	/**
-	 * Obtiene la definición del contenido destino al que se va a mapear
-	 *  by: rtinoco
+	 * Clone xml locale resource content
+	 * @param resource
+	 * @param srcLoc
+	 * @param dstLoc
+	 * @param overwrite
+	 */
+	public boolean cloneXmlLocale(Locale srcLoc, Locale dstLoc, boolean overwrite)
+		throws IllegalArgumentException, CmsXmlException {
+		boolean copied = false;
+
+		//Validamos primero que sea un XmlContent
+		if(!isXmlContentType()){
+			throw new IllegalArgumentException(
+					"resource $path is not xml content");
+		}
+
+		//Obtenemos el XmlContent
+		if (!hasLocale(srcLoc)) {
+			throw new IllegalArgumentException(
+					"resource $path has not locale $srcLoc");
+		}
+
+		//Si ya existe el locale lo borramos o no hacemos nada
+		if (hasLocale(dstLoc)) {
+			if (overwrite) {
+				xmlContent.removeLocale(dstLoc);
+			} else {
+				return false;
+			}
+		}
+
+		// Copiamos el locale
+		xmlContent.copyLocale(srcLoc, dstLoc);
+		return copied;
+	}
+
+	/**
+	 * Get content definition for resource type
+	 * by: rtinoco
 	 * @param type
 	 * @return
 	 */
-	CmsXmlContentDefinition contentDefinition(String type)
+	public CmsXmlContentDefinition contentDefinition(String type)
 			throws CmsLoaderException, CmsXmlException, SAXException, IOException {
 		I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type);
 		String schemaUri = "opencms:/${resType.configuration.schema}";
@@ -190,7 +251,35 @@ public class SgCnt {
 	}
 
 	/**
-	 * Asegura un valor en el path indicado, devolviendo uno existente o creandolo
+	 * Check if resource is xml content
+	 * @return
+     */
+	public boolean isXmlContentType(){
+		CmsResource resource = cmso.readResource(path);
+		return CmsResourceTypeXmlContent.isXmlContent(resource);
+	}
+
+	/**
+	 * Check if resource is xml content
+	 * @return
+	 */
+	public static boolean isXmlContentType(CmsObject cmso, String path){
+		CmsResource resource = cmso.readResource(path);
+		return CmsResourceTypeXmlContent.isXmlContent(resource);
+	}
+
+	/**
+	 * Check if content has locale
+	 * @param locale
+	 * @return
+     */
+	public boolean hasLocale(String locale){
+		return xmlContent.hasLocale(new Locale(locale));
+	}
+
+	/**
+	 * Provide value for content path.
+	 * If it exists return value. If it does not exist create empty value for path.
 	 * @param path
 	 * @param pos
 	 * @return
@@ -219,16 +308,10 @@ public class SgCnt {
 		}
 	}
 
-	private int obtainNodeIndex(String path) {
-		int index = CmsXmlUtils.getXpathIndexInt(path);
-		if (index > 0) {
-			index = index - 1;
-		}
-		return index;
-	}
 
 	/**
-	 * Asegura un valor en el path indicado, devolviendo uno existente o creandolo
+	 * Provide value for content path.
+	 * If it exists return value. If it does not exist create empty value for path.
 	 * @param path
 	 */
 	public I_CmsXmlContentValue procureValue(String path)
@@ -237,8 +320,23 @@ public class SgCnt {
 	}
 
 	/**
-	 * Set value for element path.
+	 * Get index for given path
 	 * @param path
+	 * @return
+     */
+	private int obtainNodeIndex(String path) {
+		int index = CmsXmlUtils.getXpathIndexInt(path);
+		if (index > 0) {
+			index = index - 1;
+		}
+		return index;
+	}
+
+
+	/**
+	 * Set value for element path.
+	 * If index is specified all previous index values must exists.
+	 * @param path ex. Title, Content/Title, Content[2]/Title
 	 * @param value
 	 * @return
 	 */
@@ -253,7 +351,8 @@ public class SgCnt {
 	}
 
 	/**
-	 * Set value for element path. If the element does not exist, procure new element and set value.
+	 * Set value for element path to the given index.
+	 * All previous index values must exists.
 	 * @param path
 	 * @param value
 	 * @param pos
@@ -280,6 +379,8 @@ public class SgCnt {
 
 	/**
 	 * Append category at last position.
+	 * Categories are appended separated by comma in control code content.
+	 * Categories
 	 * @param path
 	 * @param value
 	 * @return
@@ -292,8 +393,9 @@ public class SgCnt {
 	}
 
 	/**
-	 * Set value for element path. If the element does not exist, procure new element and set value.
-	 * @param pathWithIdx
+	 * Set value for element path.
+	 * If the element does not exist, procure new element with empty value.
+	 * @param pathWithIdx Content[2]/Title[1]
 	 * @param value
 	 * @return
 	 */
@@ -305,25 +407,25 @@ public class SgCnt {
 	}
 
 	/**
-	 * Filling the content with empty tags
-	 * @param tag
+	 * Filling the content path with empty values
+	 * @param path
 	 * @param limit
 	 */
-	public void fillWithEmptyValues(String tag, int limit)
+	public void fillWithEmptyValues(String path, int limit)
 			throws Exception {
 		if (xmlContent == null) {
-			throw new Exception("xml content not exists for resource $path".toString());
+			throw new Exception("xml content does not exist");
 		}
 		for (int i = 0; i < limit; i++) {
-			if (!xmlContent.hasValue(tag, locale, i)){
-				xmlContent.addValue(cmso, tag, locale, i);
+			if (!xmlContent.hasValue(path, locale, i)){
+				xmlContent.addValue(cmso, path, locale, i);
 			}
 		}
 	}
 
 	/**
-	 * Saving file changes from String content.
-	 * For updating xml content execute unmarshall.
+	 * Saving resource changes done in string content.
+	 * Unmarshall and repair updating xml content internally.
 	 */
 	public SgCnt saveStr()
 			throws CmsException, UnsupportedEncodingException {
@@ -335,8 +437,8 @@ public class SgCnt {
 	}
 
 	/**
-	 * Saving file changes from String content.
-	 * For updating xml content execute unmarshall.
+	 * Saving file changes from using given string content.
+	 * Unmarshall and repair updating xml content internally.
 	 */
 	public SgCnt saveStr(String contents)
 			throws CmsException, UnsupportedEncodingException {
@@ -348,8 +450,8 @@ public class SgCnt {
 	}
 
 	/**
-	 * Saving file from Xml content changes.
-	 * For updating string content execute marshall.
+	 * Saving file changes done in Xml content.
+	 * String content is not updated.
 	 */
 	public SgCnt saveXml()
 			throws CmsException {
@@ -360,45 +462,44 @@ public class SgCnt {
 		return this;
 	}
 
+	/**
+	 * Repair Xml content.
+	 * Resource must be locked and unlocked manually.
+	 * @return
+	 * @throws CmsException
+     */
 	public SgCnt repair()
 			throws CmsException {
-//		SgCms.lock(cmso, path);
 		xmlContent.setAutoCorrectionEnabled(true);
-
-		// now correct the XML
 		xmlContent.correctXmlStructure(cmso);
-
-		// Prepare for write
 		xmlContent.getHandler().prepareForWrite(cmso, xmlContent, file);
-//		SgCms.unlock(cmso, path);
-
 		return this;
 	}
 
 	/**
-	 * Returns String value from OpenCmsString element
-	 * @param tag
+	 * Return String value for given path element
+	 * @param pathg
 	 * @return
 	 */
-	public String getStringValue(String tag)
+	public String getStringValue(String path)
 			throws Exception {
 		if (xmlContent == null) {
 			throw new Exception("xml content not exists for resource $path".toString());
 		}
-		return xmlContent.getStringValue(cmso, tag, locale);
+		return xmlContent.getStringValue(cmso, path, locale);
 	}
 
 	/**
-	 * Returns String value from OpenCmsString element
-	 * @param base Parent path
+	 * Returns String value
+	 * @param basePath Parent path
 	 * @param tag Tag element
 	 * @param pos 0 based position
 	 * @return
 	 * @throws Exception
 	 */
-	public String getStringValue(String base, String tag, Integer pos)
+	public String getStringValue(String basePath, String tag, Integer pos)
 			throws Exception {
-		String path = base + "/" + tag + "[" + (pos+1) + "]";
+		String path = basePath + "/" + tag + "[" + (pos+1) + "]";
 		return getStringValue(path);
 	}
 
@@ -416,30 +517,18 @@ public class SgCnt {
 	}
 
 	/**
-	 * String value for element defined by path without indexes and list of indexes.
-	 * For example, "Gallery/Image" and indexes [0, 1] define "Gallery[1]/Image[2]".
-	 * @param pathNoIdx Element path without index "Gallery/Image"
-	 * @param idxs List of indexes [0, 1]
+	 * Returns String value for given path when content is Html type.
+	 * @param path
 	 * @return
 	 */
-	public String getStringValueWithIndex(String pathNoIdx, Integer[] idxs)
-			throws Exception {
-		return getStringValueWithIndex(pathNoIdx, Arrays.asList(idxs));
-	}
-
-	/**
-	 * Returns String value from OpenCmsHtml element
-	 * @param element
-	 * @return
-	 */
-	public String getHtmlStringValue(String element)
+	public String getHtmlStringValue(String path)
 			throws Exception {
 		if (xmlContent == null) {
 			throw new Exception("xml content not exists for resource $path".toString());
 		}
 		String value = null;
-		if (xmlContent.hasValue(element, locale)){
-			value = xmlContent.getValue(element, locale).getStringValue(cmso);
+		if (xmlContent.hasValue(path, locale)){
+			value = xmlContent.getValue(path, locale).getStringValue(cmso);
 		}
 		return value;
 	}
@@ -472,67 +561,67 @@ public class SgCnt {
 	}
 
 	/**
-	 * Add value to content definition
-	 * @param element
+	 * Add value to Xml content
+	 * @param path
 	 * @param pos
 	 * @return
 	 */
-	public I_CmsXmlContentValue addValue(String element, int pos) {
-		return xmlContent.addValue(cmso, element, locale, pos);
+	public I_CmsXmlContentValue addValue(String path, int pos) {
+		return xmlContent.addValue(cmso, path, locale, pos);
 	}
 
 	/**
-	 * Add value to content definition
-	 * @param element
+	 * Add value to Xml content
+	 * @param path
 	 * @return
 	 */
-	public I_CmsXmlContentValue addValue(String element) {
-		return xmlContent.addValue(cmso, element, locale, count(element));
+	public I_CmsXmlContentValue addValue(String path) {
+		return xmlContent.addValue(cmso, path, locale, count(path));
 	}
 
 	/**
-	 * Add value to content definition
-	 * @param element
+	 * Add value to Xml content
+	 * @param path
 	 * @param value
 	 * @return
 	 */
-	public SgCnt addValue(String element, String value) throws Exception {
-		I_CmsXmlContentValue xmlValue = addValue(element);
-		setStringValue(element, value, xmlValue.getIndex());
+	public SgCnt addValue(String path, String value) throws Exception {
+		I_CmsXmlContentValue xmlValue = addValue(path);
+		setStringValue(path, value, xmlValue.getIndex());
 		return this;
 	}
 
 	/**
-	 * Check if the content has value for element in the position
-	 * @param element
+	 * Check if the content has value for given path and position
+	 * @param path
 	 * @param pos
 	 * @return
 	 */
-	public I_CmsXmlContentValue getValue(String element, int pos)
+	public I_CmsXmlContentValue getValue(String path, int pos)
 			throws Exception {
 		if (xmlContent == null) {
 			throw new Exception("xml content not exists for resource $path".toString());
 		}
-		return xmlContent.getValue(element, locale, pos);
+		return xmlContent.getValue(path, locale, pos);
 	}
 
 	/**
-	 * Check if the content has value for element in the position
-	 * @param element
+	 * Check if the content has value for given path and position
+	 * @param path
 	 * @return
 	 */
-	public I_CmsXmlContentValue getValue(String element)
+	public I_CmsXmlContentValue getValue(String path)
 			throws Exception {
-		return getValue(element, 0);
+		return getValue(path, 0);
 	}
 
 	/**
 	 * Return list of contents into resource defined by element
-	 * @param element
+	 * @param path
 	 * @return
 	 */
-	public List<I_CmsXmlContentValue> getValues(String element){
-		return xmlContent.getValues(element, locale);
+	public List<I_CmsXmlContentValue> getXmlContentValues(String path){
+		return xmlContent.getValues(path, locale);
 	}
 
 	/**
@@ -555,7 +644,7 @@ public class SgCnt {
 	}
 
 	/**
-	 * Check if exists xmlPath content
+	 * Count how many elements for given path
 	 * @param xmlPath
 	 * @return
 	 */
@@ -564,7 +653,7 @@ public class SgCnt {
 	}
 
 	/**
-	 * Return map composed by resource identification and content:
+	 * Return map composed by resource identification (structureId@rootPath) and one level content (XmlPath: Value):
 	 * <structureId@rootPath: <path1: value1, path2: value2, ...>>
 	 * by: rtinoco
 	 * @return
@@ -611,20 +700,8 @@ public class SgCnt {
 		return xmlContent.getNames(locale);
 	}
 
-
-
-
 	/**
-	 * Return escape HTML block
-	 * @param s
-	 * @return
-	 */
-	public static String escapeHTML(String s) {
-		return StringEscapeUtils.escapeHtml4(s);
-	}
-
-	/**
-	 * Return last path value and ensure parent path and brother elements exist
+	 * Return last path value and ensure parent element and brother elements exist
 	 * @param pathWithIndex Content[2]/Image[4]/Link
 	 * @return
 	 */
@@ -634,7 +711,7 @@ public class SgCnt {
 	}
 
 	/**
-	 * Return last element value. Ensure parent elements and brother elements exist
+	 * Return last path value and ensure parent elements and brother elements exist
 	 * @param path
 	 * @return
 	 */

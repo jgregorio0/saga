@@ -1,7 +1,16 @@
 apply plugin: 'java'
+apply plugin: 'groovy'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
 version = '1.0'
+
+//sourceSets {
+//    main {
+//        groovy {
+//            srcDirs = ['src/main/groovy/']
+//        }
+//    }
+//}
 
 repositories {
     mavenCentral()
@@ -10,5 +19,23 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
+    // OpenCms
     compile group: 'org.opencms', name: 'opencms-core', version: '9.5.3'
+
+    // groovy
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.7'
+
+    // SagaSuiteScriptJsp
+    compile files ('lib/SagaSuiteScriptJsp-1.5.jar')
+    // Email
+    compile group: 'org.apache.commons', name: 'commons-email', version: '1.4'
+
+    // Apache Http
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+
+    // Mustache
+    compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.4'
+
+    // Pebble
+    compile group: 'com.mitchellbosecke', name: 'pebble', version: '2.3.0'
 }

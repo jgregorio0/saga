@@ -5,7 +5,7 @@ import org.bouncycastle.crypto.digests.SHA384Digest;
 /**
  * Created by jgregorio on 02/02/2017.
  */
-public class Sha3Test {
+public class sha3Test {
     public static void main(String args[]){
         String username = "jgregorio";
         String pass = "1234";

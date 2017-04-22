@@ -1,19 +1,41 @@
-package com.saga.sagasuite.scriptgroovy.util
+package com.saga.opencms.util
 
-import org.opencms.file.CmsObject
-import org.opencms.file.CmsResource
-import org.opencms.file.CmsResourceFilter
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import org.apache.commons.logging.Log
+import org.opencms.file.*
 import org.opencms.file.types.I_CmsResourceType
+import org.opencms.flex.CmsFlexController
 import org.opencms.lock.CmsLock
+import org.opencms.main.CmsException
+import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
+import org.opencms.security.CmsOrganizationalUnit
+import org.opencms.security.I_CmsPrincipal
+import org.opencms.staticexport.CmsLinkManager
 import org.opencms.util.CmsStringUtil
+import org.opencms.util.CmsUUID
+import org.opencms.workplace.CmsWorkplaceAction
+
+import javax.servlet.http.HttpServletRequest
 
 class SgCms {
 
-    static String folderType = "folder";
-    static String folderImageType = "imagegallery";
-    static String folderDownloadType = "downloadgallery";
-    static String folderLinkType = "linkgallery";
+    private static Log LOG = CmsLog.getLog(SgCms);
+
+    /** Default paths */
+    public static String CONTENT_PATH = "/.content";
+    public static String CONFIG_PATH = "/.config";
+
+    /** Default types */
+    public static String FOLDER_TYPE = "folder";
+    public static String IMAGE_GALLERY_TYPE = "imagegallery";
+    public static String DOWNLOAD_GALLERY_TYPE = "downloadgallery";
+    public static String LINK_GALLERY_TYPE = "linkgallery";
+    public static String SITEMAP_CONFIG_TYPE = "sitemap_config";
+    public static String CONTENT_FOLDER_TYPE = "content_folder";
+    public static String SUBSITEMAP_TYPE = "subsitemap";
+    public static String INHERITANCE_GROUP_TYPE = "inheritance_group";
+    public static String INHERITANCE_CONFIG_TYPE = "inheritance_config";
 
     CmsObject cmso;
 
@@ -27,13 +49,28 @@ class SgCms {
      * @param path Ruta del nuevo recurso
      * @param type Tipo del recurso
      * @return
+     * @throws CmsException
      */
-    def createResource(String path, String type) {
-        if (path) {
-            if (!cmso.existsResource(path)) {
-                cmso.createResource(path, OpenCms.resourceManager.getResourceType(type));
-            }
-            unlock(path);
+    public SgCms createResource(String path, String type)
+            throws CmsException {
+        cmso.createResource(path, OpenCms.getResourceManager().getResourceType(type));
+        unlock(path);
+        return this;
+    }
+
+    /**
+     * Asegura la existencia de un recurso del tipo dado y de sus carpetas padres.
+     *
+     * @param path Ruta del nuevo recurso
+     * @param type Tipo del recurso
+     * @return
+     */
+    public SgCms ensureResource(String path, String type)
+            throws CmsException {
+        if (!cmso.existsResource(path)) {
+            String parentFolder = CmsResource.getParentFolder(path);
+            ensureResource(parentFolder, FOLDER_TYPE);
+            createResource(path, type);
         }
         return this;
     }
@@ -44,8 +81,9 @@ class SgCms {
      * @param path Ruta de la carpeta
      * @return
      */
-    def createFolder(String path) {
-        createResource(path, folderType)
+    public SgCms createFolder(String path)
+            throws CmsException {
+        createResource(path, FOLDER_TYPE);
         return this;
     }
 
@@ -55,8 +93,9 @@ class SgCms {
      * @param path Ruta de la galeria de imagenes
      * @return
      */
-    def createImageGallery(String path) {
-        createResource(path, folderImageType)
+    public SgCms createImageGallery(String path)
+            throws CmsException {
+        createResource(path, IMAGE_GALLERY_TYPE);
         return this;
     }
 
@@ -66,8 +105,9 @@ class SgCms {
      * @param path Ruta de la galeria de descargas
      * @return
      */
-    def createDownloadGallery(String path) {
-        createResource(path, folderDownloadType)
+    public SgCms createDownloadGallery(String path)
+            throws CmsException {
+        createResource(path, DOWNLOAD_GALLERY_TYPE);
         return this;
     }
 
@@ -77,8 +117,9 @@ class SgCms {
      * @param path Ruta de la galeria de enlaces
      * @return
      */
-    def createLinkGallery(String path) {
-        createResource(path, folderLinkType)
+    public SgCms createLinkGallery(String path)
+            throws CmsException {
+        createResource(path, LINK_GALLERY_TYPE);
         return this;
     }
 
@@ -87,7 +128,8 @@ class SgCms {
      * @param path
      * @return
      */
-    def delete(String path) {
+    def delete(String path) throws CmsException {
+        lock(cmso, path)
         cmso.deleteResource(path, CmsResource.CmsResourceDeleteMode.MODE_DELETE_REMOVE_SIBLINGS)
         return this;
     }
@@ -120,6 +162,7 @@ class SgCms {
             }
             cmso.unlockResource(path);
         }
+        return this;
     }
 
     /**
@@ -139,6 +182,7 @@ class SgCms {
             }
             cmso.unlockResource(path);
         }
+        return this;
     }
 
     /**
@@ -154,6 +198,7 @@ class SgCms {
             cmso.changeLock(path);
         }
         cmso.lockResource(path);
+        return this;
     }
 
     /**
@@ -169,6 +214,7 @@ class SgCms {
             cmso.changeLock(path);
         }
         cmso.lockResource(path);
+        return this;
     }
 
     /**
@@ -259,6 +305,27 @@ class SgCms {
     }
 
     /**
+     * Read resource type
+     * @param path
+     * @return
+     */
+    public I_CmsResourceType readType(String path){
+        CmsResource resource = cmso.readResource(path);
+        return OpenCms.getResourceManager().getResourceType(resource.getTypeId());
+    }
+
+    /**
+     * Check resource type
+     * @param path
+     * @param type
+     * @return
+     */
+    boolean isType(String path, String type) {
+        I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type)
+        return isType(path, resType);
+    }
+
+    /**
      * Copy resource
      * @param pathFrom
      * @param pathTo
@@ -278,6 +345,222 @@ class SgCms {
         unlock(pathTo)
 
         return this
+    }
+
+    /**
+     * Generamos un nombre válido para un grupo dada su ou y su nombre.
+     * La ou no puede empezar y debe terminar con slash "/".
+     * El nombre no puede empezar ni terminar con slash "/".
+     * @param ou
+     * @param groupname
+     * @return
+     */
+    public String generateGroupName(String ou, String groupname){
+        String group = ou;
+        if (group.startsWith("/")) {
+            group = group.substring(1);
+        }
+        if (!group.endsWith("/")) {
+            group = group + "/";
+        }
+        return group + groupname;
+    }
+
+    /**
+     * Crea grupo
+     * @param groupNameWithOU
+     * @param description
+     * @param isEnabled
+     * @param parentGroupName
+     * @return
+     * @throws CmsException
+     */
+    public SgCms createGroup(
+            String groupNameWithOU, String description,
+            boolean isEnabled, String parentGroupName)
+            throws CmsException {
+        int flag = I_CmsPrincipal.FLAG_DISABLED;
+        if (isEnabled) {
+            flag = I_CmsPrincipal.FLAG_ENABLED;
+        }
+        cmso.createGroup(groupNameWithOU, description, flag, parentGroupName);
+        return this;
+    }
+
+    /**
+     * Create absolute link from relative uri
+     * @param req
+     * @param uri
+     * @return
+     */
+    public static String link(HttpServletRequest req, String uri){
+        CmsFlexController controller = CmsFlexController.getController(req);
+        // be sure the link is absolute
+        String target = CmsLinkManager.getAbsoluteUri(uri, controller.getCurrentRequest().getElementUri());
+        CmsObject cms = controller.getCmsObject();
+
+        // generate the link
+        return OpenCms.getLinkManager().substituteLinkForUnknownTarget(cms, target);
+    }
+
+    /**
+     * Generate random uuid
+     * @return
+     */
+    public static String uuid(){
+        return ObjectIdGenerators.UUIDGenerator.getInstance().generateRandomBasedUUID().toString();
+    }
+
+    /**
+     * Performs a touch operation for a single resource.<p>
+     *
+     * @param resourceName the resource name of the resource to touch
+     * @param recursive the flag if the touch operation is recursive
+     *
+     * @throws CmsException if touching the resource fails
+     */
+    public def touch(
+            String resourceName,
+            boolean recursive) throws CmsException {
+
+        // if file rewrite
+        CmsResource sourceRes = cmso.readResource(resourceName, CmsResourceFilter.ALL);
+        if (sourceRes.isFile()) {
+            String path = cmso.getSitePath(sourceRes);
+            rewrite(path);
+        } else if (recursive) {
+
+            // if recursive rewrite all sub files
+            Iterator<CmsResource> it = cmso.readResources(resourceName, CmsResourceFilter.ALL, true).iterator();
+            while (it.hasNext()) {
+                CmsResource subRes = it.next();
+                if (subRes.isFile()) {
+                    String path = cmso.getSitePath(subRes);
+                    rewrite(path);
+                }
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Rewrites the content of the given file.<p>
+     *
+     * @param resource the resource to rewrite the content for
+     *
+     * @throws CmsException if something goes wrong
+     */
+    public def rewrite(String path) throws CmsException {
+    // lock resource
+        lock(path);
+        CmsFile file = cmso.readFile(path);
+        file.setContents(file.getContents());
+        cmso.writeFile(file);
+        unlock(path)
+        return this;
+    }
+
+    /**
+     * Create user using fqn (ou/username)
+     * @param cmso
+     * @param fqn
+     * @param pass
+     * @return
+     */
+    public static CmsUser createUser(
+            CmsObject cmso, String fqn, String pass, boolean add2Users)
+            throws CmsException {
+        CmsUser user = null;
+        user = cmso.createUser(fqn, pass, null, null);
+        if (add2Users) {
+            String usersGroup =
+                    CmsOrganizationalUnit.getParentFqn(fqn)
+            + CmsOrganizationalUnit.SEPARATOR
+            + "Users";
+            add2Group(cmso, fqn, usersGroup);
+        }
+        return user;
+    }
+
+    /**
+     * Create user using Admin CmsObject
+     * @param fqn
+     * @param pass
+     * @param add2Users
+     * @return
+     * @throws CmsException
+     */
+    public static CmsUser createUser(String fqn, String pass, boolean add2Users)
+            throws CmsException {
+        CmsUser user = null;
+        CmsObject cmsoAdmin = getCmsAdmin();
+        createUser(cmsoAdmin, fqn, pass, add2Users);
+
+        return user;
+    }
+
+    /**
+     * Add group using fqn (ou/username) and group (ou/groupname)
+     * @param cmso
+     * @param fqn
+     * @param group
+     * @return
+     */
+    public static def add2Group(
+            CmsObject cmso, String fqn, String group)
+            throws CmsException {
+        cmso.addUserToGroup(fqn, group);
+        return this;
+    }
+
+    /**
+     * Return CmsObject for Admin
+     * @return
+     * @throws CmsException
+     */
+    public static CmsObject getCmsAdmin()
+            throws CmsException {
+        return CmsWorkplaceAction.getInstance().getCmsAdminObject();
+    }
+
+    /**
+     * Obtain resource by its detail path
+     * @param cmso
+     * @param detailPath
+     * @return
+     * @throws CmsException
+     */
+    public static CmsResource resourceByDetailPath(
+            CmsObject cmso, String detailPath)
+            throws CmsException {
+        String detailName = CmsResource.getName(detailPath);
+        CmsUUID strIdUUID = cmso.readIdForUrlName(detailName);
+        return cmso.readResource(strIdUUID);
+    }
+
+    /**
+     * Customize a new initialized copy of CmsObject
+     * @param baseCms
+     * @param uri
+     * @param site
+     * @return
+     * @throws CmsException
+     */
+    public static CmsObject customCmsObject(CmsObject baseCms, String uri, String site)
+            throws CmsException {
+        CmsObject cmso = baseCms;
+        boolean isCustomSite = CmsStringUtil.isNotEmptyOrWhitespaceOnly(site);
+        boolean isCustomUri = CmsStringUtil.isNotEmptyOrWhitespaceOnly(uri);
+        if (isCustomSite || isCustomUri) {
+            cmso = OpenCms.initCmsObject(baseCms);
+            if (isCustomSite) {
+                cmso.getRequestContext().setSiteRoot(site);
+            }
+            if (isCustomUri) {
+                cmso.getRequestContext().setUri(uri);
+            }
+        }
+        return cmso;
     }
 
     /**
@@ -310,38 +593,77 @@ class SgCms {
     }
 
     /**
-     * Find all files from path allowed by filter.
-     * If path is folder return all files contained for folder.
-     * If path is file return file
-     * @param path
+     * Clone resource by copying or creating and copying properties
+     * @param pathFrom
+     * @param pathTo
+     * @param copyMode Copy all resources inside
      * @return
      */
-    def findFiles(String path){
-        def files = [];
-        if (CmsResource.isFolder(path)) {
-            files = cmso.readResources(path, CmsResourceFilter.ALL.addRequireFile(), true);
-        } else {
-            files.add(cmso.readResource(path));
-        }
+    public def cloneResource(String pathFrom, String pathTo, boolean copyMode) {
+        if (!copyMode) {
+            // Get resource type
+            String type = readType(pathFrom).getTypeName();
 
-        return files;
+            // create resource
+            createResource(pathTo, type);
+
+            // copy properties
+            new SgProperties(cmso)
+                    .copyAllProperties(pathFrom, pathTo, false);
+        } else if (copyMode) {
+            copyResource(pathFrom, pathTo)
+        }
+        return this;
     }
 
     /**
-     * Find all files from path allowed by filter.
-     * If path is folder return all files contained for folder.
-     * If path is file return file
-     * @param path
+     * Clone subsitemap folder, content folder and config files.
+     * No content and containerpages are cloned
+     * @param params
      * @return
      */
-    static def findFiles(CmsObject cmso, String path){
-        def files = [];
-        if (CmsResource.isFolder(path)) {
-            files = cmso.readResources(path, CmsResourceFilter.ALL.addRequireFile(), true);
+    def cloneSubsitemapFolder(String pathFrom, String pathTo) {
+        // Si existe y es una carpeta le cambiamos el tipo
+        if (cmso.existsResource(pathTo)) {
+            SgProperties sgProps = new SgProperties(cmso);
+
+            // Si es folder cambiamos el tipo
+            if (isType(pathTo, FOLDER_TYPE)){
+                changeType(pathTo, SUBSITEMAP_TYPE)
+                sgProps.copyAllProperties(pathFrom, pathTo, false);
+            } else if (isType(pathTo, SUBSITEMAP_TYPE)){
+                sgProps.copyAllProperties(pathFrom, pathTo, false);
+            } else {
+                throw new IllegalArgumentException(
+                        "resource $pathTo already exists" +
+                                " and it is not folder or subsitemap");
+            }
         } else {
-            files.add(cmso.readResource(path));
+
+            // Creamos el subsitemap
+            cloneResource(pathFrom, pathTo, false);
         }
 
-        return files;
+        // Creamos la carpeta .content sin que genere el .config por defecto
+        String contentFrom =  CmsStringUtil.joinPaths(pathFrom, CONFIG_PATH);
+        String contentTo = CmsStringUtil.joinPaths(pathTo, CONTENT_PATH);
+        try {
+            createResource(contentTo, CONTENT_FOLDER_TYPE);
+            new SgProperties(cmso)
+                    .copyAllProperties(contentFrom, contentTo, false);
+        } catch (Exception e) {
+            LOG.error(e)
+        }
+
+        // Creamos el fichero .config
+        String configFrom =  CmsStringUtil.joinPaths(
+                pathFrom, CONTENT_PATH, CONFIG_PATH);
+        String configTo =  CmsStringUtil.joinPaths(
+                pathTo, CONTENT_PATH, CONFIG_PATH);
+        try {
+            cloneResource(configFrom, configTo, true);
+        } catch (Exception e) {
+            LOG.error(e)
+        }
     }
 }

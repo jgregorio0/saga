@@ -1,21 +1,19 @@
-package com.saga.opencms.util;
+package com.saga.opencms.util
 
-import org.apache.commons.lang3.StringUtils;
-import org.opencms.json.I_JSONString;
-import org.opencms.json.JSONArray;
-import org.opencms.json.JSONException;
-import org.opencms.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.logging.Log
+import org.opencms.json.I_JSONString
+import org.opencms.json.JSONArray
+import org.opencms.json.JSONException
+import org.opencms.json.JSONObject
+import org.opencms.main.CmsLog
 
 /**
  * Created by jgregorio on 09/09/2016.
  */
-public class SgJSON {
-	private static final Logger logger = LoggerFactory.getLogger(SgJSON.class);
+public class SgJson {
+	
+	private static final Log LOG = CmsLog.getLog(SgJson.class);
 
 	private StringBuffer bf;
 	private String sep;
@@ -88,19 +86,19 @@ public class SgJSON {
 				try {
 					o = ((I_JSONString)value).toJSONString();
 				} catch (Exception var3) {
-					logger.error("ERROR parsing to JSON value " + value, var3);
+					LOG.error("ERROR parsing to JSON value " + value, var3);
 				}
 
 				if(o instanceof String) {
 					res = (String)o;
 				} else {
-					logger.error("ERROR parsing to JSON. Bad value from " + value);
+					LOG.error("ERROR parsing to JSON. Bad value from " + value);
 				}
 			} else {
 				try {
 					res = value instanceof Number?JSONObject.numberToString((Number) value):(!(value instanceof Boolean) && !(value instanceof JSONObject) && !(value instanceof JSONArray)?(value instanceof Map?(new JSONObject((Map)value)).toString():(value instanceof Collection ?(new JSONArray((Collection)value)).toString():(value.getClass().isArray()?(new JSONArray(value)).toString():JSONObject.quote(value.toString())))):value.toString());
 				} catch (JSONException e) {
-					logger.error("ERROR parsing to JSON value " + value, e);
+					LOG.error("ERROR parsing to JSON value " + value, e);
 				}
 			}
 		}

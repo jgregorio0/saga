@@ -5,6 +5,7 @@ import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
 import org.opencms.file.CmsResourceFilter
 import org.opencms.main.OpenCms
+
 /**
  * Find resources
  * JSON:
@@ -28,7 +29,6 @@ public class SgFindRes {
 	CmsObject cmso;
 	String jsonStr;
 	def json;
-
 
 	public SgFindRes(CmsObject cmso, String jsonStr){
 		this.cmso = cmso;
@@ -96,7 +96,7 @@ public class SgFindRes {
 
 	boolean validate() {
 		def source = json.source;
-		if (StringUtils.isBlank(source)
+		if (source == null
 				|| StringUtils.isBlank(source.path)) {
 			throw new Exception("ERROR source and source.path are required");
 		}
@@ -126,5 +126,24 @@ public class SgFindRes {
 			default:
 				return CmsResourceFilter.ALL;
 		}
+	}
+
+	/**
+	 * Find all files from path allowed by filter.
+	 * If path is folder return all files contained for folder.
+	 * If path is file return file
+	 * @param cmso
+	 * @param path
+     * @return
+     */
+	public static List<CmsResource> findFiles(CmsObject cmso, String path){
+		def files = [];
+		if (CmsResource.isFolder(path)) {
+			files = cmso.readResources(path, CmsResourceFilter.ALL.addRequireFile(), true);
+		} else {
+			files.add(cmso.readResource(path));
+		}
+
+		return files;
 	}
 }

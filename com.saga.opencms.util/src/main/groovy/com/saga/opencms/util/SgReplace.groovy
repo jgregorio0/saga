@@ -1,12 +1,7 @@
 package com.saga.opencms.util
 
-import org.apache.commons.lang3.StringEscapeUtils
-import org.opencms.file.CmsFile
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
-import org.opencms.main.CmsException
-import org.opencms.xml.content.CmsXmlContent
-import org.opencms.xml.content.CmsXmlContentFactory
 
 import java.util.regex.Pattern
 
@@ -124,17 +119,17 @@ public class SgReplace {
 
 
 /**
-	 * Replace each key for value in all matches content string
-	 * @param map Contains keys to findAndReplace for values
-	 * @return
-	 */
+ * Replace each key for value in all matches content string
+ * @param map Contains keys to findAndReplace for values
+ * @return
+ */
 	public def replaceAll(Map map) {
 		map.each{
 			replaceAll(it.key, it.value)
 		}
 		this
 	}
-	
+
 	/**
 	 * Replace each key for value in all matches content string
 	 * @param map Contains keys to findAndReplace for values
@@ -226,6 +221,39 @@ public class SgReplace {
 //		if (subs.size() > 0) {
 //			replaceAll(subs, true)
 //		}
+
+		return subs
+	}
+
+	public def findReplaces(String origin, String destination, boolean quote) {
+
+		// Obtain strings to substitute
+		def subs = [:]
+
+		String originSub = origin;
+		if (quote) {
+			originSub = Pattern.quote(origin)
+		}
+		content.eachMatch(origin, {
+			String oldStr = null;
+
+			// Difference between String and List case
+			if (String.isInstance(it)){
+				oldStr = it
+			} else {
+				oldStr = it[0]
+			}
+
+			String newStr = oldStr != null ?
+					oldStr.replaceAll(originSub, destination)
+					: null
+
+			if (newStr != null && !oldStr.equals(newStr)) {
+
+				// Using quoted blocks to avoid nested string substitutions
+				subs.put(oldStr, newStr)
+			}
+		})
 
 		return subs
 	}
@@ -359,18 +387,46 @@ public class SgReplace {
 			}
 		}
 
-		
+
 //		replaceAll(subs, true)
-		
+
 		return subs
+	}
+
+	/**
+	 * Find all uuids for targets
+	 * @param pathOld
+	 * @param pathNew
+	 * @return
+	 */
+	public def findTargetUuids(){
+		def subs = [:]
+
+		List<String> blocksOld = findAll(uuidBlock, null);
+		blocksOld.each {
+			if (it != null && it.length() > 0) {
+				subs.put(it, "")
+			}
+		}
+
+		return subs
+	}
+
+	/**
+	 * Removes all uuids for all targets
+	 * @return
+	 */
+	public def removeTargetUuids(){
+		def subs = findTargetUuids()
+		replaceAll(subs, true);
 	}
 
 
 /**
-	 * Devuelve el path sin el site
-	 * @param path
-	 * @return
-	 */
+ * Devuelve el path sin el site
+ * @param path
+ * @return
+ */
 	private String relativize(String path) {
 		String siteRoot = cmso.getRequestContext().getSiteRoot()
 		String relName = path;
@@ -380,47 +436,19 @@ public class SgReplace {
 		relName
 	}
 
-	public static boolean replace(CmsObject cmso, CmsResource r, String source, String replacement){
-		try{
-			//Leemos el fichero
-			CmsFile file = cmso.readFile(r);
+	public static Map replace(CmsObject cmso, CmsResource r, String source, String replacement, boolean quoted){
+		// Es necesario eliminar los uuids para que no repare los enlaces al final del proceso
+		SgCnt xml = new SgCnt(cmso, r);
+		SgReplace replace = SgReplace(cmso, xml.strContent);
+		replace.removeTargetUuids();
 
-			//Leemos el contenido
-			String content = new String(file.getContents(),"UTF-8");
+		// Obtenemos y reemplazamos la cadena dada
+		def subs = replace.findReplaces(source, replacement, quoted);
+		replace.replaceAll(subs, true);
 
-			//Si existe la cadena inicial
-			if(content.indexOf(source)>-1)
-			{
-				content = content.replaceAll(Pattern.quote(source), replacement);
-
-				//Volvemos a guardar el contenido
-				file.setContents(content.bytes);
-
-				//reparamos el xml
-				CmsXmlContent xmlContent = CmsXmlContentFactory.unmarshal(cmso, file);
-
-				xmlContent.setAutoCorrectionEnabled(true);
-				// now correct the XML
-				xmlContent.correctXmlStructure(cmso);
-				file.setContents(xmlContent.marshal());
-
-				// escribe los mapeos y asigna las categorías de los campos tipo OpenCmsCategory
-				file = xmlContent.getHandler().prepareForWrite(cmso, xmlContent, file);
-
-				// write the corrected file
-				cmso.writeFile(file);
-
-				cmso.lockResource(r);
-				cmso.writeFile(file);
-				cmso.unlockResource(r);
-				return true;
-			}
-
-		}catch(CmsException ex){
-			ex.printStackTrace();
-			return false;
-		}
-		return false;
+		// Guardamos el contenido
+		xml.saveStr(replace.content);
+		return subs;
 	}
 
 	/**
@@ -474,15 +502,5 @@ public class SgReplace {
 			}
 		}
 		return null
-	}
-
-
-	/**
-	 * Return escape HTML block
-	 * @param s
-	 * @return
-	 */
-	public static String escapeHTML(String s) {
-		return StringEscapeUtils.escapeHtml4(s)
 	}
 }

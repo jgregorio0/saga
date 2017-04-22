@@ -428,4 +428,25 @@ class SgCntPage {
         }
         return null
     }
+
+    /**
+     * Clone containerpage
+     * @param cntPageFrom
+     * @param cntPageTo
+     * @return
+     */
+    def cloneCntPage(String cntPageTo, List<String> cntPageContainers) {
+        // Clonamos el containerpage
+        SgCms sgCms = new SgCms(cmso);
+        sgCms.cloneResource(path, cntPageTo, true);
+
+        // Clonamos los contenidos
+        cntPageContainers.each {
+            List<CmsResource> resources = readResources(it)
+            resources.each {
+                //TODO Clonamos cada recurso contenido en el containerpage y lo modificamos en el nuevo cntPage
+            }
+        }
+
+    }
 }

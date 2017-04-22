@@ -1,29 +1,16 @@
-package com.saga.opencms.util;
+package com.saga.opencms.util
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.http.HttpResponse;
-import org.opencms.main.CmsLog;
+import org.apache.commons.io.IOUtils
+import org.apache.commons.logging.Log
+import org.opencms.main.CmsLog
 
-import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import javax.servlet.ServletOutputStream
+import javax.servlet.http.HttpServletResponse
+import java.nio.file.Files
+import java.nio.file.Paths
 
-/**
- * Created by jgregorio on 09/09/2016.
- * Ref: http://www.baeldung.com/httpclient-post-http-request
- */
 public class SgFile {
 	private static final Log LOG = CmsLog.getLog(SgFile.class);
-
-//	@Autowired
-//	private ResourceLoader resourceLoader;
-//
-//	public InputStream findSpring(String path) {
-//		Resource resource = resourceLoader.getResource("classpath:" + mailPath + messagesPath);
-//		resource.getInputStream();
-//	}
 
 	public InputStream find (Class clazz, String path) throws URISyntaxException, IOException {
 		return Files.newInputStream(Paths.get(clazz.getClassLoader().getResource(path).toURI()));
@@ -63,7 +50,7 @@ public class SgFile {
 	public void downloadFile(
 			HttpServletResponse response, String contentType,
 			String contentDisposition, InputStream inputStream)
-				throws IOException {
+			throws IOException {
 
 		final ServletOutputStream outputStream = response.getOutputStream();
 		response.setContentType(contentType);

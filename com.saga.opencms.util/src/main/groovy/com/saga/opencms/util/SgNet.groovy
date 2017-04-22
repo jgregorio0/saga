@@ -1,135 +1,268 @@
 package com.saga.opencms.util
 
+import org.apache.commons.logging.Log
 import org.apache.http.HttpEntity
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.utils.URIBuilder
+import org.apache.http.NameValuePair
+import org.apache.http.auth.AuthenticationException
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.*
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.auth.BasicScheme
+import org.apache.http.impl.client.BasicCookieStore
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.HttpClients
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
-import org.apache.ivy.util.url.BasicURLHandler
+import org.opencms.main.CmsLog
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import java.nio.charset.Charset
 
 public class SgNet {
+    private static final Log LOG = CmsLog.getLog(SgNet.class);
 
-    String url;
-    def params;
+    public static String charset = "UTF-8";
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    public static final String H_USER_AGENT = "User-Agent";
+    public static final String H_MOZILLA = "Mozilla/5.0";
+    public static final String H_CONTENT_TYPE = "Content-type";
+    public static final String H_ACCEPT = "Accept";
+    public static final String H_APP_JSON = "application/json";
 
+    CloseableHttpClient client;
+    BasicCookieStore cookieStore;
+    RequestConfig requestConfig;
 
-    public SgNet(String url){
-        this.url = url
-        params = [:]
+    int resCode;
+    String resStr;
+
+    public SgNet(){
     }
 
-    String httpGetResponse(){
-        final CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-        final URIBuilder uriBuilder = new URIBuilder(url)
-        addParams(uriBuilder)
-        final HttpGet httpGet = new HttpGet(uriBuilder.build());
-        final CloseableHttpResponse execute = httpClient.execute(httpGet);
-        if (execute.getStatusLine().getStatusCode() == BasicURLHandler.HttpStatus.SC_OK) {
-            try {
-                final HttpEntity entity = execute.getEntity();
-                return EntityUtils.toString(entity, "UTF-8");
-            } catch (Exception e) {
-                throw e;
-            } finally {
-                execute.close();
-            }
-        }
-        return null
+    public SgNet(int timeout){
+        this.requestConfig = initRequestConfig(timeout);
     }
 
-    def addParams(URIBuilder uriBuilder) {
-        def nvps = []
-        params.each {
-            nvps.add(new BasicNameValuePair(it.key, it.value))
-        }
-        uriBuilder.addParameters(nvps)
+    /**
+     * Init class
+     * @param timeout miliseconds
+     * @param cookieStore
+     */
+    public SgNet(int timeout, BasicCookieStore cookieStore){
+        this(timeout);
+        this.cookieStore = cookieStore;
     }
 
-    String httpsResponse() {
-        URL myurl = new URL(url);
-        HttpsURLConnection con = (HttpsURLConnection)myurl.openConnection();
-        InputStream ins = con.getInputStream();
-        InputStreamReader isr = new InputStreamReader(ins);
-        BufferedReader br = new BufferedReader(isr);
-        String input = "";
-        try {
-            String inputLine;
-            while ((inputLine = br.readLine()) != null) {
-                input = input + inputLine;
-            }
-
-
-        }catch(IOException e){
-            throw e;
-        } finally {
-            br.close();
+    /**
+     * Init request config using timeout
+     * @param timeout milliseconds
+     * @return
+     */
+    public RequestConfig initRequestConfig(Integer timeout){
+        if (timeout == null) {
+            return null;
+        } else {
+            return RequestConfig.custom()
+                    .setConnectTimeout(timeout)
+                    .setSocketTimeout(timeout)
+                    .setConnectionRequestTimeout(timeout)
+                    .build();
         }
     }
 
-    public String https(double amount,double price){
-        // Create a trust manager that does not validate certificate chains
-        X509TrustManager trMan = new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
+    /**
+     * Init client using requestConfig and cookieStore if defined.
+     * Otherwise init default client.
+     */
+    private void initClient(){
+        LOG.debug("init client - reqConf: " + (requestConfig != null) + " cookies: " + (cookieStore != null));
+        if (requestConfig != null) {
+            if (cookieStore != null) {
+                client = HttpClients.custom()
+                        .setDefaultRequestConfig(requestConfig)
+                        .setDefaultCookieStore(cookieStore)
+                        .build();
+            } else {
+                client = HttpClients.custom()
+                        .setDefaultRequestConfig(requestConfig)
+                        .build();
             }
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        };
-        TrustManager[] trustAllCerts = [trMan].toArray();
-        // Install the all-trusting trust manager
-        final SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
-
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        final URIBuilder uriBuilder = new URIBuilder(url)
-        addParams(uriBuilder)
-        URL url = new URL(uriBuilder.build());
-        URLConnection con = url.openConnection();
-        final Reader reader = new InputStreamReader(con.getInputStream());
-        final BufferedReader br = new BufferedReader(reader);
-        String input = "";
-        String line = "";
-        while ((line = br.readLine()) != null) {
-            input = input + line;
+        } else if (cookieStore != null) {
+            client = HttpClients.custom()
+                    .setDefaultCookieStore(cookieStore)
+                    .build();
+        } else {
+            client = HttpClients.createDefault();
         }
-        br.close();
+    }
 
-        return input;
+    public int getResCode() {
+        return resCode;
+    }
+
+    public void setResCode(int resCode) {
+        this.resCode = resCode;
+    }
+
+    public String getResStr() {
+        return resStr;
+    }
+
+    public void setResStr(String resStr) {
+        this.resStr = resStr;
+    }
+
+    /**
+     * List params as BasicNameValuePair
+     * @param params
+     * @return
+     */
+    private List<NameValuePair> listParams(Map<String, String> params) {
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        for (String key : params.keySet()) {
+            nvps.add(new BasicNameValuePair(key, params.get(key)));
+        }
+        return nvps;
+    }
+
+    /**
+     * Post request to url adding json parameter as String
+     * @param url
+     * @param jsonStr
+     * @throws java.io.IOException
+     */
+    public void post(String url, String jsonStr) throws IOException {
+        initClient();
+
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPost.setEntity(entity);
+        httpPost.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPost.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+
+        CloseableHttpResponse response = client.execute(httpPost);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    /**
+     * Execute post with authorizated header
+     * @param url
+     * @param jsonStr
+     * @param user
+     * @param pass
+     * @throws IOException
+     * @throws AuthenticationException
+     */
+    public void postAuth(String url, String jsonStr, String user, String pass)
+            throws IOException, AuthenticationException {
+        initClient();
+
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPost.setEntity(entity);
+        httpPost.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPost.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+        UsernamePasswordCredentials creds =
+                new UsernamePasswordCredentials(user, pass);
+        httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+        CloseableHttpResponse response = client.execute(httpPost);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    /**
+     * Execute get to url
+     * @param url
+     * @throws IOException
+     */
+    public void get(String url) throws IOException {
+        initClient();
+        HttpGet httpGet = new HttpGet(url);
+        CloseableHttpResponse res = client.execute(httpGet);
+//        EntityUtils.consume(res.getEntity());
+        resCode = res.getStatusLine().getStatusCode();
+        HttpEntity resEntity = res.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        LOG.debug("check service " + url + " (" + resCode + "): " + resStr);
+        client.close();
+    }
+
+    public void getAuth(String url, String user, String pass)
+            throws IOException, AuthenticationException {
+        initClient();
+        HttpGet httpGet = new HttpGet(url);
+
+        UsernamePasswordCredentials creds =
+                new UsernamePasswordCredentials(user, pass);
+        httpGet.addHeader(new BasicScheme().authenticate(creds, httpGet, null));
+
+        CloseableHttpResponse response = client.execute(httpGet);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    /**
+     * Execute put
+     * @param url
+     * @param jsonStr
+     * @throws IOException
+     */
+    public void put(String url, String jsonStr) throws IOException {
+        initClient();
+
+        HttpPut httpPut = new HttpPut(url);
+
+        StringEntity entity = new StringEntity(jsonStr, Charset.forName(charset));
+        httpPut.setEntity(entity);
+        httpPut.setHeader(H_ACCEPT, H_APP_JSON);
+        httpPut.setHeader(H_CONTENT_TYPE, H_APP_JSON);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    public void put(String url) throws IOException {
+        HttpPut httpPut = new HttpPut(url);
+
+        CloseableHttpResponse response = client.execute(httpPut);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
+    }
+
+    /**
+     * Delete request to url
+     * @param url
+     * @throws java.io.IOException
+     */
+    public void delete(String url) throws IOException {
+        initClient();
+
+        HttpDelete httpDelete = new HttpDelete(url);
+
+        CloseableHttpResponse response = client.execute(httpDelete);
+        resCode = response.getStatusLine().getStatusCode();
+        HttpEntity resEntity = response.getEntity();
+        if (resEntity != null)
+            resStr = EntityUtils.toString(resEntity);
+        client.close();
     }
 }

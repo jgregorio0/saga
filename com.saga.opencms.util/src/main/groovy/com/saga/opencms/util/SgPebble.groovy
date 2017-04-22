@@ -1,22 +1,19 @@
-package com.saga.opencms.util;
+package com.saga.opencms.util
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.Loader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
-import com.mitchellbosecke.pebble.utils.PathUtils;
-import org.opencms.file.CmsObject;
-import org.opencms.file.CmsResource;
-import org.opencms.main.CmsException;
-
-import java.io.*;
-import java.util.Map;
+import com.mitchellbosecke.pebble.PebbleEngine
+import com.mitchellbosecke.pebble.error.LoaderException
+import com.mitchellbosecke.pebble.error.PebbleException
+import com.mitchellbosecke.pebble.loader.Loader
+import com.mitchellbosecke.pebble.template.PebbleTemplate
+import com.mitchellbosecke.pebble.utils.PathUtils
+import org.opencms.file.CmsObject
+import org.opencms.file.CmsResource
+import org.opencms.main.CmsException
 
 /**
- * Created by jgregorio on 07/05/2015.
+ * Based on rtinoco developments
  */
-public class SgPebble {
+class SgPebble {
 
     private static PebbleEngine engine;
     private static PebbleEngine cmsEngine;

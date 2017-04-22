@@ -1,4 +1,4 @@
-package com.saga.sagasuite.scriptgroovy.util
+package com.saga.opencms.util
 
 import org.apache.commons.lang3.StringUtils
 import org.opencms.file.CmsObject
@@ -83,6 +83,7 @@ public class SgProperties {
 
 	public def copyAllProperties(
 			String oldResPath, String newResPath, boolean recursive){
+		clear();
 		def propList = cmso.readPropertyObjects(oldResPath, recursive);
 		propList.each {
 			properties.put(it.getName(), it)

@@ -1,21 +1,25 @@
-package com.saga.opencms.util;
+package com.saga.opencms.util
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.opencms.file.*;
-import org.opencms.file.types.I_CmsResourceType;
-import org.opencms.loader.CmsLoaderException;
-import org.opencms.main.CmsException;
-import org.opencms.main.CmsLog;
-import org.opencms.main.OpenCms;
-import org.opencms.xml.CmsXmlContentDefinition;
-import org.opencms.xml.CmsXmlEntityResolver;
-import org.opencms.xml.content.CmsXmlContent;
-import org.opencms.xml.content.CmsXmlContentFactory;
-import org.opencms.xml.types.I_CmsXmlContentValue;
+import groovy.util.slurpersupport.GPathResult
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.logging.Log
+import org.opencms.file.*
+import org.opencms.file.types.I_CmsResourceType
+import org.opencms.loader.CmsLoaderException
+import org.opencms.main.CmsException
+import org.opencms.main.CmsLog
+import org.opencms.main.OpenCms
+import org.opencms.xml.CmsXmlContentDefinition
+import org.opencms.xml.CmsXmlEntityResolver
+import org.opencms.xml.content.CmsXmlContent
+import org.opencms.xml.content.CmsXmlContentFactory
+import org.opencms.xml.types.I_CmsXmlContentValue
+import org.w3c.dom.Document
+import org.xml.sax.SAXException
 
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 
 /**
  *  Based on org.opencmshispano.module.resources.manager developed by sraposo
@@ -693,8 +697,6 @@ public class SgRes {
 		return b;
 	}
 
-
-
 	/**
 	 * Convert xml to map
 	 * @param strContent
@@ -703,39 +705,16 @@ public class SgRes {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static Map<String, Object> xml2Map(String strContent)
+	public static Map<String, Object> xml2Map(String content)
 			throws IOException, SAXException, ParserConfigurationException {
-		byte[] bytes = strContent.getBytes("UTF-8");
-		InputStream is = new ByteArrayInputStream(bytes);
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setNamespaceAware(true);
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document document = db.parse(is);
-		return createMap(document.getDocumentElement());
+		GPathResult xml = new SgSlurper(content).slurpXml();
+		// Convert it to a Map containing a List of Maps
+		return xml2Map(xml);
 	}
 
-	/**
-	 * Create map from node
-	 * @param node
-	 * @return
-	 */
-	public static Map<String, Object> createMap(Node node){
-		Map<String, Object> map = new HashMap<String, Object>();
-		NodeList nodeList = node.getChildNodes();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node currentNode = nodeList.item(i);
-			if (currentNode.hasAttributes()) {
-				for (int j = 0; j < currentNode.getAttributes().getLength(); j++) {
-					Node item = currentNode.getAttributes().item(i);
-					map.put(item.getNodeName(), item.getTextContent());
-				}
-			}
-			if (node.getFirstChild() != null && node.getFirstChild().getNodeType() == Node.ELEMENT_NODE) {
-				map.putAll(createMap(currentNode));
-			} else if (node.getFirstChild().getNodeType() == Node.TEXT_NODE) {
-				map.put(node.getLocalName(), node.getTextContent());
-			}
+	def xml2Map(GPathResult xml) {
+		xml.children().collectEntries {
+			[ it.name(), it.childNodes() ? convertToMap(it) : it.text() ]
 		}
-		return map;
 	}
 }

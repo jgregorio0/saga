@@ -45,12 +45,35 @@ class SgCategory {
     }
 
     /**
+     * Add category to xml content.
+     * @param resource
+     * @param category
+     * @return
+     */
+    public void addXmlCategory(CmsResource resource, CmsResource category, String catXmlPath) throws Exception {
+        CmsCategory cmsCategory  = catSer.getCategory(cmso, category);
+        String resPath = cmso.getSitePath(resource);
+
+        // Si no la contiene
+        if (!contains(resPath, cmsCategory)) {
+
+            SgCnt cnt = new SgCnt(cmso, resource);
+            if (cnt.contains(catXmlPath)) {
+                String valueStr = cnt.getStringValue(catXmlPath) + "," + category.getRootPath();
+                cnt.setStringValue(catXmlPath, valueStr);
+            } else {
+                cnt.setStringValue(catXmlPath, category.getRootPath());
+            }
+        }
+    }
+
+    /**
      * Find CmsCategory object
      * @param repository
      * @param catPath
      * @return
      */
-    CmsCategory readCategory(String repository, String catPath){
+    public CmsCategory readCategory(String repository, String catPath){
         String absPath = CmsStringUtil.joinPaths(repository, catPath)
         return catSer.getCategory(cmso, absPath)
     }
@@ -60,7 +83,7 @@ class SgCategory {
      * @param catRootPath
      * @return
      */
-    def readCategory(String catRootPath){
+    public CmsCategory readCategory(String catRootPath){
         return catSer.getCategory(cmso, catRootPath)
     }
 
@@ -68,10 +91,10 @@ class SgCategory {
      * Find all resources for category
      * @param catRelPath
      * @param repository
-     * @param filter
+     * @param filter for resources
      * @return
      */
-    List<CmsResource> readCategoryResources(String catRelPath, String repository, CmsResourceFilter filter){
+    public List<CmsResource> readCategoryResources(String catRelPath, String repository, CmsResourceFilter filter){
         return catSer.readCategoryResources(
                 cmso, catRelPath, false, repository, filter)
     }
@@ -83,7 +106,7 @@ class SgCategory {
      * @param filter
      * @return
      */
-    CmsResource readFirstCategoryResource(String catRelPath, String repository, CmsResourceFilter filter){
+    public CmsResource readFirstCategoryResource(String catRelPath, String repository, CmsResourceFilter filter){
         CmsResource found = null;
         def resources = readCategoryResources(catRelPath, repository, filter);
         if (resources.size() > 0) {
@@ -105,7 +128,7 @@ class SgCategory {
      * @param category
      * @return
      */
-    boolean containsCategory(CmsResource resource, CmsCategory category){
+    boolean contains(CmsResource resource, CmsCategory category){
         boolean hasCat = false;
         List<CmsCategory> categories = readResourceCategories(resource);
         for (int i = 0; i < categories.size() && !hasCat; i++) {
