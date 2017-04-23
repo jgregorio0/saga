@@ -2,8 +2,11 @@
   <library name="Gradle: org.apache.pdfbox:fontbox:1.7.1">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/apache/pdfbox/fontbox/1.7.1/fontbox-1.7.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/1.7.1/6a6b6598d0e263c751fccff26ef4fdf8543888e7/fontbox-1.7.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/1.7.1/ad3998cb959b534a18c9aef2d46806675e738f83/fontbox-1.7.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

@@ -2,10 +2,12 @@
   <library name="Gradle: com.sun.xml.bind:jaxb-impl:2.1.11">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.1.11/jaxb-impl-2.1.11.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.xml.bind/jaxb-impl/2.1.11/69e2546dae3895d25aeb5e70225e492d1b9bd696/jaxb-impl-2.1.11.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/bind/jaxb-impl/2.1.11/jaxb-impl-2.1.11-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.xml.bind/jaxb-impl/2.1.11/af455345a15a704ab5f344ff574e8b982b4fef0f/jaxb-impl-2.1.11-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

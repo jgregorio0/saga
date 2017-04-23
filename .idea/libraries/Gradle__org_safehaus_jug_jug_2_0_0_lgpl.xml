@@ -2,6 +2,7 @@
   <library name="Gradle: org.safehaus.jug:jug:2.0.0:lgpl">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/safehaus/jug/jug/2.0.0/jug-2.0.0-lgpl.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.safehaus.jug/jug/2.0.0/ea83645d04e1a31126b83e8ef0e372803d0356e1/jug-2.0.0-lgpl.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -2,8 +2,11 @@
   <library name="Gradle: org.apache.chemistry.opencmis:chemistry-opencmis-commons-api:0.7.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/apache/chemistry/opencmis/chemistry-opencmis-commons-api/0.7.0/chemistry-opencmis-commons-api-0.7.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.chemistry.opencmis/chemistry-opencmis-commons-api/0.7.0/1922e9b0ad4aea7e896dedf68a409765deb9fb46/chemistry-opencmis-commons-api-0.7.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.chemistry.opencmis/chemistry-opencmis-commons-api/0.7.0/37c9b31de1b1cf45405073aa2e156c8d262f3d44/chemistry-opencmis-commons-api-0.7.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

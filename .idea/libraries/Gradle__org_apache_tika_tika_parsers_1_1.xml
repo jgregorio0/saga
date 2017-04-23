@@ -2,8 +2,11 @@
   <library name="Gradle: org.apache.tika:tika-parsers:1.1">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/apache/tika/tika-parsers/1.1/tika-parsers-1.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tika/tika-parsers/1.1/ffdc50beb2f969ef67943726858649572af670e1/tika-parsers-1.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.tika/tika-parsers/1.1/78ce16c8f2f227183a45c8e039610867f7b5c8d9/tika-parsers-1.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

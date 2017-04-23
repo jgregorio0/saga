@@ -2,6 +2,7 @@
   <library name="Gradle: net.sourceforge.serp:serp:1.13.1">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/net/sourceforge/serp/serp/1.13.1/serp-1.13.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sourceforge.serp/serp/1.13.1/737a7b53f80fa2a4265d647a9417bd9ea671a592/serp-1.13.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

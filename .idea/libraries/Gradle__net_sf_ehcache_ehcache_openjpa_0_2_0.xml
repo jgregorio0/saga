@@ -2,8 +2,11 @@
   <library name="Gradle: net.sf.ehcache:ehcache-openjpa:0.2.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/net/sf/ehcache/ehcache-openjpa/0.2.0/ehcache-openjpa-0.2.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.ehcache/ehcache-openjpa/0.2.0/cf5ea78601b27f41f7f422ff3c54e05ce08e05c4/ehcache-openjpa-0.2.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.ehcache/ehcache-openjpa/0.2.0/cdb68ab52aa5b7dc677c6b458c721e42ba8b30cc/ehcache-openjpa-0.2.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

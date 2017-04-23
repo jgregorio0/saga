@@ -1,29 +1,54 @@
 package com.jesus.opencms.util
 
-import groovy.json.JsonBuilder
+import com.saga.opencms.util.SgRes
+import com.saga.opencms.util.SgSlurper
+import groovy.util.slurpersupport.GPathResult
+import org.xml.sax.SAXException
 
+import javax.xml.parsers.ParserConfigurationException
 
-def r1 = [f1: "r1f1", f2: "r1f2", f3: "r1f3"]
-def r2 = [f1: "r2f1", f2: "r2f2"]
-def resources = [r1, r2]
-def fields = ["f1", "f2"]
-//		jsonArray : [{f1:r1[f1], f2:r1[f2]},{f1:r2[f1], f2:r2[f2]}]
+def xmlContent =
+"""
+<?xml version="1.0" encoding="UTF-8"?>
 
-//def jArray = results.inject([]){ result, solrRes, i ->
-//    result[i] = fields.inject([:]){ json, field ->
-//        json[field] = solrRes.getField(field)
-//        json
+<BootstrapTexts xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/com.alkacon.bootstrap.schemas/schemas/text.xsd">
+  <BootstrapText language="de">
+    <Headline><![CDATA[Hola Ula]]></Headline>
+    <Text name="Text0">
+      <links/>
+      <content><![CDATA[<p>Esto es OpenCms</p>]]></content>
+    </Text>
+  </BootstrapText>
+  <BootstrapText language="en">
+    <Headline><![CDATA[Hola Ula]]></Headline>
+    <Text name="Text0">
+      <links/>
+      <content><![CDATA[<p>Esto es OpenCms</p>]]></content>
+    </Text>
+  </BootstrapText>
+</BootstrapTexts>
+"""
+
+//def Map<String, Object> xml2Map(String content)
+//        throws IOException, SAXException, ParserConfigurationException {
+//    GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
+//    // Convert it to a Map containing a List of Maps
+//    return xml2Map(xml);
+//}
+//
+//def xml2Map(GPathResult xml) {
+//    xml.children().collectEntries(){
+//        def lang = it.@language.text();
+//        if (lang) {
+//            [lang, [it.name(), it.childNodes() ? xml2Map(it): it.text() ]]
+//        } else {
+//            [it.name(), it.childNodes() ? xml2Map(it): it.text() ]
+//        }
 //    }
-//    result;
 //}
 
-def list = []
-for (int i = 0; i < resources.size(); i++) {
-    def res = resources[i];
-    def map = fields.inject([:]) { json, field ->
-        json[field] = res[field]
-        json
-    }
-    list.add(map);
-}
-println new JsonBuilder(list).toString();
+def map = SgRes.toMap(xmlContent)
+println map
+
+def json = SgRes.toJson(xmlContent)
+println json

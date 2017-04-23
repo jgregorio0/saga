@@ -2,8 +2,11 @@
   <library name="Gradle: com.google.guava:guava-gwt:15.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava-gwt/15.0/guava-gwt-15.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-gwt/15.0/6b837fa3238f09d2175c6b676e13408c5bfacffb/guava-gwt-15.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/guava-gwt/15.0/4f28f65474b54558091b95ea6efdf73c92d2c66b/guava-gwt-15.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

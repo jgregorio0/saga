@@ -6,6 +6,8 @@ import org.opencms.file.CmsObject
 
 public class SgSlurper {
 
+	private static END_CONTROL_CODE_DEFINITION = "?>";
+
 	String url;
 	String text;
 	Class type;
@@ -43,6 +45,20 @@ public class SgSlurper {
 		type = Object.class;
 		result = new JsonSlurper().parseText(text);
 		return result;
+	}
+
+	/**
+	 * Remove first line used for version and encoding "<? ... ?>"
+	 * @return
+     */
+	public def cleanControlCode(){
+		String cleanText = text;
+		int pos = cleanText.indexOf(END_CONTROL_CODE_DEFINITION)
+		if(pos > 0){
+			cleanText = cleanText.substring(pos + END_CONTROL_CODE_DEFINITION.length())
+		}
+		this.text = cleanText;
+		return this;
 	}
 
 	public cleanComments(){

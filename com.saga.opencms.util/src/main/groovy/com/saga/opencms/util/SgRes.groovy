@@ -1,5 +1,6 @@
 package com.saga.opencms.util
 
+import groovy.json.JsonBuilder
 import groovy.util.slurpersupport.GPathResult
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
@@ -698,23 +699,56 @@ public class SgRes {
 	}
 
 	/**
-	 * Convert xml to map
+	 * Parse control code xml to json
 	 * @param strContent
 	 * @return
 	 * @throws IOException
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static Map<String, Object> xml2Map(String content)
+	public static Map<String, Object> toJson(String content)
 			throws IOException, SAXException, ParserConfigurationException {
-		GPathResult xml = new SgSlurper(content).slurpXml();
-		// Convert it to a Map containing a List of Maps
-		return xml2Map(xml);
+		def map = toMap(content);
+		return new JsonBuilder(map).toString();
 	}
 
-	def xml2Map(GPathResult xml) {
-		xml.children().collectEntries {
-			[ it.name(), it.childNodes() ? convertToMap(it) : it.text() ]
+	/**
+	 * Parse control code xml to map
+	 * @param strContent
+	 * @return
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
+	public static Map<String, Object> toMap(String content)
+			throws IOException, SAXException, ParserConfigurationException {
+		// Parse and remove <?xml ... ?>
+		GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
+		// Convert to Map
+		return toMap(xml);
+	}
+
+	/**
+	 * Parse each node recursively
+	 * @param xml
+	 * @return
+     */
+	public static def toMap(GPathResult xml) {
+//		xml.children().collectEntries(){
+//			def lang = it.@language.text();
+//			if (lang) {
+//				[ lang, [ it.name(), it.childNodes() ? toMap(it): it.text() ]]
+//			} else {
+//				[ it.name(), it.childNodes() ? toMap(it): it.text() ]
+//			}
+//		}
+		xml.children().inject([:]) { map, node ->
+			def lang = node.@language.text();
+			if (lang) {
+				[ lang : [ (node.name()) : (node.childNodes() ? toMap(node) : node.text()) ]]
+			} else {
+				[ (node.name()) : (node.childNodes() ? toMap(node) : node.text()) ]
+			}
 		}
 	}
 }
