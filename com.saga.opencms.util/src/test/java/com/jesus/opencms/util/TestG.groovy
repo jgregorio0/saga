@@ -1,51 +1,95 @@
 package com.jesus.opencms.util
 
 import com.saga.opencms.util.SgRes
-import com.saga.opencms.util.SgSlurper
-import groovy.util.slurpersupport.GPathResult
-import org.xml.sax.SAXException
-
-import javax.xml.parsers.ParserConfigurationException
 
 def xmlContent =
 """
 <?xml version="1.0" encoding="UTF-8"?>
 
-<BootstrapTexts xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/com.alkacon.bootstrap.schemas/schemas/text.xsd">
-  <BootstrapText language="de">
-    <Headline><![CDATA[Hola Ula]]></Headline>
-    <Text name="Text0">
+<UPOProfesors xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/com.saga.upo.centros.frontend/schemas/upofichaprofesor.xsd">
+  <UPOProfesor language="en">
+    <Nombre><![CDATA[PEREZ-PRAT DURBAN, LUIS]]></Nombre>
+    <Codigo/>
+    <Despacho/>
+    <Email/>
+    <Telefono/>
+    <Area><![CDATA[DERECHO INTERNACIONAL PUBLICO Y RELAC.INTERNACIONA]]></Area>
+    <Departamento>
+      <link type="WEAK">
+        <target><![CDATA[/sites/upo-demo-facultad/.content/upodepartamento/dpu.xml]]></target>
+        <uuid>2b378fe2-20e5-11e6-aef9-7fb253176922</uuid>
+      </link>
+    </Departamento>
+    <CargoAcademico/>
+    <HorariosTutorias name="HorariosTutorias0">
       <links/>
-      <content><![CDATA[<p>Esto es OpenCms</p>]]></content>
-    </Text>
-  </BootstrapText>
-  <BootstrapText language="en">
-    <Headline><![CDATA[Hola Ula]]></Headline>
-    <Text name="Text0">
+      <content/>
+    </HorariosTutorias>
+    <Teaser/>
+    <Keywords/>
+  </UPOProfesor>
+  <UPOProfesor language="de">
+    <Nombre><![CDATA[PEREZ-PRAT DURBAN, LUIS]]></Nombre>
+    <Codigo/>
+    <Despacho/>
+    <Email/>
+    <Telefono/>
+    <Area><![CDATA[DERECHO INTERNACIONAL PUBLICO Y RELAC.INTERNACIONA]]></Area>
+    <Departamento>
+      <link type="WEAK">
+        <target><![CDATA[/sites/upo-demo-facultad/.content/upodepartamento/dpu.xml]]></target>
+        <uuid>2b378fe2-20e5-11e6-aef9-7fb253176922</uuid>
+      </link>
+    </Departamento>
+    <CargoAcademico/>
+    <HorariosTutorias name="HorariosTutorias0">
       <links/>
-      <content><![CDATA[<p>Esto es OpenCms</p>]]></content>
-    </Text>
-  </BootstrapText>
-</BootstrapTexts>
-"""
+      <content/>
+    </HorariosTutorias>
+    <Teaser/>
+    <Keywords/>
+  </UPOProfesor>
+  <UPOProfesor language="es">
+    <Nombre><![CDATA[PEREZ-PRAT DURBAN, LUIS]]></Nombre>
+    <Codigo/>
+    <Despacho/>
+    <Email/>
+    <Telefono/>
+    <Area><![CDATA[DERECHO INTERNACIONAL PUBLICO Y RELAC.INTERNACIONA]]></Area>
+    <Departamento>
+      <link type="WEAK">
+        <target><![CDATA[/sites/upo-demo-facultad/.content/upodepartamento/dpu.xml]]></target>
+        <uuid>2b378fe2-20e5-11e6-aef9-7fb253176922</uuid>
+      </link>
+    </Departamento>
+    <CargoAcademico/>
+    <HorariosTutorias name="HorariosTutorias0">
+      <links/>
+      <content/>
+    </HorariosTutorias>
+    <LinkInteres>
+      <Href>
+        <link internal="false" type="WEAK">
+          <target><![CDATA[https://www.google.es]]></target>
+        </link>
+      </Href>
+      <Title/>
+    </LinkInteres>
+    <LinkInteres>
+      <Href>
+        <link internal="false" type="WEAK">
+          <target><![CDATA[https://www.wikipedia.es]]></target>
+        </link>
+      </Href>
+      <Title/>
+    </LinkInteres>
+    <Teaser/>
+    <Keywords/>
+  </UPOProfesor>
+</UPOProfesors>
 
-//def Map<String, Object> xml2Map(String content)
-//        throws IOException, SAXException, ParserConfigurationException {
-//    GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
-//    // Convert it to a Map containing a List of Maps
-//    return xml2Map(xml);
-//}
-//
-//def xml2Map(GPathResult xml) {
-//    xml.children().collectEntries(){
-//        def lang = it.@language.text();
-//        if (lang) {
-//            [lang, [it.name(), it.childNodes() ? xml2Map(it): it.text() ]]
-//        } else {
-//            [it.name(), it.childNodes() ? xml2Map(it): it.text() ]
-//        }
-//    }
-//}
+
+"""
 
 def map = SgRes.toMap(xmlContent)
 println map

@@ -1,5 +1,4 @@
 package com.saga.opencms.util
-
 import groovy.json.JsonBuilder
 import groovy.util.slurpersupport.GPathResult
 import org.apache.commons.lang3.StringUtils
@@ -15,13 +14,9 @@ import org.opencms.xml.CmsXmlEntityResolver
 import org.opencms.xml.content.CmsXmlContent
 import org.opencms.xml.content.CmsXmlContentFactory
 import org.opencms.xml.types.I_CmsXmlContentValue
-import org.w3c.dom.Document
 import org.xml.sax.SAXException
 
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
-
 /**
  *  Based on org.opencmshispano.module.resources.manager developed by sraposo
  */
@@ -706,7 +701,7 @@ public class SgRes {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static Map<String, Object> toJson(String content)
+	public static String toJson(String content)
 			throws IOException, SAXException, ParserConfigurationException {
 		def map = toMap(content);
 		return new JsonBuilder(map).toString();
@@ -732,23 +727,25 @@ public class SgRes {
 	 * Parse each node recursively
 	 * @param xml
 	 * @return
-     */
-	public static def toMap(GPathResult xml) {
-//		xml.children().collectEntries(){
-//			def lang = it.@language.text();
-//			if (lang) {
-//				[ lang, [ it.name(), it.childNodes() ? toMap(it): it.text() ]]
-//			} else {
-//				[ it.name(), it.childNodes() ? toMap(it): it.text() ]
-//			}
-//		}
-		xml.children().inject([:]) { map, node ->
-			def lang = node.@language.text();
+	 */
+	public static def toMap(GPathResult parent) {
+//		println("parent node: " + parent.name())
+		parent.children().inject([:]) { map, child ->
+//			println("child node: " + child.name())
+//			println("map: " + map)
+			def lang = child.@language.text();
 			if (lang) {
-				[ lang : [ (node.name()) : (node.childNodes() ? toMap(node) : node.text()) ]]
+				map << [ "$lang" :
+							 [ (child.name()) :
+							   (child.children().size() > 0 ? toMap(child) : child.text())
+							 ]
+						]
 			} else {
-				[ (node.name()) : (node.childNodes() ? toMap(node) : node.text()) ]
+				map << [ (child.name()) :
+							 (child.children().size() > 0 ? toMap(child) : child.text())
+						]
 			}
+			map
 		}
 	}
 }
