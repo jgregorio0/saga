@@ -703,7 +703,7 @@ public class SgRes {
 	 */
 	public static String toJson(String content)
 			throws IOException, SAXException, ParserConfigurationException {
-		def map = toMap(content);
+		def map = toMapParent(content);
 		return new JsonBuilder(map).toString();
 	}
 
@@ -715,37 +715,65 @@ public class SgRes {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static Map<String, Object> toMap(String content)
+	public static Map<String, Object> toMapParent(String content)
 			throws IOException, SAXException, ParserConfigurationException {
 		// Parse and remove <?xml ... ?>
 		GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
 		// Convert to Map
-		return toMap(xml);
+		return toMapParent(xml);
 	}
 
 	/**
-	 * Parse each node recursively
+	 * Parse each parent node recursively
 	 * @param xml
 	 * @return
 	 */
-	public static def toMap(GPathResult parent) {
+	public static def toMapParent(GPathResult parent) {
 //		println("parent node: " + parent.name())
 		parent.children().inject([:]) { map, child ->
 //			println("child node: " + child.name())
 //			println("map: " + map)
 			def lang = child.@language.text();
 			if (lang) {
-				map << [ "$lang" :
-							 [ (child.name()) :
-							   (child.children().size() > 0 ? toMap(child) : child.text())
-							 ]
-						]
+				map << [ "$lang" : toMapChild(map, child) ]
 			} else {
-				map << [ (child.name()) :
-							 (child.children().size() > 0 ? toMap(child) : child.text())
-						]
+				map << toMapChild(map, child)
 			}
 			map
 		}
+	}
+
+	/**
+	 * Chech if it has brother and parse child node
+	 * @param map
+	 * @param child
+     * @return
+     */
+	public static def toMapChild(def map, def child){
+		def name = child.name();
+		def brother = map.get(name);
+		if (brother) {
+			// Has brother
+			if (brother instanceof List){
+				// Add to list brother
+				[ (child.name()) : (brother) << toMapChild(child) ]
+			} else {
+				// Create list with brother
+				[ (child.name()) : [brother, toMapChild(child)]]
+			}
+		} else {
+			// No brother
+			[ (child.name()) : toMapChild(child)]
+		}
+
+	}
+
+	/**
+	 * Parse child node
+	 * @param child
+	 * @return
+     */
+	public static def toMapChild(def child){
+		(child.children().size() > 0 ? toMap(child) : child.text())
 	}
 }

@@ -83,6 +83,17 @@ def xmlContent =
       </Href>
       <Title/>
     </LinkInteres>
+    <LinkInteres>
+      <Href>
+        <link internal="false" type="WEAK">
+          <target><![CDATA[https://www.saga.es]]></target>
+        </link>
+      </Href>
+      <Title/>
+    </LinkInteres>
+    <LinkInteres>
+        Hola
+    </LinkInteres>
     <Teaser/>
     <Keywords/>
   </UPOProfesor>
@@ -91,7 +102,7 @@ def xmlContent =
 
 """
 
-def map = SgRes.toMap(xmlContent)
+def map = SgRes.toMapParent(xmlContent)
 println map
 
 def json = SgRes.toJson(xmlContent)
