@@ -1,8 +1,5 @@
 package com.saga.opencms.util
-
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gwt.json.client.JSONArray
 import groovy.json.JsonBuilder
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
@@ -32,6 +29,8 @@ public class SgSolr {
 	public final static String PROP_SOLR_INDEX = "search.index";
 	public final static String SOLR_INDEX_ONLINE = "Solr Online";
 	public final static String SOLR_INDEX_OFFLINE = "Solr Offline";
+	public final static String SOLR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	public final static String SYS_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
 
 	/**
 	 * Constantes para la query
