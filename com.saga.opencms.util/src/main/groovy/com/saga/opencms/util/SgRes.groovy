@@ -703,7 +703,7 @@ public class SgRes {
 	 */
 	public static String toJson(String content)
 			throws IOException, SAXException, ParserConfigurationException {
-		def map = toMapParent(content);
+		def map = toMap(content);
 		return new JsonBuilder(map).toString();
 	}
 
@@ -715,7 +715,7 @@ public class SgRes {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static Map<String, Object> toMapParent(String content)
+	public static Map<String, Object> toMap(String content)
 			throws IOException, SAXException, ParserConfigurationException {
 		// Parse and remove <?xml ... ?>
 		GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
@@ -774,6 +774,6 @@ public class SgRes {
 	 * @return
      */
 	public static def toMapChild(def child){
-		(child.children().size() > 0 ? toMap(child) : child.text())
+		(child.children().size() > 0 ? toMapParent(child) : child.text())
 	}
 }
