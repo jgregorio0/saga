@@ -1,6 +1,7 @@
 package com.saga.opencms.util
 
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.*
 import org.opencms.file.types.I_CmsResourceType
@@ -546,13 +547,18 @@ class SgCms {
      * @return
      * @throws CmsException
      */
-    public static CmsObject customCmsObject(CmsObject baseCms, String uri, String site)
+    public static CmsObject customCmsObject(
+            CmsObject baseCms, String locale, String uri, String site)
             throws CmsException {
         CmsObject cmso = baseCms;
-        boolean isCustomSite = CmsStringUtil.isNotEmptyOrWhitespaceOnly(site);
-        boolean isCustomUri = CmsStringUtil.isNotEmptyOrWhitespaceOnly(uri);
-        if (isCustomSite || isCustomUri) {
+        boolean isLocale = StringUtils.isNotBlank(locale);
+        boolean isCustomSite = StringUtils.isNotBlank(site);
+        boolean isCustomUri = StringUtils.isNotBlank(uri);
+        if (isLocale || isCustomSite || isCustomUri) {
             cmso = OpenCms.initCmsObject(baseCms);
+            if (isLocale) {
+                cmso.getRequestContext().setLocale(new Locale(locale));
+            }
             if (isCustomSite) {
                 cmso.getRequestContext().setSiteRoot(site);
             }
