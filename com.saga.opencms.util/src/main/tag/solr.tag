@@ -41,6 +41,8 @@
 --%>
 
 <%!
+
+
     final Log LOG = CmsLog.getLog(this.getClass());
 
     private CmsObject cmso;
@@ -129,17 +131,13 @@
      * @return
      */
     public JSONArray getJsonResults(CmsSolrResultList results, String[] fields) throws JSONException {
-        List<Map<String, String>> contents = new ArrayList<Map<String, String>>();
+        List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
         for (int iRes = 0; iRes < results.size(); iRes++) {
-            Map<String, String> contenido = new HashMap<String, String>();
+            Map<String, Object> contenido = new HashMap<String, Object>();
             CmsSearchResource result = results.get(iRes);
             for (int iField = 0; iField < fields.length; iField++) {
                 String field = fields[iField];
-                if (field.equals("link")) {
-                    contenido.put(field, cmsLink(result.getRootPath()));
-                } else {
-                    contenido.put(field, getSolrField(result, field));
-                }
+                addSolrField(contenido, result, field);
             }
 
             contents.add(contenido);
@@ -153,43 +151,112 @@
      * @param fields
      * @return
      */
-    public List<Map<String, String>> getMapResults(CmsSolrResultList results, String[] fields) throws JSONException {
-        List<Map<String, String>> contents = new ArrayList<Map<String, String>>();
+    public List<Map<String, Object>> getMapResults(CmsSolrResultList results, String[] fields) throws JSONException {
+        List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
         for (int iRes = 0; iRes < results.size(); iRes++) {
-            Map<String, String> contenido = new HashMap<String, String>();
+            Map<String, Object> contenido = new HashMap<String, Object>();
             CmsSearchResource result = results.get(iRes);
             for (int iField = 0; iField < fields.length; iField++) {
                 String field = fields[iField];
-
-                if (field.equals("link")) {
-                    contenido.put(field, cmsLink(result.getRootPath()));
-                } else {
-                    contenido.put(field, getSolrField(result, field));
-                }
+                addSolrField(contenido, result, field);
             }
-
-
         }
         return contents;
     }
 
     /**
-     * Find solr field. If it does not exist return empty String.
+     * Find simple value solr field. If it does not exist return empty String.
      * @param result
-     * @param field
+     * @param fieldName
      * @return
      */
-    public static String getSolrField(CmsSearchResource result, String field) {
-        String res = result.getField(field);
+    public String getSimpleSolrField(CmsSearchResource result, String fieldName) {
+        String res = "";
+        if (fieldName.equals("link")) {
+            res = cmsLink(result.getRootPath());
+        } else {
+            res = result.getField(fieldName);
+        }
+
         res = res == null ? "" : res;
         return res;
     }
 
-        /**
-         * Link to resource
-         * @param target
-         * @return
-         */
+    /**
+     * Find multi valued solr field. If it does not exist return empty String.
+     * @param result
+     * @param fieldName
+     * @return
+     */
+    public Object getMultiSolrField(CmsSearchResource result, String fieldName) {
+        Object res = "";
+        try {
+            List<String> multivaluedField = result.getMultivaluedField(fieldName);
+            res = new JSONArray(multivaluedField);
+            LOG.debug("parsed multi value " + res + " for field " + fieldName);
+        } catch (Exception e) {
+            LOG.error("parsing multi valued field " + fieldName, e);
+        }
+
+        return res;
+    }
+
+    /**
+     * Check if field is multivalued
+     * @param field
+     * @return
+     */
+    private boolean isMultiValued(String field) {
+        return field.indexOf("[") > 0;
+    }
+
+    /**
+     * Remove brackets and return field name
+     * @param field
+     * @return
+     */
+    private String removeBrackets(String field) {
+        int iBrackets = field.indexOf("[");
+        return field.substring(0, iBrackets);
+    }
+
+    /**
+     * Find simple or multi valued solr field. If it does not exist return empty String.
+     * @param result
+     * @param field
+     * @return
+     */
+    public Object getSolrField(CmsSearchResource result, String field) {
+        Object res = "";
+        boolean isMultiValued = field.endsWith("[]");
+        if (isMultiValued) {
+            res = getMultiSolrField(result, field);
+        } else {
+            res = getSimpleSolrField(result, field);
+        }
+        return res;
+    }
+
+    /**
+     * Add solr field name and value to map (multi and simple value)
+     * @param contenido
+     * @param result
+     * @param field
+     */
+    private void addSolrField(Map<String, Object> contenido, CmsSearchResource result, String field) {
+        if (isMultiValued(field)){
+            String multiFieldName = removeBrackets(field);
+            contenido.put(multiFieldName, getMultiSolrField(result, multiFieldName));
+        } else {
+            contenido.put(field, getSimpleSolrField(result, field));
+        }
+    }
+
+    /**
+     * Link to resource
+     * @param target
+     * @return
+     */
     private String cmsLink(String target){
         CmsFlexController controller = CmsFlexController.getController(req);
         // be sure the link is absolute
@@ -246,8 +313,6 @@
         json.put("success", false);
         json.put("error", e.getMessage());
     } finally {
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(json.toString());
+        out.print(json.toString());
     }
 %>
