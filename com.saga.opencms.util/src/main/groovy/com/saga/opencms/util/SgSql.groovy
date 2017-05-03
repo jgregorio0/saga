@@ -6,6 +6,7 @@ import org.opencms.db.CmsDbPool
 import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
 
+import javax.annotation.Nullable
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
@@ -25,7 +26,7 @@ public class SgSql {
 	 * @param statement
 	 * @param res
 	 */
-	public static void closeAll(Connection con, Statement statement, ResultSet res) {
+	public static void closeAll(@Nullable Connection con, @Nullable Statement statement, @Nullable ResultSet res) {
 		if(res != null) {
 			try {
 				res.close();
@@ -58,8 +59,7 @@ public class SgSql {
 	 * @param ocmsPropsFilePath
 	 * @param poolName
 	 */
-	private void reconect(String ocmsPropsFilePath, String poolName) {
-		Connection con = null;
+	public static void reconnect(String ocmsPropsFilePath, String poolName) {
 		try {
 			final CmsParameterConfiguration cmsParamsConfig =
 					new CmsParameterConfiguration(ocmsPropsFilePath);
@@ -74,7 +74,7 @@ public class SgSql {
 	 * @param poolName
 	 * @return
 	 */
-	private Connection tryConnection(String poolName){
+	public static Connection tryConnection(String poolName){
 		Connection con = null;
 		try {
 			con = OpenCms.getSqlManager().getConnection(poolName);
@@ -82,5 +82,36 @@ public class SgSql {
 			LOG.error("connection to " + poolName, e);
 		}
 		return con;
+	}
+
+	/**
+	 * Try to get connection from OpenCms pool.
+	 * If it is not accessible try to reconnect using file opencms.properties
+	 * @param poolName
+	 * @param fileForReconnect
+	 * @return
+	 */
+	public static Connection tryConnection(String poolName, String fileForReconnect){
+		Connection con = tryConnection(poolName);
+		if (con == null) {
+			reconnect(fileForReconnect, poolName);
+			con = tryConnection(poolName);
+		}
+		return con;
+	}
+
+	/**
+	 * Check if connection is available
+	 */
+	public static boolean checkConnection(String poolName){
+		boolean openCon = false;
+		Connection con = tryConnection(poolName);
+		if (con == null) {
+			openCon = false;
+		} else {
+			openCon = true;
+		}
+		closeAll(con, null, null);
+		return openCon;
 	}
 }
