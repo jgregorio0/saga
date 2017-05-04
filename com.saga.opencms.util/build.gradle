@@ -38,4 +38,7 @@ dependencies {
 
     // Pebble
     compile group: 'com.mitchellbosecke', name: 'pebble', version: '2.3.0'
+
+    // formgenerator
+    compile files('lib/com.alkacon.opencms.v8.formgenerator.jar')
 }

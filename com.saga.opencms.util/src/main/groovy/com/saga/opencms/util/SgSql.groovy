@@ -16,11 +16,6 @@ public class SgSql {
 	private static final Log LOG = CmsLog.getLog(SgSql.class);
 
 	/**
-	 * Constantes para la busqueda de Solr
-	 */
-	public static final String P_PARENT_FOLDER = "parentFolders";
-
-	/**
 	 * Ensure close all
 	 * @param con
 	 * @param statement
