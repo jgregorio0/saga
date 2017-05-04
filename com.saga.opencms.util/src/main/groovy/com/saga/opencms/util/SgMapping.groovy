@@ -26,6 +26,9 @@ import javax.xml.parsers.ParserConfigurationException
 
 public class SgMapping {
 
+    public static final String LINK = "link"
+    public static final String TARGET = "target"
+
 	/**
      * Parse control code xml to json
      * @param strContent
@@ -34,6 +37,7 @@ public class SgMapping {
      * @throws SAXException
      * @throws javax.xml.parsers.ParserConfigurationException
      */
+
     public static String toJson(String content)
             throws IOException, SAXException, ParserConfigurationException {
         def map = toMap(content);
@@ -153,13 +157,10 @@ public class SgMapping {
      * @param path
      * @param map {"en":{"UPOProfesor":{"Nombre":"PEREZ-PRAT DURBAN, LUIS", ...}}, "es":{...}}
      */
-    public static void addContentMap(CmsObject cmso, String path, Map map){
-        map.each {k,v ->
-            // content locale
-            SgCnt sgCnt = new SgCnt(cmso, path, k);
-            // content map
-            addContentMap(sgCnt, v.iterator().next());
-        }
+    public static void addContent(CmsObject cmso, String path, Map map){
+        // content
+        SgCnt sgCnt = new SgCnt(cmso, path);
+
         /*{
             locale -> "en": {
                 rootnode -> "UPOProfesor":{
@@ -169,30 +170,126 @@ public class SgMapping {
                 }
             }
         }*/
+        map.each {k,v ->
+
+            // init locale
+            sgCnt.initLocale(k);
+
+            // add content map next to root node
+            addContentMap(sgCnt, "", v.iterator().next());
+        }
+
+        //save content
+        sgCnt.saveXml();
+
     }
 
-//TODO no es posible hace como en ochrecursosutil
+    /**
+     * Add content map
+     * @param sgCnt
+     * @param xmlPath
+     * @param map
+     */
     public static void addContentMap(SgCnt sgCnt, String xmlPath, Map map){
-
+        // For each entry add content
         map.each { k,v ->
-            xmlPath += "/" + v + "[1]";
-            // String
-            if (v instanceof String) {
-                addContentString(sgCnt, xmlPath, v);
-            }
-            // Map
-            if (v instanceof Map) {
-                addContentMap(sgCnt, xmlPath, v);
-            }
-            // List
-            if (v instanceof List) {
-
-            }
-            addContentMap(sgCnt, map)
+            addContent(sgCnt, xmlPath, k, v, 1);
         }
     }
 
+    /**
+     * Add content depending on field type
+     * @param sgCnt
+     * @param xmlPath
+     * @param k
+     * @param v
+     * @param pos
+     */
+    public static void addContent(SgCnt sgCnt, String xmlPath, String k, def v, int pos){
+        xmlPath += nextXmlPath(xmlPath, k, pos);
+        // Link
+        if (k.equals(LINK)) {
+            addContentLink(sgCnt, xmlPath, v)
+        }
+        // String
+        else if (v instanceof String) {
+            addContentString(sgCnt, xmlPath, v);
+        }
+        // Map
+        else if (v instanceof Map) {
+            addContentMap(sgCnt, xmlPath, v);
+        }
+        // List
+        else if (v instanceof List) {
+            addContentList(sgCnt, xmlPath, v)
+        }
+    }
+
+    /**
+     * Return next xmlPath adding element k
+     * @param xmlPath
+     * @param k
+     * @param pos
+     * @return
+     */
+    public static String nextXmlPath(String xmlPath, String k, int pos) {
+        if (StringUtils.isBlank(xmlPath)) {
+            return "$k[$pos]";
+        } else {
+            return "$xmlPath/$k[$pos]";
+        }
+    }
+
+    /**
+     * Add content link
+     * @param sgCnt
+     * @param xmlPath
+     * @param map
+     */
+    public static void addContentLink(SgCnt sgCnt, String xmlPath, Map map){
+        String parentXmlPath = getParentXmlPath(xmlPath);
+        addContentString(sgCnt, parentXmlPath, map.get(TARGET));
+    }
+
+    /**
+     * Add content string
+     * @param sgCnt
+     * @param xmlPath
+     * @param value
+     */
     public static void addContentString(SgCnt sgCnt, String xmlPath, String value){
-        sgCnt.setStringValue(xmlPath, value)
+        sgCnt.setStringValue(xmlPath, value);
+
+    }
+
+    /**
+     * Add content list
+     * @param sgCnt
+     * @param xmlPath
+     * @param list
+     */
+    public static void addContentList(SgCnt sgCnt, String xmlPath, List list){
+        String k = getLastElemPath(xmlPath);
+        list.eachWithIndex { v, i ->
+            addContent(sgCnt, xmlPath, k, v, i+1);
+        }
+    }
+
+    /**
+     * Return last element of xml path
+     * @param xmlPath
+     * @return
+     */
+    public static String getLastElemPath(String xmlPath){
+        return xmlPath.substring(xmlPath.lastIndexOf("/") + 1);
+    }
+
+    /**
+     * Return parent xml path
+     * @param xmlPath
+     * @return
+     */
+    public static String getParentXmlPath(String xmlPath){
+        return xmlPath.substring(0, xmlPath.lastIndexOf("/"));
     }
 }

@@ -192,7 +192,7 @@ public class SgCnt {
 	}
 
 	/**
-	 * Create locale for xml content
+	 * Create locale for xml content and set locale attribute
 	 * @param locale
 	 * @return
      */
@@ -200,8 +200,17 @@ public class SgCnt {
 		if (!xmlContent.hasLocale(locale)){
 			xmlContent.addLocale(cmso, locale);
 		}
-
+        this.setLocale(locale);
 		return this;
+	}
+
+	/**
+	 * Create locale content node
+	 * @param locale
+	 * @return
+     */
+	public SgCnt initLocale(String locale) {
+		return initLocale(new Locale(locale));
 	}
 
 	/**
