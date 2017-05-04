@@ -21,7 +21,11 @@ import org.opencms.xml.types.I_CmsXmlContentValue
 import org.xml.sax.SAXException
 
 public class SgCnt {
-	CmsObject cmso;
+
+    public static final String EXT_XSD = ".xsd"
+    public static final String SCHEMA_DEF = "opencms:/"
+
+    CmsObject cmso;
 	String path;
 	Locale locale;
 	CmsFile file;
@@ -901,5 +905,38 @@ public class SgCnt {
 		public String toString(){
 			return elemPath + "[" + idx + "]";
 		}
+	}
+
+	/**
+	 * Read type resource
+	 * @param content
+	 * @return
+	 */
+	public static String readSchemaPath(String content){
+		String path = null;
+		int iStart = content.indexOf(SCHEMA_DEF) + "opencms:/".length();
+		int iEnd = content.indexOf("\">", iStart);
+		if (iStart > -1 && iEnd > -1 && iEnd > iStart) {
+			path = content.substring(iStart, iEnd);
+		}
+		return path;
+	}
+
+	/**
+	 * Read type resource
+	 * @param content
+	 * @return
+	 */
+	public static String readType(String content){
+		String type = null;
+		String schema = readSchemaPath(content)
+		if (schema) {
+			int lastSlash = schema.lastIndexOf('/') + 1;
+			int ext = schema.indexOf(EXT_XSD, lastSlash);
+			if (lastSlash > -1 && ext > -1 && ext > lastSlash) {
+				type = schema.substring(lastSlash, ext);
+			}
+		}
+		return type;
 	}
 }

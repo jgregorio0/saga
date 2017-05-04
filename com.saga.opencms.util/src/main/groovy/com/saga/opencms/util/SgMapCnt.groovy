@@ -1,9 +1,8 @@
-package com.saga.sagasuite.scriptgroovy.migration
+package com.saga.opencms.util
+
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.saga.sagasuite.scriptgroovy.util.SgCms
-import com.saga.sagasuite.scriptgroovy.util.SgLog
-import com.saga.sagasuite.scripts.report.SgReportManager
+import com.saga.sagasuite.scripts.SgReportManager
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.collections.Predicate
 import org.apache.commons.io.FileUtils
@@ -38,13 +37,6 @@ import org.opencms.xml.CmsXmlUtils
 import org.opencms.xml.content.CmsXmlContent
 import org.opencms.xml.content.CmsXmlContentFactory
 import org.opencms.xml.types.I_CmsXmlContentValue
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.*;
 
 public class SgMapCnt {
 

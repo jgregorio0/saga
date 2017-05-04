@@ -1,6 +1,10 @@
 package com.jesus.opencms.util
 
+import com.saga.opencms.util.SgCnt
+import com.saga.opencms.util.SgMapping
 import com.saga.opencms.util.SgRes
+import com.saga.opencms.util.SgSlurper
+import groovy.util.slurpersupport.GPathResult
 
 def xmlContent =
 """
@@ -100,8 +104,9 @@ def xmlContent =
 </UPOProfesors>
 """
 
-def map = SgRes.toMap(xmlContent)
-println map
+String jsonStr = SgMapping.toJson(xmlContent)
+println jsonStr
 
-def json = SgRes.toJson(xmlContent)
-println json
+// create content
+SgSlurper sgSlurper = new SgSlurper(jsonStr);
+def map = sgSlurper.slurpJson();

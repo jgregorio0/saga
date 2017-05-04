@@ -41,7 +41,7 @@ public class SgSlurper {
 		return this;
 	}
 
-	public slurpObject(){
+	public def slurpJson(){
 		type = Object.class;
 		result = new JsonSlurper().parseText(text);
 		return result;

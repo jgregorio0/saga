@@ -94,10 +94,10 @@ public class SgRes {
 			while(itKeys2.hasNext()) {
 				String key = (String)itKeys2.next();
 				Object value = data.get(key);
-				if(value instanceof ArrayList) {
-					modified = this.manageMultipleContent((ArrayList)value, key, localizacion, content) || modified;
-				} else if(value instanceof HashMap) {
-					modified = this.manageNestedContent((HashMap)value, key, localizacion, content) || modified;
+				if(value instanceof List) {
+					modified = this.manageMultipleContent((List)value, key, localizacion, content) || modified;
+				} else if(value instanceof Map) {
+					modified = this.manageNestedContent((Map)value, key, localizacion, content) || modified;
 				} else if(value instanceof Choice) {
 					modified = this.manageChoiceContent(((Choice)value).getSubfields(), key, localizacion, content) || modified;
 				} else {
@@ -691,89 +691,5 @@ public class SgRes {
 		}
 
 		return b;
-	}
-
-	/**
-	 * Parse control code xml to json
-	 * @param strContent
-	 * @return
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 */
-	public static String toJson(String content)
-			throws IOException, SAXException, ParserConfigurationException {
-		def map = toMap(content);
-		return new JsonBuilder(map).toString();
-	}
-
-	/**
-	 * Parse control code xml to map
-	 * @param strContent
-	 * @return
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 */
-	public static Map<String, Object> toMap(String content)
-			throws IOException, SAXException, ParserConfigurationException {
-		// Parse and remove <?xml ... ?>
-		GPathResult xml = new SgSlurper(content).cleanControlCode().slurpXml();
-		// Convert to Map
-		return toMapParent(xml);
-	}
-
-	/**
-	 * Parse each parent node recursively
-	 * @param xml
-	 * @return
-	 */
-	public static def toMapParent(GPathResult parent) {
-//		println("parent node: " + parent.name())
-		parent.children().inject([:]) { map, child ->
-//			println("child node: " + child.name())
-//			println("map: " + map)
-			def lang = child.@language.text();
-			if (lang) {
-				map << [ "$lang" : toMapChild(map, child) ]
-			} else {
-				map << toMapChild(map, child)
-			}
-			map
-		}
-	}
-
-	/**
-	 * Chech if it has brother and parse child node
-	 * @param map
-	 * @param child
-     * @return
-     */
-	public static def toMapChild(def map, def child){
-		def name = child.name();
-		def brother = map.get(name);
-		if (brother) {
-			// Has brother
-			if (brother instanceof List){
-				// Add to list brother
-				[ (child.name()) : (brother) << toMapChild(child) ]
-			} else {
-				// Create list with brother
-				[ (child.name()) : [brother, toMapChild(child)]]
-			}
-		} else {
-			// No brother
-			[ (child.name()) : toMapChild(child)]
-		}
-
-	}
-
-	/**
-	 * Parse child node
-	 * @param child
-	 * @return
-     */
-	public static def toMapChild(def child){
-		(child.children().size() > 0 ? toMapParent(child) : child.text())
 	}
 }
