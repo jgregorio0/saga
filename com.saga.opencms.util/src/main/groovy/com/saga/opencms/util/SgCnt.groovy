@@ -243,12 +243,26 @@ public class SgCnt {
 	 * @param type
 	 * @return
 	 */
-	public CmsXmlContentDefinition contentDefinition(String type)
+	public static CmsXmlContentDefinition contentDefinition(CmsObject cmso, String type)
 			throws CmsLoaderException, CmsXmlException, SAXException, IOException {
 		I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type);
 		String schemaUri = "opencms:/${resType.configuration.schema}";
 		return CmsXmlContentDefinition.unmarshal(schemaUri, new CmsXmlEntityResolver(cmso));
 	}
+
+	/**
+	 * Create document for resource definition and locale
+	 * by: rtinoco
+	 * @param cmso
+	 * @param locale
+	 * @param contentDefinition
+	 * @return
+	 */
+	public static CmsXmlContent createDocument(CmsObject cmso, Locale locale, CmsXmlContentDefinition contentDefinition){
+		return CmsXmlContentFactory.createDocument(
+				cmso, locale, "UTF-8", contentDefinition);
+	}
+
 
 	/**
 	 * Check if resource is xml content

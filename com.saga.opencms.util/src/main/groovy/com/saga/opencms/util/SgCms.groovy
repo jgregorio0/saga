@@ -1,5 +1,4 @@
 package com.saga.opencms.util
-
 import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
@@ -45,10 +44,10 @@ class SgCms {
     }
 
     /**
-     * Genera una recurso del tipo dado
+     * Create and unlock new resource
      *
-     * @param path Ruta del nuevo recurso
-     * @param type Tipo del recurso
+     * @param path
+     * @param type
      * @return
      * @throws CmsException
      */
@@ -60,18 +59,23 @@ class SgCms {
     }
 
     /**
-     * Asegura la existencia de un recurso del tipo dado y de sus carpetas padres.
+     * Ensure resource and parent folders exist.
+     * Force unlock.
      *
-     * @param path Ruta del nuevo recurso
-     * @param type Tipo del recurso
+     * @param path Resource path to ensure
+     * @param type Resource type
      * @return
      */
     public SgCms ensureResource(String path, String type)
             throws CmsException {
-        if (!cmso.existsResource(path)) {
-            String parentFolder = CmsResource.getParentFolder(path);
-            ensureResource(parentFolder, FOLDER_TYPE);
-            createResource(path, type);
+        if (StringUtils.isNotBlank(path)) {
+            if (!cmso.existsResource(path)) {
+                String parentFolder = CmsResource.getParentFolder(path);
+                ensureResource(parentFolder, FOLDER_TYPE);
+                createResource(path, type);
+            } else {
+                unlock(path);
+            }
         }
         return this;
     }
@@ -225,7 +229,21 @@ class SgCms {
      * @param pattern "blog-%(number:5).xml"
      * @return
      */
-    String nextResoucePath(String folder, String pattern){
+    public String generateNextResoucePath(String folder, String pattern){
+        String namePattern = CmsStringUtil.joinPaths(folder, pattern)
+        String newResPath = OpenCms.getResourceManager().getNameGenerator()
+                .getNewFileName(cmso, namePattern, 5)
+        return newResPath;
+    }
+
+    /**
+     * Dada una carpeta contenedora y un patron formado por el nombre y un índice,
+     * genera la ruta en la que se debería crear el siguiente recurso.
+     * @param folder "/system/modules/com.saga.sagasuite.scriptgroovy/test/blog/"
+     * @param pattern "blog-%(number:5).xml"
+     * @return
+     */
+    public static String generateNextResoucePath(CmsObject cmso, String folder, String pattern){
         String namePattern = CmsStringUtil.joinPaths(folder, pattern)
         String newResPath = OpenCms.getResourceManager().getNameGenerator()
                 .getNewFileName(cmso, namePattern, 5)
