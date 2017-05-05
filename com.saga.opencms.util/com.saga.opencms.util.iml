@@ -160,14 +160,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: com.alkacon.opencms.v8.formgenerator">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/com.alkacon.opencms.v8.formgenerator.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
