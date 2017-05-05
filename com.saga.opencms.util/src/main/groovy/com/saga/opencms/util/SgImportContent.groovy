@@ -158,7 +158,6 @@ class SgImportContent {
 		if (validateResText(resText)) {
 			Map resources = jsonSlurper.parseText(resText);
 
-
 			// Mapa con todos los recursos a mapear
 			log.add("total resources to import ${resources.size()}");
 
@@ -215,10 +214,12 @@ class SgImportContent {
 	def importResources(def cfg, Map resources){
 		log.print();
 		int totalRes = resources.size();
-		resources.eachWithIndex { sourceResource, resourceValues, i ->
+
+		resources.eachWithIndex { sourceResource, contentProps, i ->
 			try {
+
 				log.percentage(i, totalRes).add("IMPORTANDO $sourceResource");
-				importResource(cfg, sourceResource, resourceValues, i);
+				importResource(cfg, sourceResource, contentProps, i);
 				log.print();
 			} catch (Exception e) {
 				log.error("importResources $i", e).print();
@@ -227,14 +228,22 @@ class SgImportContent {
 		}
 	}
 
-	def importResource(def cfg, def sourceResource, def resourceValues, def index){
-		List resourceProperties = extractMigrationProperties(sourceResource);
-		log.add("Resource $resourceProperties");
+	def importResource(def cfg, def sourceResource, def contentProps, def index){
+
+		// Mapea propiedades que definen el recurso
+		List<CmsProperty> resourceProperties = extractMigrationProperties(sourceResource);
+
+		// Mapea propiedades indicadas en la configuracion
+		Map props = contentProps.properties;
+		importProperties(cfg, props, resourceProperties);
+
+		log.add("Properties $resourceProperties");
 
 		// Creamos el nuevo documento
 		final CmsXmlContent content = CmsXmlContentFactory.createDocument(cmso, locale, UTF8, contentDefinition);
 
 		// Iteramos sobre los campos del recurso que vamos a importar
+		Map resourceValues = contentProps.content;
 		int totalValues = resourceValues.size();
 		resourceValues.eachWithIndex {resourcePath, pathValue, iValues ->
 			log.add("${iValues+1}/$totalValues - $resourcePath");
@@ -301,12 +310,46 @@ class SgImportContent {
 		// Aplicamos post procesamiento al contenido creado
 		applyResourceProcessor(groovyClassLoader, cmso, locale, content, cfg, sourceResource, resourceValues);
 
+		// execute before create resource
+		beforeCreateResource(cfg, sourceResource, contentProps, content);
+
 		// Almacenamos el recurso
 		String resPath = cfg.targetFolder + seqNames.secuence(index + 1);
 		saveResource(cmso, content, resourceType, resPath, resourceProperties);
 
+		// execute before create resource
+		afterCreateResource(groovyClassLoader, cmso, locale, content, cfg, sourceResource, contentProps);
+
 		log.add("Migrado recurso a $resPath << ${StringEscapeUtils.escapeHtml4(content.toString())}");
 		report.infos.put(resPath, "Migrado");
+	}
+
+	/**
+	 * Import properties configured in propsMapping
+	 * @param cfg
+	 * @param props
+	 * @param resourceProperties
+	 * @return
+	 */
+	def importProperties(def cfg, def props, List<CmsProperty> resourceProperties){
+		def id = resourceProperties.get(1)?.getValue();
+		def propsMapping = cfg.propsMapping;
+		int total = propsMapping.size()
+		propsMapping.eachWithIndex { k, v, i ->
+			try {
+				log.add("${i+1}/$total - Propiedad $k")
+				def propValue = props.get(k);
+				if (propValue) {
+					resourceProperties.add(new CmsProperty(v, propValue, propValue))
+					log.add("$v << $propValue")
+				} else {
+					log.add("No tiene valor")
+				}
+			} catch (Exception e) {
+				log.error("import properties for $id >> $k", e).print();
+				report.errors.put("import properties for $id >> $k", e.getMessage());
+			}
+		}
 	}
 
 /**
@@ -326,6 +369,38 @@ class SgImportContent {
 		def arguments = [cmso, locale, content, cfg, sourceResource, resourceValues];
 		cfg.dynamicResourceProcessors.each { it ->
 			invokeScript(cmso, loader, it, 'processResource', arguments);
+		}
+
+	}
+
+	/**
+	 * Execute script before create resource
+	 * @param cfg
+	 * @param sourceResource
+	 * @param resourceValues
+	 * @param content
+	 * @return
+	 */
+	def beforeCreateResource(Map cfg, String sourceResource, Map resourceValues, CmsXmlContent content) {
+		def arguments = [cmso, locale, log, report, cfg, sourceResource, resourceValues, content];
+		cfg.beforeCreateResource.each { it ->
+			invokeScript(cmso, groovyClassLoader, it, 'init', arguments);
+		}
+
+	}
+
+	/**
+	 * Execute script after create resource
+	 * @param cfg
+	 * @param sourceResource
+	 * @param resourceValues
+	 * @param content
+	 * @return
+	 */
+	def afterCreateResource(Map cfg, String sourceResource, Map resourceValues, CmsXmlContent content) {
+		def arguments = [cmso, idProceso, locale, content, cfg, sourceResource, resourceValues];
+		cfg.afterCreateResource.each { it ->
+			invokeScript(cmso, groovyClassLoader, it, 'init', arguments);
 		}
 
 	}
@@ -712,7 +787,7 @@ class SgImportContent {
  * @param res Clave del recurso del que extraer las propiedades
  * @return
  */
-	def extractMigrationProperties(String res) {
+	List<CmsProperty> extractMigrationProperties(String res) {
 		String uuid = res.substring(0, res.indexOf('@'));
 		String path = res.substring(res.indexOf('@') + 1, res.length());
 		[new CmsProperty("migration.path", path, path), new CmsProperty("migration.uuid", uuid, uuid)];
