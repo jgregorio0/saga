@@ -15,6 +15,7 @@ import org.opencms.staticexport.CmsLinkManager
 import org.opencms.util.CmsStringUtil
 import org.opencms.util.CmsUUID
 import org.opencms.workplace.CmsWorkplaceAction
+import org.safehaus.uuid.UUIDGenerator
 
 import javax.servlet.http.HttpServletRequest
 
@@ -427,7 +428,7 @@ class SgCms {
      * @return
      */
     public static String uuid(){
-        return ObjectIdGenerators.UUIDGenerator.getInstance().generateRandomBasedUUID().toString();
+        return UUIDGenerator.getInstance().generateRandomBasedUUID();
     }
 
     /**

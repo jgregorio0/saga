@@ -3,23 +3,7 @@ package com.saga.opencms.util
 import groovy.json.JsonBuilder
 import groovy.util.slurpersupport.GPathResult
 import org.apache.commons.lang3.StringUtils
-import org.opencms.file.CmsFile
 import org.opencms.file.CmsObject
-import org.opencms.file.CmsResource
-import org.opencms.file.CmsResourceFilter
-import org.opencms.file.types.CmsResourceTypeXmlContent
-import org.opencms.file.types.I_CmsResourceType
-import org.opencms.i18n.CmsEncoder
-import org.opencms.loader.CmsLoaderException
-import org.opencms.main.CmsException
-import org.opencms.main.OpenCms
-import org.opencms.xml.CmsXmlContentDefinition
-import org.opencms.xml.CmsXmlEntityResolver
-import org.opencms.xml.CmsXmlException
-import org.opencms.xml.CmsXmlUtils
-import org.opencms.xml.content.CmsXmlContent
-import org.opencms.xml.content.CmsXmlContentFactory
-import org.opencms.xml.types.I_CmsXmlContentValue
 import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
@@ -29,7 +13,13 @@ public class SgMapping {
     public static final String LINK = "link"
     public static final String TARGET = "target"
 
-	/**
+    CmsObject cmso;
+
+    SgMapping(CmsObject cmso) {
+        this.cmso = cmso;
+    }
+
+    /**
      * Parse control code xml to json
      * @param strContent
      * @return
@@ -130,12 +120,36 @@ public class SgMapping {
      * @param cmso
      * @param path
      * @param type
-     * @param jsonStr String that represents JSON
+     * @param jsonStr JSON String content
      * @param props Map properties [propName : propValue]
      * @return
      */
-    public static CmsResource mapResource(
-            CmsObject cmso, String path, String type,
+    public void mapResource(String path, String type, String jsonStr){
+        mapResource(path, type, jsonStr, [:])
+    }
+
+    /**
+     * Map content (Stringify JSON) and properties (Map) to resource
+     *
+     * {
+     *  locale -> "en": {
+     *   rootnode -> "Profesor":{
+     *    string -> "Nombre":"PEREZ GARCÍA, LUIS",
+     *    map -> "Departamento":{"link":{"target":"/sites/facultad/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
+     *    list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":"Google"},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":"Wikipedia"},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":"Saga"}]
+     *   }
+     *  }
+     * }
+     *
+     * @param cmso
+     * @param path
+     * @param type
+     * @param jsonStr JSON String content
+     * @param props Map properties [propName : propValue]
+     * @return
+     */
+    public void mapResource(
+            String path, String type,
             String jsonStr, Map<String, String> props){
         // create resource
         SgCms sgCms = new SgCms(cmso);
@@ -147,36 +161,39 @@ public class SgMapping {
 
         // create content
         SgSlurper sgSlurper = new SgSlurper(jsonStr);
-        def json = sgSlurper.slurpJson();
-        addContentMap(cmso, path, json);
+        Map json = sgSlurper.cleanControlCode().slurpJson();
+        addContent(path, json);
     }
 
     /**
      * Add content to resource given by map
+     * {
+     *   locale -> "en": {
+     *    rootnode -> "Profesor":{
+     *     string -> "Nombre":"PÉREZ GARCÍA, LUIS",
+     *     map -> "Departamento":{"link":{"target":"/sites/facultad/.content/departamento/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
+     *     list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":""},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":""},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":""},"\n        Hola\n    "]
+     *    }
+     *   }
+     *  }
      * @param cmso
      * @param path
-     * @param map {"en":{"UPOProfesor":{"Nombre":"PEREZ-PRAT DURBAN, LUIS", ...}}, "es":{...}}
+     * @param map {"en":{"Profesor":{"Nombre":"PÉREZ GARCÍA, LUIS", ...}}, "es":{...}}
      */
-    public static void addContent(CmsObject cmso, String path, Map map){
+    public void addContent(String path, Map map){
         // content
         SgCnt sgCnt = new SgCnt(cmso, path);
 
-        /*{
-            locale -> "en": {
-                rootnode -> "UPOProfesor":{
-                    string -> "Nombre":"PEREZ-PRAT DURBAN, LUIS",
-                    map -> "Departamento":{"link":{"target":"/sites/upo-demo-facultad/.content/upodepartamento/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
-                    list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":""},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":""},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":""},"\n        Hola\n    "]
-                }
-            }
-        }*/
+        // each locale
         map.each {k,v ->
 
             // init locale
             sgCnt.initLocale(k);
 
             // add content map next to root node
-            addContentMap(sgCnt, "", v.iterator().next());
+            def firstEntry = v.iterator().next();
+            Map firstMapCnt = firstEntry.value;
+            addContentMap(sgCnt, "", firstMapCnt);
         }
 
         //save content
@@ -205,8 +222,11 @@ public class SgMapping {
      * @param v
      * @param pos
      */
-    public static void addContent(SgCnt sgCnt, String xmlPath, String k, def v, int pos){
-        xmlPath += nextXmlPath(xmlPath, k, pos);
+    public static void addContent(
+            SgCnt sgCnt, String xmlPath,
+            String k, def v, int pos){
+        // next xmlPath
+        xmlPath = nextXmlPath(xmlPath, k, pos);
         // Link
         if (k.equals(LINK)) {
             addContentLink(sgCnt, xmlPath, v)
@@ -226,17 +246,17 @@ public class SgMapping {
     }
 
     /**
-     * Return next xmlPath adding element k
-     * @param xmlPath
-     * @param k
+     * Return next rootPath adding element elemPath
+     * @param rootPath
+     * @param elemPath
      * @param pos
      * @return
      */
-    public static String nextXmlPath(String xmlPath, String k, int pos) {
-        if (StringUtils.isBlank(xmlPath)) {
-            return "$k[$pos]";
+    public static String nextXmlPath(String rootPath, String elemPath, int pos) {
+        if (StringUtils.isBlank(rootPath)) {
+            return "$elemPath[$pos]";
         } else {
-            return "$xmlPath/$k[$pos]";
+            return "$rootPath/$elemPath[$pos]";
         }
     }
 
@@ -259,7 +279,6 @@ public class SgMapping {
      */
     public static void addContentString(SgCnt sgCnt, String xmlPath, String value){
         sgCnt.setStringValue(xmlPath, value);
-
     }
 
     /**

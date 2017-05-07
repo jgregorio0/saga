@@ -22,10 +22,10 @@ import org.xml.sax.SAXException
 
 public class SgCnt {
 
-    public static final String EXT_XSD = ".xsd"
-    public static final String SCHEMA_DEF = "opencms:/"
+	public static final String EXT_XSD = ".xsd"
+	public static final String SCHEMA_DEF = "opencms:/"
 
-    CmsObject cmso;
+	CmsObject cmso;
 	String path;
 	Locale locale;
 	CmsFile file;
@@ -162,13 +162,37 @@ public class SgCnt {
 	CmsXmlContent getXmlContent() {
 		return xmlContent
 	}
+
+	void setPath(String path) {
+		this.path = path
+	}
+
+	void setLocale(Locale locale) {
+		this.locale = locale
+	}
+
+	void setLocale(String locale) {
+		this.locale = new Locale(locale)
+	}
+
+	void setFile(CmsFile file) {
+		this.file = file
+	}
+
+	void setStrContent(String strContent) {
+		this.strContent = strContent
+	}
+
+	void setXmlContent(CmsXmlContent xmlContent) {
+		this.xmlContent = xmlContent
+	}
 /**
-	 * Update control code content
-	 * @param strContent
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 * @throws CmsException
-     */
+ * Update control code content
+ * @param strContent
+ * @return
+ * @throws UnsupportedEncodingException
+ * @throws CmsException
+ */
 	public SgCnt update(String strContent)
 			throws UnsupportedEncodingException, CmsException {
 		this.strContent = strContent;
@@ -185,22 +209,21 @@ public class SgCnt {
 	 * @param file
 	 * @return
 	 * @throws CmsXmlException
-     */
+	 */
 	public SgCnt unmarshall(CmsFile file) throws CmsXmlException {
 		xmlContent = CmsXmlContentFactory.unmarshal(cmso, file);
 		return this;
 	}
 
 	/**
-	 * Create locale for xml content and set locale attribute
+	 * Create locale for xml content
 	 * @param locale
 	 * @return
-     */
+	 */
 	public SgCnt initLocale(Locale locale) {
 		if (!xmlContent.hasLocale(locale)){
 			xmlContent.addLocale(cmso, locale);
 		}
-        this.setLocale(locale);
 		return this;
 	}
 
@@ -208,7 +231,7 @@ public class SgCnt {
 	 * Create locale content node
 	 * @param locale
 	 * @return
-     */
+	 */
 	public SgCnt initLocale(String locale) {
 		return initLocale(new Locale(locale));
 	}
@@ -221,7 +244,7 @@ public class SgCnt {
 	 * @param overwrite
 	 */
 	public boolean cloneXmlLocale(Locale srcLoc, Locale dstLoc, boolean overwrite)
-		throws IllegalArgumentException, CmsXmlException {
+			throws IllegalArgumentException, CmsXmlException {
 		boolean copied = false;
 
 		//Validamos primero que sea un XmlContent
@@ -280,7 +303,7 @@ public class SgCnt {
 	/**
 	 * Check if resource is xml content
 	 * @return
-     */
+	 */
 	public boolean isXmlContentType(){
 		CmsResource resource = cmso.readResource(path);
 		return CmsResourceTypeXmlContent.isXmlContent(resource);
@@ -299,7 +322,7 @@ public class SgCnt {
 	 * Check if content has locale
 	 * @param locale
 	 * @return
-     */
+	 */
 	public boolean hasLocale(String locale){
 		return xmlContent.hasLocale(new Locale(locale));
 	}
@@ -350,7 +373,7 @@ public class SgCnt {
 	 * Get index for given path
 	 * @param path
 	 * @return
-     */
+	 */
 	private int obtainNodeIndex(String path) {
 		int index = CmsXmlUtils.getXpathIndexInt(path);
 		if (index > 0) {
@@ -494,7 +517,7 @@ public class SgCnt {
 	 * Resource must be locked and unlocked manually.
 	 * @return
 	 * @throws CmsException
-     */
+	 */
 	public SgCnt repair()
 			throws CmsException {
 		xmlContent.setAutoCorrectionEnabled(true);
