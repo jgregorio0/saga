@@ -19,6 +19,7 @@ class SgCntPage {
     static final String typeName = "containerpage";
     static final I_CmsResourceType type =
             OpenCms.getResourceManager().getResourceType(typeName);
+    public static final String BACKUP = "~";
 
     CmsObject cmso;
     String path;

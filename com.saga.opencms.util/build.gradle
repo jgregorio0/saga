@@ -4,13 +4,13 @@ apply plugin: 'groovy'
 sourceCompatibility = 1.6
 version = '1.0'
 
-//sourceSets {
-//    main {
-//        groovy {
-//            srcDirs = ['src/main/groovy/']
-//        }
-//    }
-//}
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src/main/groovy/']
+        }
+    }
+}
 
 repositories {
     mavenCentral()

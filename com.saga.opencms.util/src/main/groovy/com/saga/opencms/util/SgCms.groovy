@@ -1,5 +1,5 @@
 package com.saga.opencms.util
-import com.fasterxml.jackson.annotation.ObjectIdGenerators
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.*
@@ -37,6 +37,9 @@ class SgCms {
     public static String SUBSITEMAP_TYPE = "subsitemap";
     public static String INHERITANCE_GROUP_TYPE = "inheritance_group";
     public static String INHERITANCE_CONFIG_TYPE = "inheritance_config";
+
+    /** SPECIAL PARAMETESR */
+    public static final String BACKUP = "~";
 
     CmsObject cmso;
 
@@ -272,6 +275,15 @@ class SgCms {
      */
     boolean isExpired(String path, Date dateExp){
         return cmso.readResource(path, CmsResourceFilter.ALL).isExpired(dateExp)
+    }
+
+    /**
+     * Check if file is a backup and contains ~
+     * @param path
+     * @return
+     */
+    public static boolean isFileBackUp(String path) {
+        return path.contains(BACKUP);
     }
 
     /**
