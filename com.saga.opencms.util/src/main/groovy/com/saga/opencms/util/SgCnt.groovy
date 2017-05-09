@@ -144,7 +144,7 @@ public class SgCnt {
 	}
 
 	String getPath() {
-		return path
+		return this.path
 	}
 
 	Locale getLocale() {
@@ -305,7 +305,7 @@ public class SgCnt {
 	 * @return
 	 */
 	public boolean isXmlContentType(){
-		CmsResource resource = cmso.readResource(path);
+		CmsResource resource = cmso.readResource(this.path);
 		return CmsResourceTypeXmlContent.isXmlContent(resource);
 	}
 
@@ -479,10 +479,10 @@ public class SgCnt {
 	 */
 	public SgCnt saveStr()
 			throws CmsException, UnsupportedEncodingException {
-		SgCms.lock(cmso, path);
+		SgCms.lock(cmso, this.path);
 		update(strContent);
 		cmso.writeFile(file);
-		SgCms.unlock(cmso, path);
+		SgCms.unlock(cmso, this.path);
 		return this;
 	}
 
@@ -492,10 +492,10 @@ public class SgCnt {
 	 */
 	public SgCnt saveStr(String contents)
 			throws CmsException, UnsupportedEncodingException {
-		SgCms.lock(cmso, path);
+		SgCms.lock(cmso, this.path);
 		update(contents);
 		cmso.writeFile(file);
-		SgCms.unlock(cmso, path);
+		SgCms.unlock(cmso, this.path);
 		return this;
 	}
 
@@ -505,10 +505,10 @@ public class SgCnt {
 	 */
 	public SgCnt saveXml()
 			throws CmsException {
-		SgCms.lock(cmso, path);
+		SgCms.lock(cmso, this.path);
 		file.setContents(xmlContent.marshal());
 		cmso.writeFile(file);
-		SgCms.unlock(cmso, path);
+		SgCms.unlock(cmso, this.path);
 		return this;
 	}
 
@@ -591,7 +591,7 @@ public class SgCnt {
 	public boolean hasValue(String element)
 			throws Exception {
 		if (xmlContent == null) {
-			throw new Exception("xml content not exists for resource $path".toString());
+			throw new Exception("xml content not exists for resource $this.path ".toString());
 		}
 		return xmlContent.hasValue(element, locale);
 	}
@@ -605,7 +605,7 @@ public class SgCnt {
 	public boolean hasValue(String element, int pos)
 			throws Exception {
 		if (xmlContent == null) {
-			throw new Exception("xml content not exists for resource $path".toString());
+			throw new Exception("xml content not exists for resource $this.path ".toString());
 		}
 		return xmlContent.hasValue(element, locale, pos);
 	}
@@ -737,7 +737,7 @@ public class SgCnt {
 			}
 		}
 
-		CmsResource resource = cmso.readResource(path);
+		CmsResource resource = cmso.readResource(this.path);
 		exp.put(resource.getStructureId().getStringValue() + "@" + resource.getRootPath(), content);
 		return exp;
 	}

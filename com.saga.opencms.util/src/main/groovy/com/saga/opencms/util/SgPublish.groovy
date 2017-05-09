@@ -8,7 +8,7 @@ import org.opencms.main.OpenCms
  * Created by jgregorio on 15/11/2016.
  */
 
-class SgPublish {
+public class SgPublish {
 
     List<CmsResource> pubList;
     CmsObject cmso;
@@ -23,7 +23,7 @@ class SgPublish {
      * @param pubList
      * @return
      */
-    CmsPublishList publish(List<CmsResource> pubList){
+    public CmsPublishList publish(List<CmsResource> pubList){
         CmsPublishList toPublish = OpenCms.getPublishManager().getPublishList(cmso, pubList, true, true)
         OpenCms.getPublishManager().publishProject(cmso, null, toPublish);
         return toPublish
@@ -33,7 +33,7 @@ class SgPublish {
      * Publish list of resources
      * @return
      */
-    CmsPublishList publish(){
+    public CmsPublishList publish(){
         CmsPublishList toPublish = OpenCms.getPublishManager().getPublishList(cmso, pubList, true, true);
         OpenCms.getPublishManager().publishProject(cmso, null, toPublish);
         return toPublish
@@ -44,7 +44,7 @@ class SgPublish {
      * @param cmso
      * @param path
      */
-    void publish(String path){
+    public void publish(String path){
         OpenCms.getPublishManager().publishResource(cmso, path);
     }
 
@@ -66,7 +66,7 @@ class SgPublish {
      * Add resource to publish list
      * @param resource
      */
-    boolean add(CmsResource resource){
+    public boolean add(CmsResource resource){
         pubList.add(resource)
     }
 
@@ -75,7 +75,7 @@ class SgPublish {
      * @param path
      * @return
      */
-    boolean isPublished(CmsResource resource) {
+    public static boolean isPublished(CmsResource resource) {
         return resource.getState().isUnchanged()
     }
 }

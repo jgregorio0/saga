@@ -64,6 +64,14 @@ public class SgLog {
 		this
 	}
 
+	def warn(Object o, Exception e) {
+		add(o)
+		warn("<strong>${e.getMessage()}</strong><br/>"+
+				"Cause: ${e.getCause()}<br/>"+
+				CmsException.getStackTraceAsString(e));
+		this
+	}
+
 	def error() {
 		color = colorError
 		this

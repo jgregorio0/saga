@@ -40,6 +40,16 @@ public class SgProperties {
 	}
 
 	/**
+	 * Create a few CmsProperty and save into resource path
+	 * @param props
+	 * @return
+	 */
+	public def addProperties(String path, List<CmsProperty> propList){
+		addProperties(path, toMap(propList));
+		return this
+	}
+
+	/**
 	 * Adds property identified by parameters key and value
 	 * @param key
 	 * @param value
@@ -205,5 +215,20 @@ public class SgProperties {
 	public def clear(){
 		properties.clear()
 		this;
+	}
+
+	/**
+	 * Return a Map [Name: Value] of properties
+	 * @param cmsProps
+	 * @return
+	 */
+	public static Map<String, String> toMap(List<CmsProperty> cmsProps){
+		Map props = new HashMap<String, String>()
+		cmsProps.each{ cmsProp ->
+			if (!cmsProp.isNullProperty()){cmsProp.getName()
+				props.put(cmsProp.getName(), cmsProp.getValue())
+			}
+		}
+		return props;
 	}
 }

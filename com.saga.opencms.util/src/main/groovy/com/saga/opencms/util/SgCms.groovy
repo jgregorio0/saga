@@ -15,6 +15,8 @@ import org.opencms.staticexport.CmsLinkManager
 import org.opencms.util.CmsStringUtil
 import org.opencms.util.CmsUUID
 import org.opencms.workplace.CmsWorkplaceAction
+import org.opencms.xml.content.CmsXmlContent
+import org.opencms.xml.content.CmsXmlContentFactory
 import org.safehaus.uuid.UUIDGenerator
 
 import javax.servlet.http.HttpServletRequest
@@ -63,6 +65,27 @@ class SgCms {
     }
 
     /**
+     * Create and Save resource
+     * @param cmso
+     * @param content
+     * @param resourceType
+     * @param path
+     * @param properties
+     * @return
+     */
+    public static SgCms createResource(CmsObject cmso, CmsXmlContent content, I_CmsResourceType resourceType, String path, List properties) {
+        if (!cmso.existsResource(path)) {
+            CmsResource created = cmso.createResource(path, resourceType, content.marshal(), properties);
+            CmsFile createdFile = cmso.readFile(created);
+            CmsXmlContent createdContent = CmsXmlContentFactory.unmarshal(cmso, createdFile);
+            createdContent.handler.prepareForWrite(cmso, createdContent, createdFile);
+            cmso.writeFile(createdFile);
+            cmso.unlockResource(created);
+        }
+        return this;
+    }
+
+    /**
      * Ensure resource and parent folders exist.
      * Force unlock.
      *
@@ -81,6 +104,42 @@ class SgCms {
                 unlock(path);
             }
         }
+        return this;
+    }
+
+    /**
+     * Ensure resource does not exists. If exists delete.
+     * If resource was published before, publish delete action.
+     * @param path
+     * @return
+     */
+    public SgCms ensureNotExistsResource(String path){
+        if (cmso.existsResource(path)) {
+            // Check if resource was publish before move
+            CmsResource resource = cmso.readResource(path);
+            SgPublish sgPub = new SgPublish(cmso);
+            boolean isPublish = sgPub.isPublished(resource);
+
+            // If exists delete
+            delete(path);
+
+            // If published before
+            if(isPublish){
+                sgPub.publish(path);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Move resource
+     * @param pathFrom
+     * @param pathTo
+     * @return
+     */
+    public SgCms move(String pathFrom, String pathTo){
+        lock(pathFrom);
+        cmso.moveResource(pathFrom, pathTo);
         return this;
     }
 
