@@ -762,4 +762,37 @@ class SgCms {
             LOG.error(e)
         }
     }
+
+    /**
+     * Return a map with internal resource information
+     * @param path
+     * @return
+     */
+    public static Map<String, String> readInternalInfo(CmsObject cmso, String path){
+        Map<String, String> infos = [:];
+
+        CmsResource resource = cmso.readResource(path);
+        infos.put(dateContent: resource.getDateContent())
+        infos.put(dateCreated: resource.getDateCreated())
+        infos.put(dateExpired: resource.getDateExpired())
+        infos.put(dateLastModified: resource.getDateLastModified())
+        infos.put(dateReleased: resource.getDateReleased())
+        infos.put(flags: resource.getFlags())
+        infos.put(state: resource.getState().getState())
+        infos.put(typeId: resource.getTypeId())
+        infos.put(userCreated: resource.getUserCreated().getStringValue())
+        infos.put(userLastModified: resource.getUserLastModified().getStringValue())
+        infos.put(version: resource.getVersion())
+
+        return infos;
+    }
+
+    /**
+     * Return resource indentified by structureid@rootpath
+     * @param resource
+     * @return
+     */
+    public static String identifyResource(CmsResource resource){
+        return resource.getStructureId().getStringValue() + "@" + resource.getRootPath();
+    }
 }

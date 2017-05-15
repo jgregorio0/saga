@@ -172,6 +172,18 @@ public class SgProperties {
 	}
 
 	/**
+	 * Return all properties
+	 * @param path
+	 * @param recursive
+     * @return
+     */
+	public Map<String, String> findAll(String path, boolean recursive){
+		List<CmsProperty> cmsProperties = cmso.readPropertyObjects(path, recursive)
+		Map<String, String> props = toMap(cmsProperties);
+		return props;
+	}
+
+	/**
 	 * Remove properties
 	 * @param path
 	 * @param properties

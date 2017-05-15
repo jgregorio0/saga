@@ -8,14 +8,14 @@ import org.xml.sax.SAXException
 
 import javax.xml.parsers.ParserConfigurationException
 
-public class SgMapping {
+public class SgCntMap {
 
     public static final String LINK = "link"
     public static final String TARGET = "target"
 
     CmsObject cmso;
 
-    SgMapping(CmsObject cmso) {
+    SgCntMap(CmsObject cmso) {
         this.cmso = cmso;
     }
 
@@ -144,13 +144,13 @@ public class SgMapping {
      * @param cmso
      * @param path
      * @param type
-     * @param jsonStr JSON String content
+     * @param jsonStrCnt JSON String content
      * @param props Map properties [propName : propValue]
      * @return
      */
     public void mapResource(
             String path, String type,
-            String jsonStr, Map<String, String> props){
+            String jsonStrCnt, Map<String, String> props){
         // create resource
         SgCms sgCms = new SgCms(cmso);
         sgCms.createResource(path, type);
@@ -160,7 +160,7 @@ public class SgMapping {
         sgProps.addProperties(props).save(path);
 
         // create content
-        SgSlurper sgSlurper = new SgSlurper(jsonStr);
+        SgSlurper sgSlurper = new SgSlurper(jsonStrCnt);
         Map json = sgSlurper.cleanControlCode().slurpJson();
         addContent(path, json);
     }
@@ -210,7 +210,7 @@ public class SgMapping {
     public static void addContentMap(SgCnt sgCnt, String xmlPath, Map map){
         // For each entry add content
         map.each { k,v ->
-            addContent(sgCnt, xmlPath, k, v, 1);
+            addJsonContent(sgCnt, xmlPath, k, v, 1);
         }
     }
 
@@ -222,7 +222,7 @@ public class SgMapping {
      * @param v
      * @param pos
      */
-    public static void addContent(
+    public static void addJsonContent(
             SgCnt sgCnt, String xmlPath,
             String k, def v, int pos){
         // next xmlPath
@@ -290,7 +290,7 @@ public class SgMapping {
     public static void addContentList(SgCnt sgCnt, String xmlPath, List list){
         String k = getLastElemPath(xmlPath);
         list.eachWithIndex { v, i ->
-            addContent(sgCnt, xmlPath, k, v, i+1);
+            addJsonContent(sgCnt, xmlPath, k, v, i+1);
         }
     }
 
