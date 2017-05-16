@@ -30,6 +30,9 @@ class SgCms {
     public static String CONFIG_PATH = "/.config";
 
     /** Default types */
+    public static String POINTER_TYPE = "pointer";
+    public static String IMAGE_TYPE = "image";
+    public static String BINARY_TYPE = "binary";
     public static String FOLDER_TYPE = "folder";
     public static String IMAGE_GALLERY_TYPE = "imagegallery";
     public static String DOWNLOAD_GALLERY_TYPE = "downloadgallery";

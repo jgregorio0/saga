@@ -16,9 +16,9 @@ import org.opencms.xml.containerpage.*
 class SgCntPage {
     private static final Log LOG = CmsLog.getLog(SgCntPage.class);
 
-    static final String typeName = "containerpage";
-    static final I_CmsResourceType type =
-            OpenCms.getResourceManager().getResourceType(typeName);
+    public static final String CONTAINERPAGE_TYPE = "containerpage";
+    public static final I_CmsResourceType type =
+            OpenCms.getResourceManager().getResourceType(CONTAINERPAGE_TYPE);
     public static final String BACKUP = "~";
 
     CmsObject cmso;
