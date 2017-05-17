@@ -2,11 +2,8 @@
   <library name="Gradle: com.sun.xml.stream.buffer:streambuffer:0.9">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/com/sun/xml/stream/buffer/streambuffer/0.9/streambuffer-0.9.jar!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.xml.stream.buffer/streambuffer/0.9/f4b8b8575fcc558768df76658192f3c0202ca22a/streambuffer-0.9.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.xml.stream.buffer/streambuffer/0.9/3fd950b178e5572bdf7e196f955d61f44302935b/streambuffer-0.9-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

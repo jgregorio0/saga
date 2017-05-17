@@ -2,11 +2,8 @@
   <library name="Gradle: org.timepedia.exporter:gwtexporter:2.5.1">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/timepedia/exporter/gwtexporter/2.5.1/gwtexporter-2.5.1.jar!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.timepedia.exporter/gwtexporter/2.5.1/ce1304a6ebe9475b62f8695c95231c3cc914339f/gwtexporter-2.5.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.timepedia.exporter/gwtexporter/2.5.1/90cf4eedc8b855bdd26f8dfd1d7e6bd2bcc39aa8/gwtexporter-2.5.1-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

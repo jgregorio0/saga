@@ -591,7 +591,7 @@ public class SgCnt {
 	public boolean hasValue(String element)
 			throws Exception {
 		if (xmlContent == null) {
-			throw new Exception("xml content not exists for resource $this.path ".toString());
+			throw new Exception("xml content not exists for resource ${this.path} ".toString());
 		}
 		return xmlContent.hasValue(element, locale);
 	}
@@ -605,7 +605,7 @@ public class SgCnt {
 	public boolean hasValue(String element, int pos)
 			throws Exception {
 		if (xmlContent == null) {
-			throw new Exception("xml content not exists for resource $this.path ".toString());
+			throw new Exception("xml content not exists for resource ${this.path} ".toString());
 		}
 		return xmlContent.hasValue(element, locale, pos);
 	}

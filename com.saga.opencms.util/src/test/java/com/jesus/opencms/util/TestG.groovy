@@ -1,7 +1,7 @@
 package com.jesus.opencms.util
 
 import com.saga.opencms.util.SgCnt
-import com.saga.opencms.util.SgMapping
+import com.saga.opencms.util.SgCntMap
 import com.saga.opencms.util.SgRes
 import com.saga.opencms.util.SgSlurper
 import groovy.util.slurpersupport.GPathResult

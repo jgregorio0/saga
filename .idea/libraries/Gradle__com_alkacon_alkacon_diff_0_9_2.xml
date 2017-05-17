@@ -2,11 +2,8 @@
   <library name="Gradle: com.alkacon:alkacon-diff:0.9.2">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/com/alkacon/alkacon-diff/0.9.2/alkacon-diff-0.9.2.jar!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.alkacon/alkacon-diff/0.9.2/dd9ef90263f4743f43f00b4a5c6f7eec307e8da3/alkacon-diff-0.9.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.alkacon/alkacon-diff/0.9.2/178d143fad96c6049387ddd40eea4b6515a4c8e7/alkacon-diff-0.9.2-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

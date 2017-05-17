@@ -2,11 +2,8 @@
   <library name="Gradle: org.xhtmlrenderer:flying-saucer-pdf:9.0.4">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/org/xhtmlrenderer/flying-saucer-pdf/9.0.4/flying-saucer-pdf-9.0.4.jar!/" />
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.xhtmlrenderer/flying-saucer-pdf/9.0.4/5d59f84c355337c605fab8162a0b947e91eb978e/flying-saucer-pdf-9.0.4.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.xhtmlrenderer/flying-saucer-pdf/9.0.4/485a7e3532ae0b8798700584e5395af62f80be70/flying-saucer-pdf-9.0.4-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

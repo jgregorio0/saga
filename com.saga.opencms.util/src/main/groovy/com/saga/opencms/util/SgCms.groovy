@@ -388,6 +388,16 @@ class SgCms {
     }
 
     /**
+     * Return resource type
+     * @param type
+     * @return
+     */
+    public static I_CmsResourceType resType(String type){
+        I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type);
+        return resType;
+    }
+
+    /**
      * Check resource type
      * @param path
      * @return

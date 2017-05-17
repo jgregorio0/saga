@@ -1,7 +1,5 @@
 package com.jesus.opencms.util
 
-import com.saga.opencms.util.SgRes
-
 def xmlContent =
 """
 <?xml version="1.0" encoding="UTF-8"?>
@@ -100,8 +98,8 @@ def xmlContent =
 </UPOProfesors>
 """
 
-def map = SgRes.toMap(xmlContent)
-println map
-
-def json = SgRes.toJson(xmlContent)
-println json
+//def map = SgRes.toMap(xmlContent)
+//println map
+//
+//def json = SgRes.toJson(xmlContent)
+//println json
