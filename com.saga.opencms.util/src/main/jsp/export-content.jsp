@@ -1,8 +1,4 @@
-<%@ page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
-<%@ page import="org.opencms.file.CmsObject" %>
-<%@ page import="org.opencms.file.CmsProject" %>
-<%@ page import="org.opencms.file.CmsResource" %>
-<%@ page import="org.opencms.file.CmsResourceFilter" %>
+<%@ page buffer="none" session="false" %>
 <%@ page import="org.opencms.file.types.I_CmsResourceType" %>
 <%@ page import="org.opencms.flex.CmsFlexController" %>
 <%@ page import="org.opencms.json.JSONObject" %>
@@ -12,6 +8,9 @@
 <%@ page import="org.opencms.xml.content.CmsXmlContentFactory" %>
 <%@ page import="org.opencms.xml.types.I_CmsXmlContentValue" %>
 <%@ page import="java.util.*" %>
+<%@ page import="org.opencms.file.*" %>
+<%@ page import="org.opencms.relations.CmsRelationFilter" %>
+<%@ page import="org.opencms.relations.CmsRelation" %>
 
 <%--
   Realiza la exportación a JSON. Los parámetros que recibe son:
@@ -22,6 +21,14 @@
 --%>
 
 <%!
+  String identifyResource(String structureId, String path){
+    return structureId + "@" + path;
+  }
+
+  String identifyResource(CmsResource resource){
+    return resource.getStructureId().getStringValue() + "@" + resource.getRootPath();
+  }
+
   String getOnlineLink(CmsObject cmsObject, String resource) {
     try {
       return OpenCms.getLinkManager().getOnlineLink(cmsObject, resource);
@@ -36,7 +43,7 @@
   final CmsProject offline = cmsObject.readProject("Offline");
   cmsObject.getRequestContext().setCurrentProject(offline);
   final Locale locale = cmsObject.getRequestContext().getLocale();
-  Map<String, Map<String, String>> exp = new LinkedHashMap<String, Map<String, String>>();
+  Map<String, Map<String, Map<String, String>>> exp = new LinkedHashMap<String, Map<String, Map<String, String>>>();
 
   final String type = request.getParameter("type");
   final String max = request.getParameter("max");
@@ -47,13 +54,13 @@
     Long startDate = null;
     Integer maxResults = null;
     try {
-     startDate = Long.parseLong(since);
+      startDate = Long.parseLong(since);
     } catch(Exception e) {
 
     }
 
     try {
-     maxResults = Integer.parseInt(max);
+      maxResults = Integer.parseInt(max);
     } catch(Exception e) {
 
     }
@@ -68,12 +75,14 @@
     List<CmsResource> find = cmsObject.readResources(folder, filter, true);
     List<CmsResource> resources = new ArrayList<CmsResource>();
     if (maxResults != null) {
-        resources = maxResults < find.size() ? find.subList(0, maxResults) : find;
+      resources = maxResults < find.size() ? find.subList(0, maxResults) : find;
     } else {
       resources = find;
     }
 
     for (CmsResource resource : resources) {
+
+      // Map content
       Map<String, String> content = new LinkedHashMap<String, String>();
 
       final CmsXmlContent unmarshal = CmsXmlContentFactory.unmarshal(cmsObject, cmsObject.readFile(resource));
@@ -98,7 +107,52 @@
 
         }
       }
-      exp.put(resource.getStructureId().getStringValue() + "@" + resource.getRootPath(), content);
+
+      // Map properties
+      HashMap<String, String> props = new HashMap<String, String>();
+      List<CmsProperty> propList = cmsObject.readPropertyObjects(resource, true);
+      for (CmsProperty prop : propList){
+        if (!prop.isNullProperty()) {
+          props.put(prop.getName(), prop.getValue());
+        }
+      }
+
+      // Map document info
+      HashMap<String, String> document = new HashMap<String, String>();
+      try {
+        document.put("dateContent", Long.toString(resource.getDateContent()));
+        document.put("dateCreated", Long.toString(resource.getDateCreated()));
+        document.put("dateExpired", Long.toString(resource.getDateExpired()));
+        document.put("dateLastModified", Long.toString(resource.getDateLastModified()));
+        document.put("dateReleased", Long.toString(resource.getDateReleased()));
+        document.put("state", Integer.toString(resource.getState().getState()));
+      } catch (Exception e){}
+
+      // Map relations
+      HashMap<String, String> relations = new HashMap<String, String>();
+      try{
+        List<CmsRelation> relationsForResource = cmsObject.getRelationsForResource(resource, CmsRelationFilter.ALL);
+        for (int i = 0; i < relationsForResource.size(); i++) {
+          CmsRelation relation = relationsForResource.get(i);
+          String sourceStructureId = relation.getSourceId().getStringValue();
+          String sourcePath = relation.getSourcePath();
+          String sourceId = identifyResource(sourceStructureId, sourcePath);
+
+          String targetStructureId = relation.getTargetId().getStringValue();
+          String targetPath = relation.getTargetPath();
+          String targetId = identifyResource(targetStructureId, targetPath);
+
+          relations.put(sourceId, targetId);
+        }
+      } catch (Exception e){}
+
+      Map<String, Map<String, String>> valueMap = new LinkedHashMap<String, Map<String, String>>();
+      valueMap.put("content", content);
+      valueMap.put("properties", props);
+      valueMap.put("document", document);
+      valueMap.put("relation", relations);
+
+      exp.put(identifyResource(resource), valueMap);
       //out.print(exp);
     }
   }
@@ -116,6 +170,4 @@
     out.print("Excepcion");
     out.print("{}");
   }
-
-
 %>
