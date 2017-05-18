@@ -237,26 +237,6 @@ class SgCms {
     }
 
     /**
-     * Unlock resource.
-     * If resource is lock by inheritance try to unlock parent folder.
-     * If lock owns to another user steal lock and unlock.
-     * @param path
-     * @return
-     */
-    def static unlock(CmsObject cmso, String path) {
-        CmsLock lock = cmso.getLock(path);
-        if (lock.inherited) {
-            unlock(cmso, CmsResource.getParentFolder(path));
-        } else if (!lock.unlocked) {
-            if (!lock.isOwnedBy(cmso.requestContext.currentUser)) {
-                cmso.changeLock(path);
-            }
-            cmso.unlockResource(path);
-        }
-        return this;
-    }
-
-    /**
      * Lock resource if it is possible.
      * If lock owns to another user steal lock.
      * @param path
@@ -278,13 +258,33 @@ class SgCms {
      * @param path
      * @return
      */
-    def static lock(CmsObject cmso, String path) {
+    public static def lock(CmsObject cmso, String path) throws CmsException {
         CmsLock lock = cmso.getLock(path);
         if (!lock.isUnlocked() &&
-                !lock.isOwnedBy(cmso.requestContext.currentUser)) {
+                !lock.isOwnedBy(cmso.getRequestContext().getCurrentUser())) {
             cmso.changeLock(path);
         }
         cmso.lockResource(path);
+        return this;
+    }
+
+    /**
+     * Unlock resource.
+     * If resource is lock by inheritance try to unlock parent folder.
+     * If lock owns to another user steal lock and unlock.
+     * @param path
+     * @return
+     */
+    public static def unlock(CmsObject cmso, String path) throws CmsException {
+        CmsLock lock = cmso.getLock(path);
+        if (lock.isInherited()) {
+            unlock(cmso, CmsResource.getParentFolder(path));
+        } else if (!lock.isUnlocked()) {
+            if (!lock.isOwnedBy(cmso.getRequestContext().getCurrentUser())) {
+                cmso.changeLock(path);
+            }
+            cmso.unlockResource(path);
+        }
         return this;
     }
 
@@ -329,6 +329,24 @@ class SgCms {
     }
 
     /**
+     * Set date last modified
+     * @param filePath
+     * @param time
+     */
+    public void setDateLastModified(String filePath, Long time) {
+        // Get and lock
+        CmsFile file = cmso.readFile(filePath, CmsResourceFilter.ALL);
+        lock(cmso, filePath);
+
+        // set value
+        file.setDateLastModified(time);
+
+        // save changes and unlock
+        cmso.writeFile(file);
+        unlock(cmso, filePath);
+    }
+
+    /**
      * Check if resource is expired
      * @param cmso
      * @param path
@@ -345,7 +363,7 @@ class SgCms {
      * @return
      */
     public static boolean isFileBackUp(String path) {
-        return path.contains(BACKUP);
+        return path.contains(this.BACKUP);
     }
 
     /**

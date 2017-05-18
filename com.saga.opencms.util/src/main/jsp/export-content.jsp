@@ -117,15 +117,15 @@
         }
       }
 
-      // Map document info
-      HashMap<String, String> document = new HashMap<String, String>();
+      // Map file info
+      HashMap<String, String> file = new HashMap<String, String>();
       try {
-        document.put("dateContent", Long.toString(resource.getDateContent()));
-        document.put("dateCreated", Long.toString(resource.getDateCreated()));
-        document.put("dateExpired", Long.toString(resource.getDateExpired()));
-        document.put("dateLastModified", Long.toString(resource.getDateLastModified()));
-        document.put("dateReleased", Long.toString(resource.getDateReleased()));
-        document.put("state", Integer.toString(resource.getState().getState()));
+        file.put("dateContent", Long.toString(resource.getDateContent()));
+        file.put("dateCreated", Long.toString(resource.getDateCreated()));
+        file.put("dateExpired", Long.toString(resource.getDateExpired()));
+        file.put("dateLastModified", Long.toString(resource.getDateLastModified()));
+        file.put("dateReleased", Long.toString(resource.getDateReleased()));
+        file.put("state", Integer.toString(resource.getState().getState()));
       } catch (Exception e){}
 
       // Map relations
@@ -149,7 +149,7 @@
       Map<String, Map<String, String>> valueMap = new LinkedHashMap<String, Map<String, String>>();
       valueMap.put("content", content);
       valueMap.put("properties", props);
-      valueMap.put("document", document);
+      valueMap.put("file", file);
       valueMap.put("relations", relations);
 
       exp.put(identifyResource(resource), valueMap);
