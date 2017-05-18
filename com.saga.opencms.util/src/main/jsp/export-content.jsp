@@ -150,7 +150,7 @@
       valueMap.put("content", content);
       valueMap.put("properties", props);
       valueMap.put("document", document);
-      valueMap.put("relation", relations);
+      valueMap.put("relations", relations);
 
       exp.put(identifyResource(resource), valueMap);
       //out.print(exp);
