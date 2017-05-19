@@ -2,6 +2,7 @@ package com.saga.opencms.util
 
 import com.saga.sagasuite.scripts.SgReportManager
 import org.opencms.main.CmsException
+import org.opencms.main.CmsMultiException
 
 public class SgLog {
 
@@ -124,5 +125,30 @@ public class SgLog {
 		init();
 		percentage(i, total);
 		this;
+	}
+
+	/**
+	 * Returns the stack trace (including the message) of an exception as a String.<p>
+	 *
+	 * If the exception is a CmsException,
+	 * also writes the root cause to the String.<p>
+	 *
+	 * @param e the exception to get the stack trace from
+	 * @return the stack trace of an exception as a String
+	 */
+	public static String getStackTraceAsString(Throwable e) {
+
+		StringWriter stringWriter = new StringWriter();
+		PrintWriter printWriter = new PrintWriter(stringWriter);
+		e.printStackTrace(printWriter);
+		if (e instanceof CmsMultiException) {
+			CmsMultiException me = (CmsMultiException)e;
+			Iterator<CmsException> it = me.getExceptions().iterator();
+			while (it.hasNext()) {
+				Throwable t = it.next();
+				t.printStackTrace(printWriter);
+			}
+		}
+		return stringWriter.toString();
 	}
 }
