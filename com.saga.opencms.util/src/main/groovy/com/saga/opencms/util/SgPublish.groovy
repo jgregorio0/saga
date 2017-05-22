@@ -78,4 +78,13 @@ public class SgPublish {
     public static boolean isPublished(CmsResource resource) {
         return resource.getState().isUnchanged()
     }
+
+    /**
+     * Wait until finish publishing
+     * @param ms max waiting time
+     * @return
+     */
+    public static boolean waitFinish(long ms){
+        OpenCms.getPublishManager().waitWhileRunning(ms)
+    }
 }

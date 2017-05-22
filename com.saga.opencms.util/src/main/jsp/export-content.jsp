@@ -167,7 +167,7 @@
     JSONObject jo = new JSONObject(exportacion);
     out.print(jo.toString());
   } catch (Exception e) {
-    out.print("Excepcion");
+    out.print("Excepcion generando JSON");
     out.print("{}");
   }
 %>
