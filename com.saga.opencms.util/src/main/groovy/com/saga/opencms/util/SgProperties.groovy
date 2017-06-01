@@ -243,4 +243,23 @@ public class SgProperties {
 		}
 		return props;
 	}
+
+	/**
+	 * Read property value
+	 * @param cmso
+	 * @param path
+	 * @param propertyName
+	 * @param recursive
+	 * @return
+	 */
+	public static String readProperty(
+			CmsObject cmso, String path, String propertyName, boolean recursive){
+		CmsProperty prop = cmso.readPropertyObject(path, propertyName, recursive)
+		if (prop.isNullProperty()){
+			return null;
+		} else {
+			return prop.getValue()
+		}
+
+	}
 }

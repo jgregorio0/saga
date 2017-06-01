@@ -1,6 +1,7 @@
 package com.saga.opencms.util
-
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
+import org.apache.http.client.utils.URIBuilder
 import org.opencms.file.CmsFile
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
@@ -11,6 +12,7 @@ import org.opencms.i18n.CmsEncoder
 import org.opencms.loader.CmsLoaderException
 import org.opencms.main.CmsException
 import org.opencms.main.OpenCms
+import org.opencms.util.CmsStringUtil
 import org.opencms.xml.CmsXmlContentDefinition
 import org.opencms.xml.CmsXmlEntityResolver
 import org.opencms.xml.CmsXmlException
@@ -22,6 +24,7 @@ import org.xml.sax.SAXException
 
 public class SgCnt {
 
+	/** XSD */
 	public static final String EXT_XSD = ".xsd"
 	public static final String SCHEMA_DEF = "opencms:/"
 
@@ -971,4 +974,172 @@ public class SgCnt {
 		}
 		return type;
 	}
+
+	/**
+	 * Add value to content node
+	 * @param cmso
+	 * @param locale
+	 * @param content
+	 * @param idxPaths
+	 * @param value
+	 */
+	public static void addValueToContent(CmsObject cmso, Locale locale, CmsXmlContent content, List<String> idxPaths, String value) {
+		I_CmsXmlContentValue node = createNode(cmso, locale, content, idxPaths);
+		node.setStringValue(cmso, value);
+	}
+
+	/**
+	 * Add default index [1] for each path element
+	 * @param path
+	 * @return
+	 */
+	public static List<String> addDefaultIdxPaths(String path){
+		List<String> idxPaths = [];
+		List<String> paths = Arrays.asList(path.split("/"))
+		for (int i = 0; i < paths.size(); i++) {
+			String idxPath = paths.get(i);
+			if (!isIdxPath(idxPath)) {
+				idxPath =+ "[1]"
+			}
+			idxPaths.add(idxPath)
+		}
+		return idxPaths;
+	}
+
+	/**
+	 * Create new content node
+	 *
+	 * @param cmso
+	 * @param locale
+	 * @param content Xml resource content
+	 * @param idxPaths List of paths that represent node including index (Content[1]/Text[2])
+	 * @return Node given by joining param paths
+	 * @throws Exception
+	 */
+	public static I_CmsXmlContentValue createNode(CmsObject cmso, Locale locale, CmsXmlContent content, List<String> idxPaths)
+			throws Exception {
+		I_CmsXmlContentValue node;
+
+		// Add content nodes for whole path
+		String currPath = "";
+		for (int i = 0; i < idxPaths.size(); i++) {
+			String targetPath = idxPaths.get(i);
+			if (i == 0) {
+				currPath = targetPath;
+			} else {
+				currPath = currPath + "/" + targetPath;
+			}
+
+			String cleanPath = cleanLastIdxPath(currPath);
+			int idxPath = getIdxPath(currPath) - 1;
+			if (!content.hasValue(cleanPath, locale, idxPath)) {
+				content.addValue(cmso, cleanPath, locale, idxPath);
+			}
+
+			if (i == idxPaths.size() - 1) {
+				node = content.getValue(cleanPath, locale, idxPath);
+			}
+		}
+		return node;
+	}
+
+	/**
+	 * Check if path contains index
+	 * @param path
+	 * @return
+	 */
+	public static boolean isIdxPath(String path){
+		return path.contains("[");
+	}
+
+	/**
+	 * Return index for path (Content[1] -> 1)
+	 * @param idxPath
+	 * @return
+	 */
+	public static String cleanLastIdxPath(String idxPath){
+		int lastBracket = idxPath.lastIndexOf("[");
+		return idxPath.substring(0, lastBracket);
+	}
+
+	/**
+	 * Clean indexes from paths
+	 * @param idxPath
+	 * @return
+	 */
+	public static List<String> cleanAllIdxPath(String idxPath){
+		List<String> paths = [];
+		List<String> idxPathsList = Arrays.asList(idxPath.split("/"))
+		for (int i = 0; i < idxPathsList.size(); i++) {
+			String path = idxPathsList.get(i);
+			if (isIdxPath(idxPath)) {
+				path = cleanLastIdxPath(path)
+			}
+			paths.add(path)
+		}
+		return paths;
+	}
+
+	public static int getIdxPath(String idxPath){
+		int lastBracket = idxPath.lastIndexOf("[");
+		return Integer.valueOf(idxPath.substring(lastBracket + 1, lastBracket + 2));
+	}
+
+	/**
+	 * Upload file from URL
+	 *
+	 * @param CmsObject cmso
+	 * @param cfg Config galleries
+	 * @param url Origin URL file
+	 * @return
+	 */
+	CmsResource createFile(CmsObject cmso, String url, String imageGallery, String downloadGallery) {
+		// Obtenemos la información del fichero que almacenar
+		Map fileInfo = getFileInfo(url, imageGallery, downloadGallery);
+
+		// Cuando se importan ficheros, se almacena en la propiedad 'migration.uri' la ruta original del fichero.
+		// Ya que todas las imágenes van a la misma carpeta durante la importación, y para evitar que ficheros con el
+		// mismo nombre en el origen, aunque alojados en carpetas distintas, se traten como si fueran ficheros igulaes,
+		// comprobamos que si existe en la galería donde se importan los ficheros un fichero que procede de la misma ruta
+		// origen (lo hacemos comprobando la propiedad 'migration.uri')
+		CmsResource res = findByProperty([imageGallery, downloadGallery], "migration.uri", url)
+
+		// si no existe el fichero lo creamos
+		if (!res) {
+			res = uploadFile(cmso, url, fileInfo.path, fileInfo.resourceType);
+		}
+
+		return res;
+	}
+
+
+
+	/**
+	 * Get info map (resourceType and path) from file
+	 *
+	 * @param url Origin URL file
+	 * @param imageGallery
+	 * @param downloadGallery
+	 * @return
+	 */
+	public static Map getFileInfo(String url, String imageGallery, String downloadGallery) {
+		def info = [:];
+		String filePath = new URIBuilder(url).path;
+		String fileName = filePath.substring(filePath.lastIndexOf('/') + 1, filePath.length());
+
+		String ext = FilenameUtils.getExtension(fileName).toLowerCase();
+		if (SgCms.EXT_IMAGE.contains(ext)) {
+			info.resourceType = OpenCms.resourceManager.getResourceType(SgCms.IMAGE_TYPE);
+			info.path = CmsStringUtil.addLeadingAndTrailingSlash(imageGallery) + fileName;
+		} else if (SgCms.EXT_VIDEO.contains(ext)){
+			info.resourceType = OpenCms.resourceManager.getResourceType(SgCms.PLAIN_TYPE);
+			info.path = CmsStringUtil.addLeadingAndTrailingSlash(downloadGallery) + fileName;
+		} else {
+			info.resourceType = OpenCms.resourceManager.getResourceType(SgCms.BINARY_TYPE);
+			info.path = CmsStringUtil.addLeadingAndTrailingSlash(downloadGallery) + fileName;
+		}
+		info;
+	}
+
+
 }

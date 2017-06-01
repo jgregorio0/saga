@@ -1,5 +1,6 @@
 package com.saga.opencms.util
 
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.*
@@ -34,6 +35,7 @@ class SgCms {
     public static String IMAGE_TYPE = "image";
     public static String BINARY_TYPE = "binary";
     public static String FOLDER_TYPE = "folder";
+    public static String PLAIN_TYPE = "plain";
     public static String IMAGE_GALLERY_TYPE = "imagegallery";
     public static String DOWNLOAD_GALLERY_TYPE = "downloadgallery";
     public static String LINK_GALLERY_TYPE = "linkgallery";
@@ -42,6 +44,15 @@ class SgCms {
     public static String SUBSITEMAP_TYPE = "subsitemap";
     public static String INHERITANCE_GROUP_TYPE = "inheritance_group";
     public static String INHERITANCE_CONFIG_TYPE = "inheritance_config";
+
+    /** Extensions */
+    public static final EXT_IMAGE = ["jpeg", "jpg", "png", "gif", "tif", "tiff"];
+    public static final EXT_VIDEO = ["flv", "avi", "mp4", "mkv"];
+
+    /** OpenCms Type Content */
+    public static final CNT_TYPE_VFS_FILE = "OpenCmsVfsFile";
+    public static final CNT_TYPE_CATEGORY = "OpenCmsCategory";
+    public static final CNT_TYPE_HTML = "OpenCmsHtml";
 
     /** SPECIAL PARAMETESR */
     public static final String BACKUP = "~";
@@ -116,7 +127,7 @@ class SgCms {
      * @param path
      * @return
      */
-    public SgCms ensureNotExistsResource(String path){
+    public SgCms ensureNotExistsResource(String path, long waitMillis){
         if (cmso.existsResource(path)) {
             // Check if resource was publish before move
             CmsResource resource = cmso.readResource(path);
@@ -129,8 +140,16 @@ class SgCms {
             // If published before
             if(isPublish){
                 sgPub.publish(path);
+                // Wait for publishing 2 minutes maximum
+                sgPub.waitFinish(waitMillis);
             }
         }
+
+        // Check if still exists
+        if (cmso.existsResource(path, CmsResourceFilter.ALL)) {
+            throw new Exception("Resource $path still exists")
+        }
+
         return this;
     }
 
@@ -286,6 +305,27 @@ class SgCms {
             cmso.unlockResource(path);
         }
         return this;
+    }
+
+    /**
+     * Check if resource is unlocked.
+     * @param path
+     * @return
+     */
+    public static boolean isUnlocked(CmsObject cmso, String path) throws CmsException {
+        CmsLock lock = cmso.getLock(path);
+        return lock.isUnlocked()
+    }
+
+    /**
+     * Check if resource is locked.
+     * If lock owns to another user steal lock.
+     * @param path
+     * @return
+     */
+    public static boolean isLocked(CmsObject cmso, String path) throws CmsException {
+        CmsLock lock = cmso.getLock(path);
+        return !lock.isUnlocked()
     }
 
     /**
@@ -713,7 +753,9 @@ class SgCms {
         if (CmsResource.isFolder(path)) {
             resources = cmso.readResources(path, filter, true);
         } else {
-            resources.add(cmso.readResource(path, filter));
+            try {
+                resources.add(cmso.readResource(path, filter));
+            } catch (Exception e){}
         }
 
         return resources;
@@ -825,5 +867,103 @@ class SgCms {
      */
     public static String identifyResource(CmsResource resource){
         return resource.getStructureId().getStringValue() + "@" + resource.getRootPath();
+    }
+
+    /**
+     * Return resource info [type:path]
+     * @param rootPath
+     * @return
+     */
+    public static def extensionfileType(String rootPath){
+        String ext = FilenameUtils.getExtension(rootPath).toLowerCase();
+        if (EXT_IMAGE.contains(ext)) {
+            return resType(IMAGE_TYPE);
+        } else if (EXT_VIDEO.contains(ext)){
+            return resType(PLAIN_TYPE);
+        } else {
+            return resType(BINARY_TYPE);
+        }
+    }
+
+    /**
+     * Read resource in any path with property
+     * @param cmso
+     * @param paths
+     * @param propName
+     * @param propValue
+     * @return
+     */
+    public static CmsResource findResourceByProperty(CmsObject cmso, List<String> paths, String propName, String propValue){
+        CmsResource res = null;
+        for (int i = 0; i < paths.size() && res == null; i++) {
+            String path = paths.get(i);
+            res = findResourceByProperty(cmso, path, propName, propValue);
+        }
+        return res;
+    }
+
+    /**
+     * Read resource into path with property
+     * @param cmso
+     * @param path
+     * @param propName
+     * @param propValue
+     * @return
+     */
+    public static CmsResource findResourceByProperty(CmsObject cmso, String path, String propName, String propValue){
+        CmsResource res = null;
+        List<CmsResource> resources = cmso.readResourcesWithProperty(path, propName, propValue);
+        if (!resources.isEmpty()) {
+            res = resources.get(0);
+        }
+        return res;
+    }
+
+    /**
+     * Upload file to opencms given by url
+     * @param cmso
+     * @param url
+     * @param fileInfo
+     * @return
+     */
+    public static CmsResource uploadFile(CmsObject cmso, String url, String path, I_CmsResourceType resourceType){
+        CmsResource res = null;
+
+        // Download file bytes array
+        byte[] file = downloadFile(url);
+
+        // Create resource
+        if (file != null && file.length > 0) {
+            String resPath = path;
+            if (cmso.existsResource(resPath)) {
+                resPath = FilenameUtils.removeExtension(path) +
+                        '_' + System.currentTimeMillis() +
+                        '.' + FilenameUtils.getExtension(path).toLowerCase();
+            }
+            res = cmso.createResource(resPath, resourceType, file, [new CmsProperty("migration.uri", url, url)]);
+            cmso.unlockResource(res);
+        }
+
+        return res;
+    }
+
+    /**
+     * Read pointer url
+     * @param cmso
+     * @param path
+     * @return
+     */
+    public static String readPointer(CmsObject cmso, String path){
+        CmsFile link = cmso.readFile(path, CmsResourceFilter.ALL);
+        String linkUrl = new String(link.getContents());
+        return linkUrl;
+    }
+
+    /**
+     * Create pointer
+     * @return
+     */
+    public static CmsResource createPointer(CmsObject cmso, String path, String linkTarget, List<CmsProperty> properties){
+        cmso.createResource(path, SgCms.resType(SgCms.POINTER_TYPE), linkTarget.getBytes(), properties);
     }
 }

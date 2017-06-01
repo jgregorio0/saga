@@ -84,7 +84,8 @@ public class SgPublish {
      * @param ms max waiting time
      * @return
      */
-    public static boolean waitFinish(long ms){
+    public static def waitFinish(long ms){
         OpenCms.getPublishManager().waitWhileRunning(ms)
+        return this;
     }
 }
