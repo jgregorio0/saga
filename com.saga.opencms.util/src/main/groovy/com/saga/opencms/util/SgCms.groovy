@@ -3,6 +3,13 @@ package com.saga.opencms.util
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.utils.URIBuilder
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.client.LaxRedirectStrategy
+import org.apache.http.util.EntityUtils
 import org.opencms.file.*
 import org.opencms.file.types.I_CmsResourceType
 import org.opencms.flex.CmsFlexController
@@ -29,6 +36,7 @@ class SgCms {
     /** Default paths */
     public static String CONTENT_PATH = "/.content";
     public static String CONFIG_PATH = "/.config";
+    public static final String GALLERIES = "/.galleries/"
 
     /** Default types */
     public static String POINTER_TYPE = "pointer";
@@ -117,6 +125,38 @@ class SgCms {
             } else {
                 unlock(path);
             }
+        }
+        return this;
+    }
+
+    /**
+     * Ensure gallery folder.
+     * If parent folder not exists creates parent gallery folder
+     *
+     * @param path Resource path to ensure
+     * @param galleryType Resource type
+     * @return
+     */
+    public SgCms ensureGalleryFolder(String path, String galleryType)
+            throws CmsException {
+        if (cmso.existsResource(path)) {
+
+            // Ensure folder type
+            if (!isType(path, galleryType)){
+                changeType(path, galleryType)
+            }
+        } else {
+
+            // Ensure parent folder
+            String parentFolder = CmsResource.getParentFolder(path);
+            if (isInGalleryResource(parentFolder)) {
+                ensureGalleryFolder(parentFolder, galleryType);
+            } else {
+                ensureResource(parentFolder, FOLDER_TYPE);
+            }
+
+            // Create gallery folder
+            createResource(path, galleryType);
         }
         return this;
     }
@@ -945,6 +985,59 @@ class SgCms {
         }
 
         return res;
+    }
+
+    /**
+     * Return type resource given gallery type
+     * @param typeGallery
+     * @return
+     */
+    public static String getTypeResourceInGalleryFolder(String typeGallery) {
+        switch (typeGallery){
+            case SgCms.IMAGE_GALLERY_TYPE:
+                return SgCms.IMAGE_TYPE;
+            case SgCms.DOWNLOAD_GALLERY_TYPE:
+                return SgCms.BINARY_TYPE;
+            case SgCms.LINK_GALLERY_TYPE:
+                return SgCms.POINTER_TYPE;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Check if resource is into gallery
+     * @param path
+     * @return
+    */
+    boolean isInGalleryResource(String path) {
+        if (path.contains(GALLERIES)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Return bytes array file given by online URL. If response code is not OK (200) return null.
+     *
+     * @param url URL del fichero
+     * @return array de bytes con el contenido
+     */
+    public static byte[] downloadFile(String url) {
+        byte[] f = null;
+
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setRedirectStrategy(new LaxRedirectStrategy())
+                .build();
+        CloseableHttpResponse response = httpclient.execute(new HttpGet(new URIBuilder(url).build()))
+        int code = response.getStatusLine().getStatusCode();
+
+        if (code == 200) {
+            f = EntityUtils.toByteArray(response.getEntity());
+        }
+        httpclient.close();
+        return f;
+
     }
 
     /**
