@@ -51,6 +51,11 @@ public class SgSolr {
 	private final String QUERY_OPEN_P = "(";
 	private final String QUERY_CLOSE_P = ")";
 
+	/** Default Fields */
+	public static final String PATH = "path";
+	public static final String ID = "id";
+	public static final String LINK = "link";
+
 	private CmsObject cmso;
 	private String solrIndex;
 

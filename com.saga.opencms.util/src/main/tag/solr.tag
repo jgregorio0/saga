@@ -38,11 +38,14 @@
 - locale (Opcional): 'es'
 - uri (Opcional): '/blog'
 - site (Opcional): '/sites/default'
+
+*If field is multivalued add [m] at the end of the field id to return array value
+*If field is date type add [d] at the end of the field id to return long value
 --%>
 
-<%!
-
-
+<%! public static final String BRACKET = "[";
+    public static final String TYPE_DATE = "[d";
+    public static final String TYPE_MULTIVALUED = "[m";
     final Log LOG = CmsLog.getLog(this.getClass());
 
     private CmsObject cmso;
@@ -148,20 +151,46 @@
     /**
      * Map results content value
      * @param results
-     * @param fields
      * @return
      */
-    public List<Map<String, Object>> getMapResults(CmsSolrResultList results, String[] fields) throws JSONException {
+    public List<Map<String, Object>> getMapResults(CmsSolrResultList results) throws JSONException {
         List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
         for (int iRes = 0; iRes < results.size(); iRes++) {
             Map<String, Object> contenido = new HashMap<String, Object>();
             CmsSearchResource result = results.get(iRes);
-            for (int iField = 0; iField < fields.length; iField++) {
-                String field = fields[iField];
-                addSolrField(contenido, result, field);
-            }
+            Map<String, Object> resContent = getDefaultMapCmsSearchResource(result);
         }
         return contents;
+    }
+
+    /**
+     * Return default attributes for each solr result
+     * @param solrResource
+     * @return
+     */
+    private Map<String, Object> getDefaultMapCmsSearchResource(CmsSearchResource solrResource) {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("path", solrResource.getRootPath());
+        result.put("structureId", solrResource.getStructureId());
+        result.put("resourceId", solrResource.getResourceId());
+        result.put("typeId", solrResource.getTypeId());
+        result.put("isFolder", solrResource.isFolder());
+        result.put("flags", solrResource.getFlags());
+        result.put("project", solrResource.getProjectLastModified());
+        result.put("state", solrResource.getState());
+        result.put("dateCreated", solrResource.getDateCreated());
+        result.put("userCreated", solrResource.getUserCreated());
+        result.put("dateLastModified", solrResource.getDateLastModified());
+        result.put("userLastModified", solrResource.getUserLastModified());
+        result.put("dateReleased", solrResource.getDateReleased());
+        result.put("dateExpired", solrResource.getDateExpired());
+        result.put("dateContent", solrResource.getDateContent());
+        result.put("dateContent", solrResource.getDateContent());
+        result.put("size", solrResource.getLength());
+        result.put("sibilingCount", solrResource.getSiblingCount());
+        result.put("version", solrResource.getVersion());
+
+        return result;
     }
 
     /**
@@ -202,12 +231,39 @@
     }
 
     /**
-     * Check if field is multivalued
+     * Find date type value solr field. If it does not exist return empty String.
+     * @param result
+     * @param fieldName
+     * @return
+     */
+    public Object getDateSolrField(CmsSearchResource result, String fieldName) {
+        Object res = "";
+        try {
+            res = result.getDateField(fieldName).getTime();
+            LOG.debug("parsed date type value " + res + " for field " + fieldName);
+        } catch (Exception e) {
+            LOG.error("parsing date type value field " + fieldName, e);
+        }
+
+        return res;
+    }
+
+    /**
+     * Check if field is multivalued type
      * @param field
      * @return
      */
     private boolean isMultiValued(String field) {
-        return field.indexOf("[") > 0;
+        return field.indexOf(TYPE_MULTIVALUED) > 0;
+    }
+
+    /**
+     * Check if field is data type
+     * @param field
+     * @return
+     */
+    private boolean isDateValued(String field) {
+        return field.indexOf(TYPE_DATE) > 0;
     }
 
     /**
@@ -216,25 +272,8 @@
      * @return
      */
     private String removeBrackets(String field) {
-        int iBrackets = field.indexOf("[");
+        int iBrackets = field.indexOf(BRACKET);
         return field.substring(0, iBrackets);
-    }
-
-    /**
-     * Find simple or multi valued solr field. If it does not exist return empty String.
-     * @param result
-     * @param field
-     * @return
-     */
-    public Object getSolrField(CmsSearchResource result, String field) {
-        Object res = "";
-        boolean isMultiValued = field.endsWith("[]");
-        if (isMultiValued) {
-            res = getMultiSolrField(result, field);
-        } else {
-            res = getSimpleSolrField(result, field);
-        }
-        return res;
     }
 
     /**
@@ -247,6 +286,9 @@
         if (isMultiValued(field)){
             String multiFieldName = removeBrackets(field);
             contenido.put(multiFieldName, getMultiSolrField(result, multiFieldName));
+        }else if (isDateValued(field)){
+            String dateFieldName = removeBrackets(field);
+            contenido.put(dateFieldName, getDateSolrField(result, dateFieldName));
         } else {
             contenido.put(field, getSimpleSolrField(result, field));
         }
