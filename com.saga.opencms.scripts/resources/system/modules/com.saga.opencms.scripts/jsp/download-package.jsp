@@ -6,9 +6,11 @@
 <%
     String filename = "com.saga.caprabo.frontend_1.1.zip";
     String folder = "packages/modules";
+    String mimeType = "application/zip";
+
     String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
     String filepath = webInfPath + folder + "/" + filename;
-    response.setContentType("application/zip");
+    response.setContentType(mimeType);
     response.setHeader("Content-Disposition","attachment; filename=\"" + filename + "\"");
 
     byte[] buf = new byte[1024];
