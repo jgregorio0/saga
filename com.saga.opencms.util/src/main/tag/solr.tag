@@ -15,6 +15,8 @@
 <%@ tag import="org.opencms.util.CmsRequestUtil" %>
 <%@ tag import="java.util.*" %>
 <%@ tag import="org.opencms.json.JSONObject" %>
+<%@ tag import="org.apache.solr.common.util.DateUtil" %>
+<%@ tag import="java.text.ParseException" %>
 <%@ tag trimDirectiveWhitespaces="true" pageEncoding="UTF-8"
         description="Genera un tag img" %>
 
@@ -43,9 +45,10 @@
 *If field is date type add [d] at the end of the field id to return long value
 --%>
 
-<%! public static final String BRACKET = "[";
-    public static final String TYPE_DATE = "[d";
-    public static final String TYPE_MULTIVALUED = "[m";
+<%!
+    public static final String BRACKET = "[";
+    public static final String TYPE_DATE = "d";
+    public static final String TYPE_MULTIVALUED = "m";
     final Log LOG = CmsLog.getLog(this.getClass());
 
     private CmsObject cmso;
@@ -196,15 +199,21 @@
     /**
      * Find simple value solr field. If it does not exist return empty String.
      * @param result
-     * @param fieldName
+     * @param solrField
      * @return
      */
-    public String getSimpleSolrField(CmsSearchResource result, String fieldName) {
+    public String getSimpleSolrField(CmsSearchResource result, SolrField solrField) {
         String res = "";
-        if (fieldName.equals("link")) {
+
+        if (solrField.isDateType()){
+            // DATE
+            res = getDateSolrField(result, solrField.getFieldName()).toString();
+        } else if (solrField.isLink()) {
+            // LINK
             res = cmsLink(result.getRootPath());
         } else {
-            res = result.getField(fieldName);
+            // OTHER
+            res = result.getField(solrField.getFieldName());
         }
 
         res = res == null ? "" : res;
@@ -214,20 +223,47 @@
     /**
      * Find multi valued solr field. If it does not exist return empty String.
      * @param result
-     * @param fieldName
+     * @param solrField
      * @return
      */
-    public Object getMultiSolrField(CmsSearchResource result, String fieldName) {
+    public Object getMultiSolrField(CmsSearchResource result, SolrField solrField) {
         Object res = "";
         try {
-            List<String> multivaluedField = result.getMultivaluedField(fieldName);
+            List<String> multivaluedField = result.getMultivaluedField(solrField.getFieldName());
+
+            // If type date
+            if (solrField.isDateType()) {
+                multivaluedField = multiDateStringToLong(multivaluedField);
+            }
+
+            // JSON Array
             res = new JSONArray(multivaluedField);
-            LOG.debug("parsed multi value " + res + " for field " + fieldName);
+            LOG.debug("parsed multi value " + res + " for field " + solrField);
         } catch (Exception e) {
-            LOG.error("parsing multi valued field " + fieldName, e);
+            LOG.error("parsing multi valued field " + solrField, e);
         }
 
         return res;
+    }
+
+
+    /**
+     * Parse format date string to long
+     * @param multivaluedField
+     * @return
+     */
+    private List<String> multiDateStringToLong(List<String> multivaluedField) {
+        ArrayList<String> results = new ArrayList<String>();
+        for (int i = 0; i < multivaluedField.size(); i++) {
+            String dateStr = multivaluedField.get(i);
+            try {
+                Date date = DateUtil.parseDate(dateStr);
+                results.add(String.valueOf(date.getTime()));
+            } catch (ParseException e) {
+                LOG.error("Error parsing date " + dateStr);
+            }
+        }
+        return results;
     }
 
     /**
@@ -249,48 +285,19 @@
     }
 
     /**
-     * Check if field is multivalued type
-     * @param field
-     * @return
-     */
-    private boolean isMultiValued(String field) {
-        return field.indexOf(TYPE_MULTIVALUED) > 0;
-    }
-
-    /**
-     * Check if field is data type
-     * @param field
-     * @return
-     */
-    private boolean isDateValued(String field) {
-        return field.indexOf(TYPE_DATE) > 0;
-    }
-
-    /**
-     * Remove brackets and return field name
-     * @param field
-     * @return
-     */
-    private String removeBrackets(String field) {
-        int iBrackets = field.indexOf(BRACKET);
-        return field.substring(0, iBrackets);
-    }
-
-    /**
      * Add solr field name and value to map (multi and simple value)
      * @param contenido
      * @param result
      * @param field
      */
     private void addSolrField(Map<String, Object> contenido, CmsSearchResource result, String field) {
-        if (isMultiValued(field)){
-            String multiFieldName = removeBrackets(field);
-            contenido.put(multiFieldName, getMultiSolrField(result, multiFieldName));
-        }else if (isDateValued(field)){
-            String dateFieldName = removeBrackets(field);
-            contenido.put(dateFieldName, getDateSolrField(result, dateFieldName));
+        SolrField solrField = new SolrField(field);
+        if (solrField.isMultivaluedType()){
+            // MULTIVALUED
+            contenido.put(solrField.getFieldName(), getMultiSolrField(result, solrField));
         } else {
-            contenido.put(field, getSimpleSolrField(result, field));
+            // SIMPLE
+            contenido.put(solrField.getFieldName(), getSimpleSolrField(result, solrField));
         }
     }
 
@@ -306,6 +313,138 @@
 
         // generate the link
         return OpenCms.getLinkManager().substituteLinkForUnknownTarget(cmso, uri);
+    }
+
+    /**
+     * Create class SolrField to manage multivalued and date types
+     */
+    class SolrField {
+
+        private String field;
+        private String fieldName;
+        private boolean isMultivaluedType;
+        private boolean isDateType;
+        private boolean isLink;
+        private boolean isBracketsAnnoted;
+
+        public SolrField(String field) {
+            this.field = field;
+
+            this.fieldName = field;
+            this.isMultivaluedType = false;
+            this.isDateType = false;
+            this.isLink = false;
+            this.isBracketsAnnoted = hasBrackets(field);
+
+            if (isBracketsAnnoted) {
+                initSolrField(field);
+            }
+        }
+
+        private void initSolrField(String field) {
+            this.fieldName = removeBrackets(field);
+            this.isMultivaluedType = isMultiValued(field);
+            this.isDateType = isDateValued(field);
+            this.isLink = isLinkField(field);
+        }
+
+        public String getField() {
+            return field;
+        }
+
+        public void setField(String field) {
+            this.field = field;
+        }
+
+        public String getFieldName() {
+            return fieldName;
+        }
+
+        public boolean isMultivaluedType() {
+            return isMultivaluedType;
+        }
+
+        public boolean isDateType() {
+            return isDateType;
+        }
+
+        public boolean isLink() {
+            return isLink;
+        }
+
+        /**
+         * Check if it field has brackets annotation
+         * @param field
+         * @return
+         */
+        private boolean hasBrackets(String field) {
+            return field.indexOf(BRACKET) > 0;
+        }
+
+        /**
+         * Check if field is multivalued type
+         * @param field
+         * @return
+         */
+        private boolean isMultiValued(String field) {
+            boolean isMultiVal = false;
+            int iBracket = field.indexOf(BRACKET);
+            if (field.indexOf(BRACKET) > 0){
+                String bracketCnt = field.substring(iBracket);
+                isMultiVal = bracketCnt.contains(TYPE_MULTIVALUED);
+            }
+            return isMultiVal;
+        }
+
+        /**
+         * Check if field is data type
+         * @param field
+         * @return
+         */
+        private boolean isDateValued(String field) {
+            boolean isDateVal = false;
+            int iBracket = field.indexOf(BRACKET);
+            if (field.indexOf(BRACKET) > 0){
+                String bracketCnt = field.substring(iBracket);
+                isDateVal = bracketCnt.contains(TYPE_DATE);
+            }
+            return isDateVal;
+        }
+
+        /**
+         * Check if field is data type
+         * @param field
+         * @return
+         */
+        private boolean isLinkField(String field) {
+            return field.equals("link");
+        }
+
+        /**
+         * Remove brackets and return field name
+         * @param field
+         * @return
+         */
+        private String removeBrackets(String field) {
+            int iBrackets = field.indexOf(BRACKET);
+            if (iBrackets > 0) {
+                return field.substring(0, iBrackets);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "SolrField{" +
+                    "field='" + field + '\'' +
+                    ", fieldName='" + fieldName + '\'' +
+                    ", isMultivaluedType=" + isMultivaluedType +
+                    ", isDateType=" + isDateType +
+                    ", isLink=" + isLink +
+                    ", isBracketsAnnoted=" + isBracketsAnnoted +
+                    '}';
+        }
     }
 %>
 
