@@ -7,13 +7,20 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="cms" uri="http://www.opencms.org/taglib/cms" %>
+<ul>
+	<%
 
-<%
+		try {
+			String file = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("logs/");
 
-	try {
-		out.println(OpenCms.getSystemInfo().getWebInfRfsPath()
-
-	} catch (Exception e) {
-		out.println("ERROR " + e);
-	}
-%>
+			File f = new File(file);
+			String [] fileNames = f.list();
+			Arrays.sort(fileNames);
+			for (int i = 0; i < fileNames.length; i++) {
+				out.println("<li>" + fileNames[i] + "</li>");
+			}
+		} catch (Exception e) {
+			out.println("ERROR " + e);
+		}
+	%>
+</ul>

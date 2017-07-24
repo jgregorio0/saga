@@ -1,117 +1,61 @@
 package com.saga.opencms.util
 
-import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
-import org.opencms.json.I_JSONString
 import org.opencms.json.JSONArray
-import org.opencms.json.JSONException
 import org.opencms.json.JSONObject
+import org.opencms.main.CmsException
 import org.opencms.main.CmsLog
-
 /**
  * Created by jgregorio on 09/09/2016.
  */
 public class SgJson {
-	
+
 	private static final Log LOG = CmsLog.getLog(SgJson.class);
+	public static final String ERROR = "error"
+	public static final String ERROR_MSG = "errorMsg"
+	public static final String ERROR_TRACE = "errorTrace"
+	public static final String TOTAL = "total"
+	public static final String DATA_SIZE = "dataSize"
+	public static final String DATA = "data"
 
-	private StringBuffer bf;
-	private String sep;
-
-	public SgJSON(){
-		bf = new StringBuffer();
-		sep = ", ";
+	public static JSONObject errorJResponse(Exception e){
+		JSONObject jRes = new JSONObject();
+		jRes.put(ERROR, true);
+		jRes.put(ERROR_MSG, e.getMessage());
+		jRes.put(ERROR_TRACE, CmsException.getStackTraceAsString(e));
+		return jRes;
 	}
 
-	/**
-	 * Add value par using JSON format
-	 * @param key
-	 * @param value
-	 */
-	public void addJSONValuePar(String key, Object value){
-		if (bf.length() > 0) {
-			bf.append(sep);
+	public static JSONObject successJResponse(int total, JSONArray datas){
+		return successJResponse(Long.valueOf(total), datas);
+	}
+
+	public static JSONObject successJResponse(long total, JSONArray datas){
+		JSONObject jRes = new JSONObject();
+		jRes.put(ERROR, false);
+		jRes.put(TOTAL, total);
+		jRes.put(DATA_SIZE, datas.length());
+		jRes.put(DATA, datas);
+		return jRes;
+	}
+
+	public static JSONObject jResutls(String jsonStr){
+		JSONObject jResult = new JSONObject();
+		try {
+			jResult = new JSONObject(jsonStr);
+		} catch (Exception e) {
+			LOG.debug("parsing json resutls", e);
 		}
-		bf.append(toJSONValuePar(key, value));
+		return jResult;
 	}
 
-	/**
-	 * Print JSON format including parameters loaded previously
-	 * @return
-	 */
-	public String printJSON(){
-		return "{" + bf.toString() + "}";
-	}
-
-	/**
-	 * Validate param is not empty
-	 * @param param
-	 * @return
-	 */
-	public static boolean validate(String param){
-		String clParam = cleanParam(param);
-		return !StringUtils.isEmpty(clParam);
-	}
-
-	/**
-	 * Clean whitespace
-	 * @param param
-	 * @return
-	 */
-	public static String cleanParam(String param) {
-		return param != null ? param.trim() : param;
-	}
-
-	/**
-	 * Get param and clean whitespace
-	 * @param json
-	 * @param paramName
-	 * @return
-	 */
-	public static String getString(JSONObject json, String paramName) throws JSONException {
-		return cleanParam(json.getString(paramName));
-	}
-
-	/**
-	 * Return string value for JSON response.
-	 * For example, it depends on class it shows {string: "test"} or {int: 1}.
-	 * @param value
-	 * @return
-	 */
-	public static String toJSONValue(Object value) {
-		String res = "null";
-		if(value != null && !value.equals((Object)null)) {
-			if(value instanceof I_JSONString) {
-				String o = null;
-				try {
-					o = ((I_JSONString)value).toJSONString();
-				} catch (Exception var3) {
-					LOG.error("ERROR parsing to JSON value " + value, var3);
-				}
-
-				if(o instanceof String) {
-					res = (String)o;
-				} else {
-					LOG.error("ERROR parsing to JSON. Bad value from " + value);
-				}
-			} else {
-				try {
-					res = value instanceof Number?JSONObject.numberToString((Number) value):(!(value instanceof Boolean) && !(value instanceof JSONObject) && !(value instanceof JSONArray)?(value instanceof Map?(new JSONObject((Map)value)).toString():(value instanceof Collection ?(new JSONArray((Collection)value)).toString():(value.getClass().isArray()?(new JSONArray(value)).toString():JSONObject.quote(value.toString())))):value.toString());
-				} catch (JSONException e) {
-					LOG.error("ERROR parsing to JSON value " + value, e);
-				}
-			}
+	public static Object getJField(JSONObject json, String field){
+		Object o = null;
+		try {
+			o = json.get(field);
+		} catch (Exception e) {
+			LOG.debug("getting field $field from json $json", e);
 		}
-		return res;
-	}
-
-	/**
-	 * Format par of values to JSON
-	 * @param key
-	 * @param value
-	 * @return
-	 */
-	public static String toJSONValuePar(String key, Object value) {
-		return toJSONValue(key) + ": " + toJSONValue(value);
+		return o;
 	}
 }

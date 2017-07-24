@@ -67,7 +67,11 @@ public class SgPublish {
      * @param resource
      */
     public boolean add(CmsResource resource){
-        pubList.add(resource)
+        boolean added = false;
+        if (resource != null) {
+            added = pubList.add(resource);
+        }
+        return added;
     }
 
     /**
