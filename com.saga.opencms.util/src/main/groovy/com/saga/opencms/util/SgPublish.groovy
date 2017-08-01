@@ -2,6 +2,7 @@ package com.saga.opencms.util
 import org.opencms.db.CmsPublishList
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsResource
+import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
 
 /**
@@ -10,11 +11,14 @@ import org.opencms.main.OpenCms
 
 public class SgPublish {
 
+    private static final LOG = CmsLog.getLog(SgPublish);
+
     List<CmsResource> pubList;
     CmsObject cmso;
 
     public SgPublish(CmsObject cmso){
         this.cmso = cmso;
+        pubList = [];
     }
 
     /**
@@ -71,6 +75,25 @@ public class SgPublish {
         if (resource != null) {
             added = pubList.add(resource);
         }
+        return added;
+    }
+
+
+
+    /**
+     * Add resource to publish list
+     * @param resource
+     */
+    public boolean add(String path){
+        boolean added = false;
+
+        try {
+            CmsResource resource = cmso.readResource(path);
+            added = add(resource);
+        } catch (Exception e) {
+            LOG.error("Cannot find resource $path for publishing", e);
+        }
+
         return added;
     }
 

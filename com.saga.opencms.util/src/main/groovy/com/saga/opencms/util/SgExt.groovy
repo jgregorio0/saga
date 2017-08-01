@@ -22,7 +22,7 @@ class SgExt {
     }
 
     static boolean isFileExt(String filename, List<String> exts) {
-        return FilenameUtils.isExtension(filename, exts);
+        return exts.contains(getExtension(filename).toLowerCase());
     }
 
     static String getExtension(String filename) {

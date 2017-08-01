@@ -349,7 +349,7 @@ public class SgCnt {
 			// Si no existe aseguramos que el padre exista
 			if (CmsXmlUtils.isDeepXpath(path)) {
 				String parentPath = CmsXmlUtils.createXpath(CmsXmlUtils.removeLastXpathElement(path), 1);
-				return procureValue(parentPath, obtainNodeIndex(parentPath));
+				procureValue(parentPath, obtainNodeIndex(parentPath));
 			}
 
 			// Comprobamos que al crear el padre no se haya creado automaticamente el hijo
@@ -370,6 +370,29 @@ public class SgCnt {
 	public I_CmsXmlContentValue procureValue(String path)
 			throws Exception {
 		return procureValue(path, 0);
+	}
+
+	/**
+	 * Remove value. Value must exists.
+	 * @param path
+	 * @return
+	 */
+	public SgCnt rmValue(String path){
+		return rmValue(path, 0);
+	}
+
+	/**
+	 * Remove value. Value must exists.
+	 * @param path
+	 * @param i
+	 * @return
+	 */
+	public SgCnt rmValue(String path, int i){
+		if (xmlContent == null) {
+			throw new Exception("xml content not exists for resource $path".toString());
+		}
+		xmlContent.removeValue(path, locale, i);
+		return this;
 	}
 
 	/**
