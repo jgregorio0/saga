@@ -492,10 +492,10 @@ public class SgSolrJson {
 			String[] fieldsArray = fields.split(",");
 			JSONArray jResults = getJsonResults(results, fieldsArray);
 
-			json = com.saga.upo.util.SgJson.successJResponse(results.getNumFound(), jResults);
+			json = SgJson.successJResponse(results.getNumFound(), jResults);
 		} catch (Exception e) {
 			LOG.error("SgSolrJson", e);
-			json = com.saga.upo.util.SgJson.errorJResponse(e);
+			json = SgJson.errorJResponse(e);
 		}
 		return json.toString();
 	}
@@ -514,7 +514,7 @@ public class SgSolrJson {
 		//default
 		// fq=expired:[NOW TO *]
 		//      &con_locales:es
-		//      &parent-folders:"/sites/chefcaprabo/"
+		//      &parent-folders:"/sites/default/"
 		//      &released:[* TO NOW]
 		// q=*:*
 		// fl=*,score
@@ -536,10 +536,10 @@ public class SgSolrJson {
 			String[] fieldsArray = fields.split(",");
 			JSONArray jResults = getJsonResults(results, fieldsArray);
 
-			json = com.saga.upo.util.SgJson.successJResponse(results.getNumFound(), jResults);
+			json = SgJson.successJResponse(results.getNumFound(), jResults);
 		} catch (Exception e) {
 			LOG.error("SgSolrJson", e);
-			json = com.saga.upo.util.SgJson.errorJResponse(e);
+			json = SgJson.errorJResponse(e);
 		}
 		return json;
 	}
