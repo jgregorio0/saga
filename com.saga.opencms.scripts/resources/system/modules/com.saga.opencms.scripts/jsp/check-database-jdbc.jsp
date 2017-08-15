@@ -8,9 +8,9 @@
 
 <%--MYSQL--%>
 <%--<%
-  String url = "jdbc:mysql://wordpress-rds.cq90jkt2ggmk.eu-west-1.rds.amazonaws.com:3306/pim_db";
-  String user = "pim_ro_user";
-  String pass = "23nfaHA/-m";
+  String url =
+  String user =
+  String pass =
   Connection con = null;
   Statement stmt = null;
   ResultSet rs = null;
@@ -42,23 +42,19 @@
 <%--ORACLE--%>
 <%
   //        jdbc.drivertype=thin
-//        jdbc.servername=rivendel.upo.es
-//        jdbc.port=1521
-//        jdbc.username=upo_data
-//        jdbc.password=upo_data00
-//        jdbc.servicename=epcd
-//        jdbc.processEscapes=false
+//        jdbc.servername=
+//        jdbc.port=
+//        jdbc.username=
+//        jdbc.password=
+//        jdbc.servicename=
+//        jdbc.processEscapes=
 
-    /*String QUERY = "select DISTINCT p.*, a.NOMBRE_AREA, a.ID_DEPARTAMENTO" +
-            " from PROFESOR p" +
-            " INNER JOIN AREA a on a.ID_AREA = p.ID_AREA" +
-            " where  a.ID_DEPARTAMENTO='z121'";*/
 
   String QUERY = "select * from PROFESOR p";
 
-  String url = "jdbc:oracle:thin:@rivendel.upo.es:1521/epcd";
-  String user = "upo_data";
-  String pass = "upo_data00";
+  String url =
+  String user =
+  String pass =
   Connection con = null;
   Statement stmt = null;
   ResultSet rs = null;

@@ -1,6 +1,5 @@
 package com.saga.opencms.util
-import groovy.json.JsonBuilder
-import groovy.util.slurpersupport.GPathResult
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.*
@@ -14,9 +13,6 @@ import org.opencms.xml.CmsXmlEntityResolver
 import org.opencms.xml.content.CmsXmlContent
 import org.opencms.xml.content.CmsXmlContentFactory
 import org.opencms.xml.types.I_CmsXmlContentValue
-import org.xml.sax.SAXException
-
-import javax.xml.parsers.ParserConfigurationException
 /**
  *  Based on org.opencmshispano.module.resources.manager developed by sraposo
  */
@@ -518,13 +514,13 @@ public class SgRes {
 
 		try {
 			switch (mode) {
-				case MODE_UPDATE_NON_EMPTY:
+				case Mode.MODE_UPDATE_NON_EMPTY:
 					modified = updateNotEmpty(key, valor, localizacion, content, i);
 					break;
-				case MODE_UPDATE_NON_NULL:
+				case Mode.MODE_UPDATE_NON_NULL:
 					modified = updateNotNull(key, valor, localizacion, content, i);
 					break;
-				case MODE_REMOVE_WHEN_NULL:
+				case Mode.MODE_REMOVE_WHEN_NULL:
 					modified = updateRmWhenNull(key, valor, localizacion, content, i);
 					break;
 				default:

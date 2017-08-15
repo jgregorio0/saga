@@ -230,21 +230,6 @@ public class SgProperties {
 	}
 
 	/**
-	 * Return a Map [Name: Value] of properties
-	 * @param cmsProps
-	 * @return
-	 */
-	public static Map<String, String> toMap(List<CmsProperty> cmsProps){
-		Map props = new HashMap<String, String>()
-		cmsProps.each{ cmsProp ->
-			if (!cmsProp.isNullProperty()){cmsProp.getName()
-				props.put(cmsProp.getName(), cmsProp.getValue())
-			}
-		}
-		return props;
-	}
-
-	/**
 	 * Read property value
 	 * @param cmso
 	 * @param path
@@ -261,5 +246,44 @@ public class SgProperties {
 			return prop.getValue()
 		}
 
+	}
+
+	/**
+	 * Return a Map [Name: Value] of properties
+	 * @param cmsProps
+	 * @return
+	 */
+	public static Map<String, String> toMap(List<CmsProperty> cmsProps){
+		Map props = new HashMap<String, String>()
+		cmsProps.each{ cmsProp ->
+			if (!cmsProp.isNullProperty()){cmsProp.getName()
+				props.put(cmsProp.getName(), cmsProp.getValue())
+			}
+		}
+		return props;
+	}
+
+	/**
+	 * Return a Map [Name: Value] of properties
+	 * @param cmsProps
+	 * @return
+	 */
+	public static List<CmsProperty> toList(Map<String, String> props){
+		List<CmsProperty> cmsProps = [];
+		props.each{ pName, pValue ->
+			CmsProperty cmsProp = null;
+			try {
+				if (StringUtils.isNotBlank(pValue)) {
+					cmsProp = new CmsProperty(pName, pValue, pValue)
+				} else {
+					cmsProp = new CmsProperty(pName, "", null)
+				}
+			} catch (Exception e){}
+
+			if (cmsProp){
+				cmsProps.add(cmsProp);
+			}
+		}
+		return cmsProps;
 	}
 }

@@ -8,16 +8,15 @@ import org.opencms.main.CmsException
 import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
 import org.opencms.staticexport.CmsLinkManager
-import org.opencms.util.CmsStringUtil
 
 import javax.annotation.Nullable
 import javax.servlet.ServletRequest
 
 public class SgLink {
 
-	private final Log LOG = CmsLog.getLog(this.getClass());
+	private static final Log LOG = CmsLog.getLog(this.getClass());
 
-	private String relativizeSchema(Boolean relScheme, String link) {
+	private static String relativizeSchema(Boolean relScheme, String link) {
 		String linkRel = link;
 		if (relScheme != null && relScheme) {
 			// Si contiene esquema (http, https, etc)
@@ -35,7 +34,7 @@ public class SgLink {
 		return linkRel;
 	}
 
-	private CmsObject customizeCmsObject(CmsObject cms, String baseUri, String baseSite) {
+	private static CmsObject customizeCmsObject(CmsObject cms, String baseUri, String baseSite) {
 		CmsObject cmso = cms;
 		boolean isCustomUri = StringUtils.isNotBlank(baseUri);
 		boolean isCustomSite = StringUtils.isNotBlank(baseSite);
@@ -63,10 +62,10 @@ public class SgLink {
 	 * @param baseSite
 	 * @param secure
 	 * @param relScheme
-     * @return
-     */
+	 * @return
+	 */
 
-	public String link(ServletRequest req, String target, @Nullable String baseUri, @Nullable String baseSite, @Nullable Boolean secure, @Nullable Boolean relScheme) {
+	public static String link(ServletRequest req, String target, @Nullable String baseUri, @Nullable String baseSite, @Nullable Boolean secure, @Nullable Boolean relScheme) {
 
 		CmsFlexController controller = CmsFlexController.getController(req);
 

@@ -1,5 +1,4 @@
 package com.saga.opencms.util
-
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
@@ -24,7 +23,6 @@ import org.opencms.util.CmsStringUtil
 import org.opencms.util.CmsUUID
 import org.opencms.workplace.CmsWorkplaceAction
 import org.opencms.xml.content.CmsXmlContent
-import org.opencms.xml.content.CmsXmlContentFactory
 import org.safehaus.uuid.UUIDGenerator
 
 import javax.servlet.http.HttpServletRequest
@@ -87,7 +85,7 @@ class SgCms {
     }
 
     /**
-     * Create and Save resource
+     * Create resource
      * @param cmso
      * @param content
      * @param resourceType
@@ -96,15 +94,41 @@ class SgCms {
      * @return
      */
     public static SgCms createResource(CmsObject cmso, CmsXmlContent content, I_CmsResourceType resourceType, String path, List properties) {
-        if (!cmso.existsResource(path)) {
-            CmsResource created = cmso.createResource(path, resourceType, content.marshal(), properties);
-            CmsFile createdFile = cmso.readFile(created);
-            CmsXmlContent createdContent = CmsXmlContentFactory.unmarshal(cmso, createdFile);
-            createdContent.handler.prepareForWrite(cmso, createdContent, createdFile);
-            cmso.writeFile(createdFile);
-            cmso.unlockResource(created);
-        }
+//        CmsResource created = cmso.createResource(path, resourceType, content.marshal(), properties);
+//        CmsFile createdFile = cmso.readFile(created);
+//        CmsXmlContent createdContent = CmsXmlContentFactory.unmarshal(cmso, createdFile);
+//        createdContent.handler.prepareForWrite(cmso, createdContent, createdFile);
+//        cmso.writeFile(createdFile);
+//        cmso.unlockResource(created);
+        createResource(cmso, path, resourceType, content.marshal(), properties);
         return this;
+    }
+
+    /**
+     * Create resource
+     * @param cmso
+     * @param resourcename
+     * @param type
+     * @param content
+     * @param properties
+     * @return
+     */
+    public static SgCms createResource(CmsObject cmso, String resourcename, I_CmsResourceType type, byte[] content, List<CmsProperty> properties){
+        cmso.createResource(resourcename, type, content, properties);
+        return this;
+    }
+
+    /**
+     * Create resource
+     * @param cmso
+     * @param resourcename
+     * @param type
+     * @param content
+     * @param properties
+     * @return
+     */
+    public static SgCms createResource(CmsObject cmso, String resourcename, String type, byte[] content, List<String> properties){
+        return createResource(cmso, resourcename, resType(type), content, SgProperties.toList(properties));
     }
 
     /**
@@ -525,6 +549,17 @@ class SgCms {
     boolean isType(String path, String type) {
         I_CmsResourceType resType = OpenCms.getResourceManager().getResourceType(type)
         return isType(path, resType);
+    }
+
+    /**
+     * Default resource type for the given resource name.
+     * If fileName does not match resource type Plain is returned
+     * @param fileName
+     * @return
+     * @throws CmsException
+     */
+    public static I_CmsResourceType getTypeByFileName(String fileName) throws CmsException {
+        return OpenCms.getResourceManager().getDefaultTypeForName(fileName);
     }
 
     /**
