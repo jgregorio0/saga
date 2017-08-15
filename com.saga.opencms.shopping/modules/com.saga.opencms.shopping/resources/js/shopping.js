@@ -17,17 +17,24 @@
             _jResources  = 'resources',
             _jQuantity  = 'quantity',
             _jTotal  = 'total',
-            //_separator  = '-',
+        //_separator  = '-',
             _cookieName = 'shoppingCart',
             _cPath = "path=/;",
-            _cSecure = "";//" secure;";
+            _cSecure = "",//" secure;";
+            _results = _jsId + '-results',
+            _resController  = 'controller',
+            _resTempHeader = 'templateHeader',
+            _resTempHeaderId = 'templateHeaderId',
+            _resTempItem = 'templateItem',
+            _resTempItemId = 'templateItemId',
+            _resTempPagination = 'templatePagination',
+            _resTempPaginationId = 'templatePaginationId';
 
         SGShoppingCart.init = function(){
             try {
                 loadQuantity();
                 $('.' + _btn).click(modValue);
-                /*$('.' + _btnMinus).click(minus);
-                $('.' + _btnPlus).click(plus);*/
+                loadResults();
             } catch (err) {
                 console.error(err);
             }
@@ -105,19 +112,6 @@
         }
 
         /**
-         * Get index from button id
-         * @param id
-         * @returns {string}
-         */
-        function getIndex(id){
-            if (!(id.split("[").length === 1) || !(id.split("[").length === 1)) {
-                throw Error('Buttons format id must end with index surrended by squared bracket "id[index]"');
-            }
-            var idx = id.substring(id.indexOf("[") + 1, id.indexOf("]"));
-            return idx;
-        }
-
-        /**
          * Load quantity from cookie to input
          */
         function loadQuantity(){
@@ -133,6 +127,48 @@
                     if (jResource && jResource[_jQuantity]) {
                         $input.val(jResource[_jQuantity]);
                     }
+                }
+            }
+        }
+
+        /**
+         * List results from cookie
+         */
+        function loadResults(){
+            //console.log("loadQuantity");
+            var $results = $('.' + _results);
+            for(var i = 0; i < $results.length; i++){
+                var $result = $($results[i]);
+                var datas = $result.data();
+                if (!datas[_resController]
+                    || !datas[_resTempHeader]
+                    || !datas[_resTempHeaderId]
+                    || !datas[_resTempItem]
+                    || !datas[_resTempItemId]
+                    || !datas[_resTempPagination]
+                    || !datas[_resTempPaginationId]) {
+                    throw Error("Resuts " + _results + " do not define datas correctly");
+                }
+
+                var ctxt = {
+                    "_resTempHeaderId": _resTempHeaderId,
+                    "_resTempItemId": _resTempItemId,
+                    "_resTempPaginationId": _resTempPaginationId
+                };
+                var jCookie = getJCookie(_cookieName);
+                var jResources = jCookie[_jResources];
+                if (jResources) {
+                    var ids = Object.keys(jResources).join("|");
+                    ctxt["ids"] = ids;
+                    $.get(datas[_resController], ctxt)
+                        .done(function(data){
+                            $('#' + ctxt[_resTempHeaderId]).empty().append(data);
+                            $('#' + ctxt[_resTempItemId]).append(data);
+                            $('#' + ctxt[_resTempPaginationId]).empty().append(data);
+                        })
+                        .fail(function(err){
+                            console.error("loading resources", ctxt, err);
+                        })
                 }
             }
         }
@@ -180,11 +216,11 @@
 
             // update total
             /*json.total = 0;
-            var total = 0;
-            for(var i in json[_jResources]){
-                total++;
-            }
-            json.total = total;*/
+             var total = 0;
+             for(var i in json[_jResources]){
+             total++;
+             }
+             json.total = total;*/
             // Not available IE 8
             json.total = Object.keys(json[_jResources]).length;
             console.log('modified total', json.total);
