@@ -66,7 +66,7 @@ public class SgSolrJson {
 	 * @param uri
 	 * @param site
 	 * @return
-	 * @throws CmsException
+	 * @throws org.opencms.main.CmsException
 	 */
 	private CmsObject initCmsObject(
 			CmsObject baseCms, String locale, String uri, String site)
@@ -501,7 +501,7 @@ public class SgSolrJson {
 	}
 
 	/**
-	 * Return Json String
+	 * Return JSONObject
 	 * @param solrquery
 	 * @param fields
 	 * @param index
@@ -536,7 +536,10 @@ public class SgSolrJson {
 			String[] fieldsArray = fields.split(",");
 			JSONArray jResults = getJsonResults(results, fieldsArray);
 
-			json = SgJson.successJResponse(results.getNumFound(), jResults);
+			List fieldsWithoutBrackets = fieldsArray.collect(){new SolrField(it).getFieldName()};
+			String fieldsOutBkts = fieldsWithoutBrackets.join(",");
+
+			json = SgJson.successJResponse(results.getNumFound(), jResults, solrquery, fieldsOutBkts);
 		} catch (Exception e) {
 			LOG.error("SgSolrJson", e);
 			json = SgJson.errorJResponse(e);

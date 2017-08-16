@@ -17,6 +17,8 @@ public class SgJson {
 	public static final String TOTAL = "total"
 	public static final String DATA_SIZE = "dataSize"
 	public static final String DATA = "data"
+	public static final String FIELDS = "fields"
+	public static final String QUERY = "query"
 
 	public static JSONObject errorJResponse(Exception e){
 		JSONObject jRes = new JSONObject();
@@ -26,7 +28,19 @@ public class SgJson {
 		return jRes;
 	}
 
-	public static JSONObject successJResponse(int total, JSONArray datas){
+	public static JSONObject successJResponse(def total, JSONArray datas, String query, String fields){
+		JSONObject jRes = successJResponse(total, datas, query);
+		jRes.put(FIELDS, fields);
+		return jRes;
+	}
+
+	public static JSONObject successJResponse(def total, JSONArray datas, String query){
+		JSONObject jRes = successJResponse(total, datas);
+		jRes.put(QUERY, query);
+		return jRes;
+	}
+
+	public static JSONObject successJResponse(def total, JSONArray datas){
 		return successJResponse(Long.valueOf(total), datas);
 	}
 
