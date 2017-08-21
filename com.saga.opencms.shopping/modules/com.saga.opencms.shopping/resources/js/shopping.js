@@ -101,10 +101,10 @@
                         jResource = {};
                     }
                     jResource[_jQuantity] = newValue;
-                    console.log("resource to modify", jResource);
+                    //console.log("resource to modify", jResource);
 
                     jCookie[_jResources][strId] = jResource;
-                    console.log("modified cookie", jCookie);
+                    //console.log("modified cookie", jCookie);
                 }
 
                 saveCookie(jCookie);
