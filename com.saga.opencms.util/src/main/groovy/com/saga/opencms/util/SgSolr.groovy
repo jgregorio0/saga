@@ -116,20 +116,15 @@ public class SgSolr {
 	}
 
 	/**
-	 * Create solr query using params
-	 * @param params
+	 * Create solr query Object using string query.
+	 * It can be customize after create, for example: solrQuery.removeExpiration()
+	 * @param query
 	 * @return
 	 */
-	public CmsSolrQuery solrQuery(Map<String, String[]> fq, List<String> locales, List<String> roots){
-		/*Map<String, String[]> params = new HashMap<String, String[]>();
-		params.put("fq", new String[]{
-			"type:ProductoProximidad",
-			"xmlproductid_" + ln + "_s:" + id
-		});*/
-		CmsSolrQuery query = new CmsSolrQuery(null, fq);
-		query.setLocales(locales);
-		query.setSearchRoots(roots);
-		return query;
+	public CmsSolrQuery solrQuery(String query){
+		Map<String, String[]> fq = CmsRequestUtil.createParameterMap(query);
+		CmsSolrQuery solrQuery = new CmsSolrQuery(cmso, fq);
+		return solrQuery;
 	}
 
 	/**

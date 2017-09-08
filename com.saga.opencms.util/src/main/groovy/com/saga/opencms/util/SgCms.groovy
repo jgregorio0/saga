@@ -437,17 +437,17 @@ class SgCms {
      * @param filePath
      * @param time
      */
-    public void setDateLastModified(String filePath, Long time) {
+    public void setDateLastModified(String filePath, Long time, boolean recursive) {
         // Get and lock
-        CmsFile file = cmso.readFile(filePath, CmsResourceFilter.ALL);
-        lock(cmso, filePath);
-
+//        CmsFile file = cmso.readFile(filePath, CmsResourceFilter.ALL);
+        lock(filePath);
+        cmso.setDateLastModified(filePath, time, recursive);
         // set value
-        file.setDateLastModified(time);
+//        file.setDateLastModified(time);
 
         // save changes and unlock
-        cmso.writeFile(file);
-        unlock(cmso, filePath);
+//        cmso.writeFile(file);
+        unlock(filePath);
     }
 
     /**
@@ -660,23 +660,9 @@ class SgCms {
             String resourceName,
             boolean recursive) throws CmsException {
 
-        // if file rewrite
-        CmsResource sourceRes = cmso.readResource(resourceName, CmsResourceFilter.ALL);
-        if (sourceRes.isFile()) {
-            String path = cmso.getSitePath(sourceRes);
-            rewrite(path);
-        } else if (recursive) {
-
-            // if recursive rewrite all sub files
-            Iterator<CmsResource> it = cmso.readResources(resourceName, CmsResourceFilter.ALL, true).iterator();
-            while (it.hasNext()) {
-                CmsResource subRes = it.next();
-                if (subRes.isFile()) {
-                    String path = cmso.getSitePath(subRes);
-                    rewrite(path);
-                }
-            }
-        }
+        lock(resourceName);
+        setDateLastModified(resourceName, System.currentTimeMillis());
+        unlock(resourceName);
         return this;
     }
 
