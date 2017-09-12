@@ -60,4 +60,34 @@ public class SgFile {
 		outputStream.flush();
 		outputStream.close();
 	}
+
+	public void readBuffered(String filepath, String encoding){
+		def lines = [];
+
+		FileInputStream inputStream = null;
+		Scanner sc = null;
+		try {
+			inputStream = new FileInputStream(filepath);
+			sc = new Scanner(inputStream, encoding);
+			int lineCounter = 0;
+			def headers = [];
+			while (sc.hasNextLine()) {
+				String line = sc.nextLine();
+				// TODO process data
+				lines.add(line);
+				lineCounter++;
+			}
+			// note that Scanner suppresses exceptions
+			if (sc.ioException() != null) {
+				LOG.error("Loading data from csv " + filepath, sc.ioException());
+			}
+		} finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+			if (sc != null) {
+				sc.close();
+			}
+		}
+	}
 }
