@@ -1,4 +1,4 @@
-package com.saga.opencms.util
+package com.saga.opencms.vue
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.solr.common.util.DateUtil
