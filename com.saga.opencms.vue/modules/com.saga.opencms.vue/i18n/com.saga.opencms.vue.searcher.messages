@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<XmlVfsBundles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="opencms://system/modules/org.opencms.ade.config/schemas/xmlvfsbundle.xsd">
+  <Bundle language="es">
+    <Message>
+      <Key><![CDATA[ofertas.search.by.store]]></Key>
+      <Value><![CDATA[Ofertas por tienda]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[ofertas.search.by.capraboacasa]]></Key>
+      <Value><![CDATA[Ofertas Capraboacasa]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[ofertas.search.filter.where]]></Key>
+      <Value><![CDATA[¿Dónde?]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[ofertas.search.filter.region]]></Key>
+      <Value><![CDATA[Província]]></Value>
+    </Message>
+  </Bundle>
+  <Bundle language="en">
+    <Message>
+      <Key><![CDATA[ofertas.search.by.store]]></Key>
+      <Value><![CDATA[Offers by store]]></Value>
+    </Message>
+    <Message>
+      <Key><![CDATA[ofertas.search.by.capraboacasa]]></Key>
+      <Value><![CDATA[Offers Capraboacasa]]></Value>
+    </Message>
+
+    <Message>
+      <Key><![CDATA[ofertas.search.filter.where]]></Key>
+      <Value><![CDATA[Where?]]></Value>
+    </Message>
+
+    <Message>
+      <Key><![CDATA[ofertas.search.filter.region]]></Key>
+      <Value><![CDATA[Region]]></Value>
+    </Message>
+  </Bundle>
+</XmlVfsBundles>

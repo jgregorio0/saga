@@ -1,11 +1,10 @@
-apply plugin: 'groovy'
+ply plugin: 'java'
 
 sourceCompatibility = 1.5
 version = '1.0'
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
