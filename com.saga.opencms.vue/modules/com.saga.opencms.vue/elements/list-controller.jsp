@@ -1,11 +1,16 @@
-<%@ page import="com.saga.opencms.vue.SgSolrJson" %>
+<%@ page import="com.saga.opencms.util.SgSolrJson" %>
 <%@ page import="org.opencms.json.JSONObject" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.opencms.main.CmsLog" %>
+<%@ page import="org.apache.commons.logging.Log" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 
 <%--LOAD DATA FROM PARAMETERS--%>
 <%!
+    final Log LOG = CmsLog.getLog(this.getClass());
+
     private String locale;
     private String site;
     private String uri;
@@ -15,11 +20,36 @@
     private String fields;
 
     private void load(HttpServletRequest request) {
-        String p1 = request.getParameter("param1");
-        String p2 = request.getParameter("param2");
-        query = p1 + p2;
+        // Rows
+        int iRows = 10;
+        String rows = request.getParameter("rows");
+        if (StringUtils.isNotBlank(rows)) {
+            try {
+                iRows = Integer.valueOf(rows);
+            } catch (Exception e) {
+                LOG.error("rows parameter must be int " + rows, e);
+            }
+        }
+        String qRows = "&rows=" + iRows;
 
-        fields = "id,path,link";
+        // Start
+        int iStart = 0;
+        String start = request.getParameter("start");
+        if (StringUtils.isNotBlank(start)) {
+            try {
+                iStart = Integer.valueOf(start);
+            } catch (Exception e) {
+                LOG.error("start parameter must be int " + start, e);
+            }
+        }
+        String qStart = "&start=" + iStart;
+
+        query = "fq=parent-folders:\"/sites/default/\"" +
+                "&fq=type:image" +
+                qRows +
+                qStart;
+
+        fields = "id,path,Title_prop";
 
         locale = request.getParameter("locale");
         site = request.getParameter("site");
