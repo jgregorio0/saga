@@ -1,4 +1,5 @@
 package com.saga.opencms.util
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.apache.solr.common.util.DateUtil
@@ -158,6 +159,7 @@ public class SgSolrJson {
 		for (int iRes = 0; iRes < results.size(); iRes++) {
 			Map<String, Object> contenido = new HashMap<String, Object>();
 			CmsSearchResource result = results.get(iRes);
+
 			for (int iField = 0; iField < fields.length; iField++) {
 				String field = fields[iField];
 				addSolrField(contenido, result, field);
@@ -166,6 +168,94 @@ public class SgSolrJson {
 			contents.add(contenido);
 		}
 		return new JSONArray(contents);
+	}
+
+	/**
+	 *
+	 * @param results
+	 * @param fields
+	 * @return
+	 */
+	public JSONArray getJsonResults(CmsSolrResultList results)
+			throws JSONException {
+		JSONArray datas = new JSONArray();
+		Set fieldsSet = new HashSet<String>();
+		for (int iRes = 0; iRes < results.size(); iRes++) {
+			JSONObject data = new JSONObject();
+			CmsSearchResource result = results.get(iRes);
+
+			List<String> fields = result.getDocument().getFieldNames()
+			for (int iField = 0; iField < fields.size(); iField++) {
+
+				// Field name
+				String fieldName = fields.get(iField);
+				fieldsSet.add(fieldName);
+
+				// Field value
+				Object value = "";
+				List<String> values = result.getMultivaluedField(fieldName)
+				if (values.size() > 0) {
+					// Contain values
+
+					if (values.size() > 1) {
+
+						// Multivalued
+						if (isDateField(values)) {
+
+							// Multi Date
+							value = multiDateStringToLong(values)
+						} else {
+
+							// Multi String
+							value = values;
+						}
+					} else {
+
+						// Single value
+						if (isDateField(values)) {
+
+							// Single Date
+							Date date = DateUtil.parseDate(values.get(0));
+							value = String.valueOf(date.getTime());
+						} else {
+
+							// Single String
+							value = values.get(0);
+						}
+					}
+				}
+				// Add field to contenido
+				data.put(fieldName, value);
+			}
+
+			// update fields
+			fields = fieldsSet.toList();
+
+			// Add contenido to resources
+			datas.put(data);
+		}
+		return new JSONArray(datas);
+	}
+
+	/**
+	 * Check if first value is Date type
+	 * @param values
+	 * @return
+	 */
+	private boolean isDateField(List<String> values){
+		boolean isDate = false;
+		if (values != null && values.size() > 0) {
+			String val = values.get(0);
+			try {
+				Date date = DateUtil.parseDate(val)
+				if (date != null) {
+					isDate = true;
+				}
+			} catch (Exception e) {
+				LOG.debug("value $val is not date");
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -549,6 +639,37 @@ public class SgSolrJson {
 			String fieldsOutBkts = fieldsWithoutBrackets.join(",");
 
 			json = successJResponse(results.getNumFound(), jResults, solrquery, fieldsOutBkts);
+		} catch (Exception e) {
+			LOG.error("SgSolrJson", e);
+			json = errorJResponse(e);
+		}
+		return json;
+	}
+
+	/**
+	 * Return JSONObject
+	 * @param solrquery
+	 * @param index
+	 * @param locale
+	 * @param uri
+	 * @param site
+	 * @return
+	 */
+	public JSONObject searchSolrFields(String solrquery) {
+
+		// Parametros
+		JSONObject json;
+		try {
+
+			// Search
+			LOG.debug("For query: " + solrquery);
+			CmsSolrResultList results = search(solrquery, index);
+			LOG.debug("Get " + results.size() + " results");
+
+			// Results
+			JSONArray jResults = getJsonResults(results);
+
+			json = successJResponse(results.getNumFound(), jResults, solrquery, fields.join(","));
 		} catch (Exception e) {
 			LOG.error("SgSolrJson", e);
 			json = errorJResponse(e);
