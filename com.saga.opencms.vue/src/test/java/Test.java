@@ -1,9 +1,6 @@
-import com.saga.opencms.vue.CmsSolrUtil;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**

@@ -179,8 +179,9 @@ public class SgSolrJson {
 	 */
 	public JSONArray getJsonResults(CmsSolrResultList results)
 			throws JSONException {
-		JSONArray datas = new JSONArray();
 		Set fieldsSet = new HashSet<String>();
+		List dataList = new ArrayList<JSONObject>();
+
 		for (int iRes = 0; iRes < results.size(); iRes++) {
 			JSONObject data = new JSONObject();
 			CmsSearchResource result = results.get(iRes);
@@ -230,12 +231,12 @@ public class SgSolrJson {
 			}
 
 			// update fields
-			fields = fieldsSet.toList();
+			this.fields = fieldsSet.toList().join(",");
 
 			// Add contenido to resources
-			datas.put(data);
+			dataList.add(data);
 		}
-		return new JSONArray(datas);
+		return new JSONArray(dataList);
 	}
 
 	/**
@@ -256,7 +257,7 @@ public class SgSolrJson {
 				LOG.debug("value $val is not date");
 			}
 		}
-		return true;
+		return isDate;
 	}
 
 	/**
@@ -670,7 +671,7 @@ public class SgSolrJson {
 			// Results
 			JSONArray jResults = getJsonResults(results);
 
-			json = successJResponse(results.getNumFound(), jResults, solrquery, fields.join(","));
+			json = successJResponse(results.getNumFound(), jResults, solrquery, fields);
 		} catch (Exception e) {
 			LOG.error("SgSolrJson", e);
 			json = errorJResponse(e);
