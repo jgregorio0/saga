@@ -142,7 +142,7 @@ class SgCms {
     public SgCms ensureResource(String path, String type)
             throws CmsException {
         if (StringUtils.isNotBlank(path)) {
-            if (!cmso.existsResource(path)) {
+            if (!cmso.existsResource(path, CmsResourceFilter.ALL)) {
                 String parentFolder = CmsResource.getParentFolder(path);
                 ensureResource(parentFolder, FOLDER_TYPE);
                 createResource(path, type);
