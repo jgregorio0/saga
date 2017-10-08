@@ -19,7 +19,8 @@
             <div class="col-lg-12"><h1><fmt:message key="list.title"/></h1></div>
 
                 <%--LIST--%>
-            <div id="vue-list" class="col-lg-12 nopadding">
+            <div id="vue-list" class="col-lg-12 nopadding"
+                 v-cloak>
                 <ul>
                     <li v-for="data in datas">
                         <dl>
@@ -42,7 +43,7 @@
             <div id="vue-list-more" class="col-lg-12 nopadding mt-20 mb-20 text-center"
                  v-if="!loading">
                 <button type="button" class="btn btn-brand btn-lg vue-list-more-btn" <%--data-start="getLast()"--%>
-                        <%--v-if="getLast() < total"--%>
+                        v-if="(start + rows) < total"
                         v-on:click="loadMoreResults()">
                     <span class="inline-b v-align-m">
                         <fmt:message key="list.more.results.btn"/>
@@ -52,7 +53,7 @@
 
                     <%--NONE RESULTS--%>
                 <div class="btn btn-brand"
-                     <%--v-else--%>>
+                     v-else-if="total == 0">
                 <span class="inline-b v-align-m">
                     <fmt:message key="list.more.results.none"/>
                 </span>
@@ -172,7 +173,7 @@
                     console.log("update", jRes);
                     this.total = Number(jRes.total);
                     this.datasSize = Number(jRes.dataSize);
-                    this.datas = jRes.data;
+                    this.datas = this.datas.concat(jRes.data);
                     this.query = jRes.query;
                     this.fields = jRes.fields;
                 },
@@ -245,10 +246,10 @@
                         this.loading = true;
 
                         // Load data from controller
-                        this.$http.get(this.controller).then(function (response) {
+                        this.$http.get(this.controller, {params:params}).then(function (response) {
                             // Response to JSON
                             try {
-                                var jRes = JSON.parse(response);
+                                var jRes = response.body;
 
                                 // Check if error
                                 if (!jRes.error) {

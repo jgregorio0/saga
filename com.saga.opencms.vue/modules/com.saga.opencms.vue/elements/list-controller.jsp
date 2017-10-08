@@ -1,10 +1,10 @@
-<%@ page import="com.saga.opencms.util.SgSolrJson" %>
+<%@ page import="com.saga.opencms.vue.SgSolrJson" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.logging.Log" %>
 <%@ page import="org.opencms.json.JSONObject" %>
+<%@ page import="org.opencms.main.CmsLog" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.apache.commons.lang3.StringUtils" %>
-<%@ page import="org.opencms.main.CmsLog" %>
-<%@ page import="org.apache.commons.logging.Log" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 
 <%--LOAD DATA FROM PARAMETERS--%>
