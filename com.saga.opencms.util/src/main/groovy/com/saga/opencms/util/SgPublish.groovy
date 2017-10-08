@@ -1,10 +1,13 @@
 package com.saga.opencms.util
 import org.opencms.db.CmsPublishList
 import org.opencms.file.CmsObject
+import org.opencms.file.CmsProject
 import org.opencms.file.CmsResource
 import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
-
+import org.opencms.publish.CmsPublishManager
+import org.opencms.report.CmsLogReport
+import org.opencms.report.I_CmsReport
 /**
  * Created by jgregorio on 15/11/2016.
  */
@@ -114,5 +117,33 @@ public class SgPublish {
     public static def waitFinish(long ms){
         OpenCms.getPublishManager().waitWhileRunning(ms)
         return this;
+    }
+
+    /**
+     * Based on CmsDeleteExpiredResourcesJob.
+     * Initialize publishing by creating new project
+     * @param cmso
+     * @return
+     */
+    public static I_CmsReport initPublishing(CmsObject cmso){
+        CmsProject project = cmso.createTempfileProject();
+        cmso.getRequestContext().setCurrentProject(project);
+        I_CmsReport report = new CmsLogReport(
+            cmso.getRequestContext().getLocale(),
+            this.class);
+        return report;
+    }
+
+    /**
+     * Based on CmsDeleteExpiredResourcesJob.
+     * Execute publishing for resources modified on project
+     * @param cmso
+     * @param report
+     */
+    public static void exePublishing(CmsObject cmso, I_CmsReport report){
+        CmsPublishManager publishManager = OpenCms.getPublishManager();
+        publishManager.publishProject(cmso, report);
+        // this is to not scramble the logging output:
+        publishManager.waitWhileRunning();
     }
 }

@@ -7,9 +7,13 @@
     /*String filename = "com.saga.caprabo.frontend_1.1.zip";
     String folder = "packages/modules";
     String mimeType = "application/zip";*/
-    String filename = "opencms-modules.xml";
+    String filename = "upo-servicios-site-2017-10-04.zip";
+    String folder = "packages";
+    String mimeType = "application/zip";
+	
+    /*String filename = "opencms-modules.xml";
     String folder = "config";
-    String mimeType = "text/plain";
+    String mimeType = "text/plain";*/
 
     String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
     String filepath = webInfPath + folder + "/" + filename;

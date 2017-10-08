@@ -12,13 +12,13 @@ version = '1.0'
 
 repositories {
     mavenCentral()
-    mavenLocal()
+//    mavenLocal()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'org.opencms', name: 'opencms-core', version: '9.5.3'
+//    compile group: 'org.opencms', name: 'opencms-core', version: '9.5.3'
 
     // groovy
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.7'
