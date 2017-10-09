@@ -762,6 +762,18 @@ class SgCms {
     }
 
     /**
+     * Remove site root from root path
+     */
+    public static String sitePath(CmsObject cmso, String rootPath) {
+        String sitePath = rootPath;
+        String siteRoot = cmso.getRequestContext().getSiteRoot();
+        if (sitePath.startsWith(siteRoot)){
+            sitePath = sitePath.substring(siteRoot.length(), sitePath.length());
+        }
+        return sitePath;
+    }
+
+    /**
      * Customize a new initialized copy of CmsObject
      * @param baseCms
      * @param uri

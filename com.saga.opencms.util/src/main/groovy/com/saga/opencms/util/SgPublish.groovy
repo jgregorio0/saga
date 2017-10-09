@@ -3,6 +3,8 @@ import org.opencms.db.CmsPublishList
 import org.opencms.file.CmsObject
 import org.opencms.file.CmsProject
 import org.opencms.file.CmsResource
+import org.opencms.file.CmsResourceFilter
+import org.opencms.main.CmsException
 import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
 import org.opencms.publish.CmsPublishManager
@@ -34,6 +36,23 @@ public class SgPublish {
         CmsPublishList toPublish = OpenCms.getPublishManager().getPublishList(cmso, pubList, true, true)
         OpenCms.getPublishManager().publishProject(cmso, null, toPublish);
         return toPublish
+    }
+
+    /**
+     * Publish list of resources.
+     * Resource list must not contain null object
+     * @param rootPaths
+     * @return
+     */
+    public CmsPublishList publishPaths(Collection<String> rootPaths) throws CmsException {
+        List<CmsResource> resources = new ArrayList<CmsResource>();
+        Iterator<String> it = rootPaths.iterator();
+        while (it.hasNext()){
+            String rootPath = it.next();
+            String sitePath = SgCms.sitePath(cmso, rootPath);
+            resources.add(cmso.readResource(sitePath, CmsResourceFilter.ALL));
+        }
+        return publish(resources);
     }
 
     /**
