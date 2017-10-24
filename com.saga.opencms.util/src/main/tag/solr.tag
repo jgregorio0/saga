@@ -73,27 +73,23 @@
     private CmsObject cmso;
     private HttpServletRequest req;
 
-    private String solrquery;
-    private String fields;
-    private String index;
+    //    private String solrquery;
+    private String _fields;
+    private String _index;
 
     public void initTag(HttpServletRequest request, Map<String, String> ctx) throws CmsException {
         req = request;
+
         cmso = CmsJspStandardContextBean.getInstance(request).getVfs().getCmsObject();
-
-        String locale = ctx.get(LOCALE);
-        String uri = ctx.get(URI);
-        String site = ctx.get(SITE);
-
-        cmso = initCmsObject(cmso, locale, uri, site);
+        cmso = initCmsObject(cmso, ctx.get(LOCALE), ctx.get(URI), ctx.get(SITE));
         LOG.debug("init cmso: " +
                 "locale: " + cmso.getRequestContext().getLocale() +
                 " | uri: " + cmso.getRequestContext().getUri() +
                 " | site: " + cmso.getRequestContext().getSiteRoot());
 
         // Init index
-        index = initSolrIndex(ctx.get(INDEX));
-        LOG.debug("index: " + index);
+        _index = initSolrIndex(ctx.get(INDEX));
+        LOG.debug("index: " + _index);
     }
 
     /**
@@ -260,14 +256,14 @@
             }
 
             // update fields
-            this.fields = "";
+            _fields = "";
             Iterator<String> it = fieldsSet.iterator();
             while (it.hasNext()) {
                 String field = it.next();
-                if (this.fields.length() > 0) {
-                    this.fields += ",";
+                if (_fields.length() > 0) {
+                    _fields += ",";
                 }
-                this.fields += field;
+                _fields += field;
             }
 
             // Add contenido to resources
@@ -618,7 +614,7 @@
 
             // Search
             LOG.debug("For query: " + solrquery);
-            CmsSolrResultList results = search(solrquery, index);
+            CmsSolrResultList results = search(solrquery, _index);
             LOG.debug("Get " + results.size() + " results");
 
             // Fields
@@ -658,7 +654,7 @@
 
             // Search
             LOG.debug("For query: " + solrquery);
-            CmsSolrResultList results = search(solrquery, index);
+            CmsSolrResultList results = search(solrquery, _index);
             LOG.debug("Get " + results.size() + " results");
 
             // Fields
@@ -695,13 +691,13 @@
 
             // Search
             LOG.debug("For query: " + solrquery);
-            CmsSolrResultList results = search(solrquery, index);
+            CmsSolrResultList results = search(solrquery, _index);
             LOG.debug("Get " + results.size() + " results");
 
             // Results
             JSONArray jResults = getJsonResults(results);
 
-            json = successJResponse(results.getNumFound(), jResults, solrquery, fields);
+            json = successJResponse(results.getNumFound(), jResults, solrquery, _fields);
         } catch (Exception e) {
             LOG.error("SgSolrJson", e);
             json = errorJResponse(e);
