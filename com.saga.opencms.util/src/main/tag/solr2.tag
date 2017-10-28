@@ -1,4 +1,3 @@
-<%@ tag import="com.saga.opencms.util.SgJson" %>
 <%@ tag import="com.saga.opencms.util.SgSolrJson" %>
 <%@ tag import="org.apache.commons.logging.Log" %>
 <%@ tag import="org.opencms.json.JSONObject" %>
@@ -63,7 +62,7 @@
         json = solr.searchSolrFields(solrquery, fields);
     } catch (Exception e) {
         LOG.error("solr tag", e);
-        json = SgJson.errorJResponse(e);
+        json = SgSolrJson.errorJResponse(e);
     } finally {
         out.print(json.toString());
     }

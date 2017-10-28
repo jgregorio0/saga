@@ -1,5 +1,4 @@
 package com.saga.opencms.util
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.CmsObject
@@ -9,6 +8,9 @@ import org.opencms.search.CmsSearchException
 import org.opencms.search.solr.CmsSolrQuery
 import org.opencms.search.solr.CmsSolrResultList
 import org.opencms.util.CmsRequestUtil
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 public class SgSolr {
 
@@ -28,6 +30,7 @@ public class SgSolr {
 	public static final String SOLR_INDEX_ONLINE = "Solr Online";
 	public static final String SOLR_INDEX_OFFLINE = "Solr Offline";
 	public static final String SOLR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	public static final String SOLR_DATE_TIMEZONE = "UTC";
 	public static final String SYS_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
 
 	/**
@@ -136,5 +139,15 @@ public class SgSolr {
 	public CmsSolrResultList search(CmsSolrQuery solrQuery) throws CmsSearchException {
 		return OpenCms.getSearchManager().getIndexSolr(
 				solrIndex).search(cmso, solrQuery, true);
+	}
+
+	/**
+	 * Return date format for solr
+	 * @return
+	 */
+	public static SimpleDateFormat solrFormat(){
+		DateFormat dfSolr = new SimpleDateFormat(SOLR_DATE_FORMAT);
+		dfSolr.setTimeZone(TimeZone.getTimeZone(SOLR_DATE_TIMEZONE));
+		return dfSolr;
 	}
 }
