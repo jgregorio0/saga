@@ -14,5 +14,5 @@
   CmsProject offProject = cmso.readProject(projectName);
   cmso.getRequestContext().setCurrentProject(offProject);
 
-  response.sendRedirect("/users/area-de-edicion/");
+  response.sendRedirect("/");
 %>
