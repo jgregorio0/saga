@@ -26,11 +26,13 @@ class SgZip {
     /**
      * Compress file or directry to zip
      *
-     * @param source path to File or directory to zip
+     * @param source  path to File or directory to zip
      * @param zipPath new zip file path
      * @throws IOException
      */
-    public static void zip(String source, String zipPath) throws IOException {
+    public static void zip(String source, String zipPath)
+            throws IOException, IllegalArgumentException {
+        ensureNotExist(zipPath);
         FileOutputStream fos = new FileOutputStream(zipPath);
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(source);
@@ -101,19 +103,40 @@ class SgZip {
     }
 
     /**
+     * Unzip file to folder with the same name
+     *
+     * @param sourcePath path to zip file
+     * @throws IOException
+     */
+    public static void unzipInFolder(String sourcePath) throws IOException {
+        File file = new File(sourcePath);
+        String destDir = FilenameUtils.removeExtension(file.getPath());
+        unzip(sourcePath, destDir);
+    }
+
+    /**
+     * Unzip file to folder with the same name
+     *
+     * @param sourcePath path to zip file
+     * @throws IOException
+     */
+    public static void unzip(String sourcePath) throws IOException {
+        File file = new File(sourcePath);
+        unzip(sourcePath, file.getParent());
+    }
+
+
+    /**
      * Unzip file
      *
      * @param sourcePath path to zip file
-     * @param unzipDir path to directory (keep zip files)
+     * @param unzipDir   path to directory (keep zip files)
      * @throws IOException
      */
-    public static void unzip(String sourcePath, String unzipDir) throws IOException {
+    public static void unzip(String sourcePath, String unzipDir)
+            throws IOException, IllegalArgumentException {
         // Ensure directory exists
-        String baseDir = unzipDir;
-        if (!baseDir.endsWith("/")) {
-            baseDir += "/";
-        }
-        new File(baseDir).mkdirs();
+        String baseDir = ensureBaseDir(unzipDir);
 
         byte[] buffer = new byte[1024];
         ZipInputStream zis = new ZipInputStream(new FileInputStream(sourcePath));
@@ -122,6 +145,11 @@ class SgZip {
         while (zipEntry != null) {
             String fileName = zipEntry.getName();
             File newFile = new File(baseDir + fileName);
+            ensureNotExist(newFile);
+
+            // Ensure file
+            ensureFile(newFile);
+
             FileOutputStream fos = new FileOutputStream(newFile);
             int len;
             while ((len = zis.read(buffer)) > 0) {
@@ -132,5 +160,64 @@ class SgZip {
         }
         zis.closeEntry();
         zis.close();
+    }
+
+    /**
+     * Ensure base directory ends with / and create directory and parent directories if not exist.
+     * @param unzipDir
+     * @return
+     */
+    private static String ensureBaseDir(String unzipDir) {
+        String baseDir = unzipDir;
+        if (!baseDir.endsWith("/")) {
+            baseDir += "/";
+        }
+        ensureDirectory(baseDir);
+        return baseDir;
+    }
+
+    /**
+     * Create parent directories and file if not exist
+     * @param newFile
+     * @throws IOException
+     */
+    private static void ensureFile(File newFile) throws IOException {
+        // Ensure parent folder
+        ensureDirectory(newFile.getParent());
+
+        // Create file if not exists
+        if (!newFile.exists()) {
+            newFile.createNewFile();
+        }
+    }
+
+    /**
+     * Create directory and parent directories if not exist.
+     * @param baseDir
+     */
+    private static void ensureDirectory(String baseDir) {
+        new File(baseDir).mkdirs();
+    }
+
+    /**
+     * Ensure detination path do not exist already.
+     * @param zipPath
+     * @throws IllegalArgumentException
+     */
+    private static void ensureNotExist(String zipPath)
+            throws IllegalArgumentException {
+        ensureNotExist(new File(zipPath));
+    }
+
+    /**
+     * Ensure detination path do not exist already.
+     * @param file
+     * @throws IllegalArgumentException
+     */
+    private static void ensureNotExist(File file)
+            throws IllegalArgumentException {
+        if (file.exists()) {
+            throw new IllegalArgumentException("Destination file path already exists: " + file.getAbsolutePath());
+        }
     }
 }
