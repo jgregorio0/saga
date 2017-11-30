@@ -17,10 +17,11 @@ class SgZip {
      * @param source path to File or directory to zip
      * @throws IOException
      */
-    public static void zip(String source) throws IOException {
+    public static String zip(String source) throws IOException {
         File fileToZip = new File(source);
         String destName = FilenameUtils.removeExtension(fileToZip.getName()) + ".zip";
-        zip(source, fileToZip.getParent() + "/" + destName);
+        zip(source, fileToZip.getParent() + "/" + destName, false);
+        return fileToZip.getParent();
     }
 
     /**
@@ -30,15 +31,36 @@ class SgZip {
      * @param zipPath new zip file path
      * @throws IOException
      */
-    public static void zip(String source, String zipPath)
+    public static String zip(String source, String zipPath)
             throws IOException, IllegalArgumentException {
-        ensureNotExist(zipPath);
+        return zip(source, zipPath, false);
+    }
+
+    /**
+     * Compress file or directory to zip
+     * @param source
+     * @param zipPath
+     * @param deleteIfExists
+     * @return
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    public static String zip(String source, String zipPath, boolean deleteIfExists)
+            throws IOException, IllegalArgumentException {
+
+        if (deleteIfExists) {
+            ensureNotExist(zipPath);
+        }
+        exceptionIfExist(zipPath);
+        ensureBaseDir(new File(zipPath).getParent());
+
         FileOutputStream fos = new FileOutputStream(zipPath);
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         File fileToZip = new File(source);
         zip(fileToZip, zipOut);
         zipOut.close();
         fos.close();
+        return zipPath;
     }
 
     /**
@@ -91,7 +113,7 @@ class SgZip {
      * @param zipPath
      * @throws IOException
      */
-    public static void zip(List<String> srcPaths, String zipPath) throws IOException {
+    public static String zip(List<String> srcPaths, String zipPath) throws IOException {
         FileOutputStream fos = new FileOutputStream(zipPath);
         ZipOutputStream zipOut = new ZipOutputStream(fos);
         for (String srcPath : srcPaths) {
@@ -100,29 +122,39 @@ class SgZip {
         }
         zipOut.close();
         fos.close();
+        return zipPath;
     }
 
     /**
      * Unzip file to folder with the same name
      *
      * @param sourcePath path to zip file
+     * @param deleteIfExist
      * @throws IOException
      */
-    public static void unzipInFolder(String sourcePath) throws IOException {
-        File file = new File(sourcePath);
-        String destDir = FilenameUtils.removeExtension(file.getPath());
+    public static String unzipInNewFolder(String sourcePath, boolean deleteIfExist) throws IOException {
+        // Destination directory base on source path
+        String destDir = generateUnzipDirPath(sourcePath);
+
+        // Delete if exist
+        if (deleteIfExist) {
+            ensureNotExist(destDir);
+        }
+
+        // unzip
         unzip(sourcePath, destDir);
+        return destDir;
     }
-
     /**
      * Unzip file to folder with the same name
      *
      * @param sourcePath path to zip file
      * @throws IOException
      */
-    public static void unzip(String sourcePath) throws IOException {
+    public static String unzipInParentFolder(String sourcePath) throws IOException {
         File file = new File(sourcePath);
         unzip(sourcePath, file.getParent());
+        return file.getParent();
     }
 
 
@@ -133,7 +165,7 @@ class SgZip {
      * @param unzipDir   path to directory (keep zip files)
      * @throws IOException
      */
-    public static void unzip(String sourcePath, String unzipDir)
+    public static String unzip(String sourcePath, String unzipDir)
             throws IOException, IllegalArgumentException {
         // Ensure directory exists
         String baseDir = ensureBaseDir(unzipDir);
@@ -145,7 +177,7 @@ class SgZip {
         while (zipEntry != null) {
             String fileName = zipEntry.getName();
             File newFile = new File(baseDir + fileName);
-            ensureNotExist(newFile);
+            exceptionIfExist(newFile);
 
             // Ensure file
             ensureFile(newFile);
@@ -160,6 +192,7 @@ class SgZip {
         }
         zis.closeEntry();
         zis.close();
+        return unzipDir;
     }
 
     /**
@@ -167,7 +200,7 @@ class SgZip {
      * @param unzipDir
      * @return
      */
-    private static String ensureBaseDir(String unzipDir) {
+    public static String ensureBaseDir(String unzipDir) {
         String baseDir = unzipDir;
         if (!baseDir.endsWith("/")) {
             baseDir += "/";
@@ -181,7 +214,7 @@ class SgZip {
      * @param newFile
      * @throws IOException
      */
-    private static void ensureFile(File newFile) throws IOException {
+    public static void ensureFile(File newFile) throws IOException {
         // Ensure parent folder
         ensureDirectory(newFile.getParent());
 
@@ -195,7 +228,7 @@ class SgZip {
      * Create directory and parent directories if not exist.
      * @param baseDir
      */
-    private static void ensureDirectory(String baseDir) {
+    public static void ensureDirectory(String baseDir) {
         new File(baseDir).mkdirs();
     }
 
@@ -204,9 +237,9 @@ class SgZip {
      * @param zipPath
      * @throws IllegalArgumentException
      */
-    private static void ensureNotExist(String zipPath)
+    private static void exceptionIfExist(String zipPath)
             throws IllegalArgumentException {
-        ensureNotExist(new File(zipPath));
+        exceptionIfExist(new File(zipPath));
     }
 
     /**
@@ -214,10 +247,46 @@ class SgZip {
      * @param file
      * @throws IllegalArgumentException
      */
-    private static void ensureNotExist(File file)
+    private static void exceptionIfExist(File file)
             throws IllegalArgumentException {
         if (file.exists()) {
             throw new IllegalArgumentException("Destination file path already exists: " + file.getAbsolutePath());
         }
+    }
+
+    /**
+     * Generate unzip directory path using source path
+     * @param sourcePath
+     * @return
+     */
+    public static String generateUnzipDirPath(String sourcePath) {
+        File file = new File(sourcePath);
+        return FilenameUtils.removeExtension(file.getPath());
+    }
+
+
+    /**
+     * Ensure detination directory does not exist. Delete if exists.
+     * @param destDir
+     */
+    public static void ensureNotExist(String destDir) throws IOException {
+        File destFile = new File(destDir);
+        if (destFile.exists()) {
+            delete(destFile);
+        }
+    }
+
+    /**
+     * Delete files recursively
+     * @param file
+     * @throws IOException
+     */
+    public static void delete(File file) throws IOException {
+        if (file.isDirectory()) {
+            for (File child : file.listFiles())
+                delete(child);
+        }
+        if (!file.delete())
+            throw new FileNotFoundException("Failed to delete file: " + file);
     }
 }
