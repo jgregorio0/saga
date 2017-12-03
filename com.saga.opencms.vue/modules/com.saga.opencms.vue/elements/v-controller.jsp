@@ -97,7 +97,12 @@
             String solrquery = query + qRows + qStart;
             Map<String, String> ctxt = loadCtxt();
             SgSolrJson solr = new SgSolrJson(request, ctxt);
-            jRes = solr.searchSolrFields(solrquery);
+
+            if (StringUtils.isNotBlank(fields)) {
+                jRes = solr.searchSolrFields(solrquery, fields);
+            } else {
+                jRes = solr.searchSolrFields(solrquery);
+            }
         }
     } catch (Exception e) {
         jRes = SgSolrJson.errorJResponse(e);
