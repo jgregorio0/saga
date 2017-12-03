@@ -66,7 +66,7 @@
                         showForm: this._showForm === "true"
                     },
                     mounted: function () {
-                        this.initDatePicker();
+                        // TODO this.initDatePicker();
                         this.initResults();
                     },
                     methods: {
@@ -234,7 +234,7 @@
                         /**
                          * Load JQuery datepicker filters
                          */
-                        initDatePicker: function () {
+                        /*initDatePicker: function () {
                             // Datepicker
                             var dplocale = this.locale === 'en' ? "en-GB" : this.locale;
                             $.datepicker.setDefaults($.datepicker.regional[dplocale]);
@@ -258,7 +258,7 @@
                                     }
                                 }
                             });
-                        },
+                        },*/
 
                         /**
                          * Set filter value

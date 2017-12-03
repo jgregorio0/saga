@@ -24,8 +24,7 @@ FILTER CATEGORY
            v-else>{{filter.id}}</label>
 
     <%--SELECT--%>
-    <div class="block-drop"
-         v-if="filter.fieldType == 'select'">
+    <div class="block-drop">
         <select class="form-control" :name="filter.id" :id="filter.id"
                 v-model="filter.value">
             <option disabled value="" class="nivel-0"

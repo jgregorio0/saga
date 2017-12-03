@@ -9,7 +9,7 @@
 <cms:bundle basename="com.saga.sagasuite.search.messages">
 
     <%--SEARCH CONTAINER--%>
-    <div id="${value.Id}" class="col-lg-12"
+    <div :id="id + '-results" class="col-lg-12"
          v-cloak>
             <%--FILTERS--%>
         <div id="filters" class="col-lg-12 nopadding"
@@ -23,23 +23,23 @@
 
                                 <%--FILTER TEXT PRINCIPAL--%>
                             <cms:include
-                                    file="%(link.strong:/system/modules/com.saga.sagasuite.search/elements/v-filters/v-filter-text-principal.jsp:7ee9fb2a-a768-11e7-90b6-7fb253176922)"/>
+                                    file="%(link.strong:/system/modules/com.saga.opencms.vue/elements/v-filters/v-filter-text-principal.jsp)"/>
 
                                 <%--FILTER TEXT--%>
                             <cms:include
-                                    file="%(link.strong:/system/modules/com.saga.sagasuite.search/elements/v-filters/v-filter-text.jsp:7ecbebd7-a768-11e7-90b6-7fb253176922)"/>
+                                    file="%(link.strong:/system/modules/com.saga.opencms.vue/elements/v-filters/v-filter-text.jsp)"/>
 
                                 <%--FILTER DATE 1 FIELD--%>
                             <cms:include
-                                    file="%(link.strong:/system/modules/com.saga.sagasuite.search/elements/v-filters/v-filter-date1.jsp:7e7f7981-a768-11e7-90b6-7fb253176922)"/>
+                                    file="%(link.strong:/system/modules/com.saga.opencms.vue/elements/v-filters/v-filter-date1.jsp)"/>
 
                                 <%--FILTER DATE FROM AND TO FIELDS--%>
                             <cms:include
-                                    file="%(link.strong:/system/modules/com.saga.sagasuite.search/elements/v-filters/v-filter-date2.jsp:7eab6b84-a768-11e7-90b6-7fb253176922)"/>
+                                    file="%(link.strong:/system/modules/com.saga.opencms.vue/elements/v-filters/v-filter-date2.jsp)"/>
 
                                 <%--FILTER CATEGORIES--%>
                             <cms:include
-                                    file="%(link.strong:/system/modules/com.saga.sagasuite.search/elements/v-filters/v-filter-category.jsp:eb533c8d-a78c-11e7-90b6-7fb253176922)"/>
+                                    file="%(link.strong:/system/modules/com.saga.opencms.vue/elements/v-filters/v-filter-category.jsp)"/>
 
 
 
@@ -110,6 +110,7 @@
                 </span>
         </div>
     </div>
+
     <style>
         [v-cloak] {
             display: none;
