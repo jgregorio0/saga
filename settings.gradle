@@ -11,6 +11,8 @@ include 'com.saga.opencms.util'
 include 'com.saga.opencms.vue'
 
 include 'com.saga.opencms.sigmagrid'
+
 include 'com.saga.opencms.backgrid'
-findProject(':com.saga.opencms.backgrid')?.name = 'backgrid'
+
+include 'com.saga.opencms.backgrid'
 
