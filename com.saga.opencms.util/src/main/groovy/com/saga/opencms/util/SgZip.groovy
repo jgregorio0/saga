@@ -176,18 +176,22 @@ class SgZip {
 
         while (zipEntry != null) {
             String fileName = zipEntry.getName();
-            File newFile = new File(baseDir + fileName);
-            exceptionIfExist(newFile);
+            if (zipEntry.isDirectory()) {
+                ensureDirectory(baseDir + fileName);
+            } else {
+                File newFile = new File(baseDir + fileName);
+                exceptionIfExist(newFile);
 
-            // Ensure file
-            ensureFile(newFile);
+                // Ensure file
+                ensureFile(newFile);
 
-            FileOutputStream fos = new FileOutputStream(newFile);
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
             }
-            fos.close();
             zipEntry = zis.getNextEntry();
         }
         zis.closeEntry();
@@ -289,4 +293,5 @@ class SgZip {
         if (!file.delete())
             throw new FileNotFoundException("Failed to delete file: " + file);
     }
+
 }
