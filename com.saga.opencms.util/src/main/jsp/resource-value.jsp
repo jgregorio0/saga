@@ -1,29 +1,29 @@
-<%@ page import="org.opencms.file.CmsResourceFilter" %>
-<%@ page import="org.opencms.main.OpenCms" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
-<%@ page import="org.opencms.file.CmsResource" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.opencms.flex.CmsFlexController" %>
-<%@ page import="org.opencms.file.CmsObject" %>
-<%@ page import="org.opencms.xml.CmsXmlEntityResolver" %>
-<%@ page import="org.opencms.i18n.CmsEncoder" %>
-<%@ page import="org.opencms.file.CmsFile" %>
-<%@ page import="org.opencms.xml.content.CmsXmlContentFactory" %>
-<%@ page import="org.opencms.main.CmsException" %>
-<%@ page import="org.opencms.xml.content.CmsXmlContent" %>
-<%@ page import="org.opencms.xml.types.I_CmsXmlContentValue" %>
-<%@ page import="org.opencms.xml.CmsXmlUtils" %>
-<%@ page import="java.util.Locale" %>
-<%@ page import="org.opencms.lock.CmsLock" %>
 <%@ page import="org.opencms.db.CmsPublishList" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="org.opencms.util.CmsStringUtil" %>
-<%@page buffer="none" session="false" trimDirectiveWhitespaces="true"%>
+<%@ page import="org.opencms.file.CmsFile" %>
+<%@ page import="org.opencms.file.CmsObject" %>
+<%@ page import="org.opencms.file.CmsResource" %>
+<%@ page import="org.opencms.file.CmsResourceFilter" %>
+<%@ page import="org.opencms.jsp.util.CmsJspStandardContextBean" %>
+<%@ page import="org.opencms.lock.CmsLock" %>
+<%@ page import="org.opencms.main.CmsException" %>
+<%@ page import="org.opencms.main.OpenCms" %>
+<%@ page import="org.opencms.xml.CmsXmlUtils" %>
+<%@ page import="org.opencms.xml.content.CmsXmlContent" %>
+<%@ page import="org.opencms.xml.content.CmsXmlContentFactory" %>
+<%@ page import="org.opencms.xml.types.I_CmsXmlContentValue" %>
+<%@ page import="java.util.*" %>
+
+<%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
+
 <%!
-
-
     String type;
     String site;
+    String xmlPath;
+    int xmlIndex;
+    String mode;
     CmsObject cmso;
 
     Locale locale;
@@ -33,10 +33,20 @@
     List<CmsResource> pubList;
 
     private boolean validate(CmsResource res) {
-        return isGeneral(site, res) || isTransparencia(site, res);
+//        return isGeneral(site, res) || isTransparencia(site, res);
+        return true;
     }
 
-    private void addDefaultFilterValue(CmsObject cmso, CmsResource res)
+    private String readValue(CmsObject cmso, CmsResource res, String xmlPath, int xmlIndex)
+            throws Exception {
+
+        //Leemos el recurso
+        file = cmso.readFile(cmso.getSitePath(res), CmsResourceFilter.ALL);
+        xmlContent = CmsXmlContentFactory.unmarshal(cmso, file);
+        return xmlContent.getStringValue(cmso, xmlPath, locale, xmlIndex);
+    }
+
+    /*private void addDefaultFilterValue(CmsObject cmso, CmsResource res)
             throws Exception {
         locale = cmso.getRequestContext().getLocale();
 
@@ -50,7 +60,7 @@
         setStringValue("/SolrFieldQuery",
                 "fq=((type:sgindicadortransparencia AND xmlactive_es:true) OR (type:(* AND NOT sgindicadortransparencia)))");
         save(res);
-    }
+    }*/
 
     public void setStringValue(String path, String value)
             throws Exception {
@@ -149,34 +159,38 @@
         OpenCms.getPublishManager().publishProject(cmso, null, toPublish);
         return toPublish;
     }
-
-
-    private boolean isTransparencia(String site, CmsResource res) {
-        return res.getRootPath().contains(CmsStringUtil.joinPaths(site, "/es/.content/sgsearchadvanced/"));
-    }
-
-    private boolean isGeneral(String site, CmsResource res) {
-        return res.getRootPath().contains(CmsStringUtil.joinPaths(site, "/es/transparencia/.content/sgsearchadvanced/"));
-    }
 %>
 
 
 <%
-    type = "sgsearchadvanced";
+    type = "sgthemeconfig";
     site = "/";
-    cmso = CmsFlexController.getCmsObject(request);
+    mode = "show";
+    xmlPath = "Theme";
+    xmlIndex = 0;
+    cmso = CmsJspStandardContextBean.getInstance(request).getVfs().getCmsObject();
+    locale = cmso.getRequestContext().getLocale();
+
+    Map<String, String> messages = new HashMap<String, String>();
     CmsResourceFilter filter = CmsResourceFilter.ALL.addRequireFile();
-    out.print("<div>");
     if (!StringUtils.isEmpty(type)) {
         filter = filter.addRequireType(
                 OpenCms.getResourceManager().getResourceType(type));
         List<CmsResource> resources = cmso.readResources(site, filter, true);
-        out.print("<ul>");
         for (int i = 0; i < resources.size(); i++) {
             CmsResource res = resources.get(i);
-            out.print("<li>" + i + " - " + res.getRootPath() + "</li>");
+            String path = res.getRootPath();
+            String msg = "NADA";
             if (validate(res)) {
                 try {
+                    if (mode.equals("show")) {
+                        msg = readValue(cmso, res, xmlPath, xmlIndex);
+                    }
+                } catch (Exception e) {
+                    msg = "ERROR: " + e.getCause().toString() + " || \n" + CmsException.getStackTraceAsString(e);
+                }
+
+                /*try {
                     addDefaultFilterValue(cmso, res);
                     addPublish(res);
                     publishOne(res);
@@ -184,21 +198,18 @@
                 } catch (Exception e) {
                     out.print("<p>ERROR editando recurso </p>" + res.getRootPath());
                     out.print("<p>" + e.getCause().toString() + "</p>");
-                }
+                }*/
 
             }
+            messages.put(path, msg);
         }
-    /*try {
-      publishAll();
-      out.print("<p>PUBLICADOS LOS RECURSOS</p>");
-    } catch (Exception e) {
-      out.print("<p>ERROR publicando recursos</p>");
-      out.print("<p>" + e.getCause().toString() + "</p>");
-    }*/
-        out.print("</ul>");
-    } else {
-        out.print("<h2>" + "Debe incluir el parametro 'type'" + "</h2>");
     }
-    out.print("</div>");
 %>
-
+<div>
+    <h1>Results (<%=messages.size()%>)</h1>
+    <c:if test="<%=messages.size() > 0%>">
+        <c:forEach items="<%=messages.entrySet()%>" var="entry" varStatus="status">
+            ${status.count};${entry.key};${entry.value}<br/>
+        </c:forEach>
+    </c:if>
+</div>

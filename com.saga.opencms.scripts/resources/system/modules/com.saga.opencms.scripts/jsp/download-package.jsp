@@ -4,16 +4,16 @@
 <%@ page import="java.io.FileInputStream" %>
 
 <%
-    /*String filename = "com.saga.caprabo.frontend_1.1.zip";
+    String filename = "es.extremadura.psdt.rrtt_1.0.26.zip";
     String folder = "packages/modules";
-    String mimeType = "application/zip";*/
+    String mimeType = "application/zip";
     /*String filename = "upo-servicios-site-2017-10-04.zip";
     String folder = "packages";
     String mimeType = "application/zip";*/
 	
-    String filename = "opencms-system.xml";
+    /*String filename = "opencms-system.xml";
     String folder = "config";
-    String mimeType = "text/plain";
+    String mimeType = "text/plain";*/
 
     String webInfPath = OpenCms.getSystemInfo().getWebInfRfsPath();
     String filepath = webInfPath + folder + "/" + filename;

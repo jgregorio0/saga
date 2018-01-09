@@ -1,9 +1,13 @@
+<%@ page import="org.opencms.main.OpenCms" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 <div>
-    <h1>##### Heap utilization statistics [MB] #####</h1>
+    <h1>Nodo</h1>
+    <p>Nombre del nodo: <%= OpenCms.getSystemInfo().getServerName() %></p>
 
+    <h1>##### Heap utilization statistics [MB] #####</h1>
     <%
-        int mb = 1024*1024;
+
+        int mb = 1024 * 1024;
 
         //Getting the runtime reference from system
         Runtime runtime = Runtime.getRuntime();
@@ -22,8 +26,15 @@
         //Print Maximum available memory
         String maxMem = "Max Memory:" + runtime.maxMemory() / mb;
     %>
-    <p><%=usedMem%></p>
-    <p><%=freeMem%></p>
-    <p><%=totalMem%></p>
-    <p><%=maxMem%></p>
+    <p><%=usedMem%>
+    </p>
+
+    <p><%=freeMem%>
+    </p>
+
+    <p><%=totalMem%>
+    </p>
+
+    <p><%=maxMem%>
+    </p>
 </div>

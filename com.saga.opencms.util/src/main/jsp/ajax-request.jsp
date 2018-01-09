@@ -1,3 +1,4 @@
+<%@ taglib prefix="cms" uri="http://www.opencms.org/taglib/cms" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 <div>
     <div id="idFav"></div>
@@ -26,3 +27,5 @@
         });
     </script>
 </div>
+
+<cms:contentload collector="byQuery" param="${queryReq}&fl=Title_es_s${querySort}" pageSize="${nResPagina}" pageIndex="${paginaBusqueda}" pageNavLength="${nPaginasPorPagina}">

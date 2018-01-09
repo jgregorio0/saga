@@ -14,5 +14,3 @@ include 'com.saga.opencms.sigmagrid'
 
 include 'com.saga.opencms.backgrid'
 
-include 'com.saga.opencms.backgrid'
-
