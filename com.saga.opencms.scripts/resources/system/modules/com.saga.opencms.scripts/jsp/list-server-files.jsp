@@ -1,8 +1,9 @@
+<%@ page import="org.opencms.file.CmsResource" %>
 <%@ page import="org.opencms.main.CmsException" %>
+<%@ page import="org.opencms.main.OpenCms" %>
 <%@ page import="org.opencms.util.CmsStringUtil" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.Arrays" %>
-<%@ page import="org.opencms.file.CmsResource" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -25,6 +26,8 @@
 <div>
 	<%
 		String path = "/";
+		String logsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("logs/");
+		String libsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("libs/");
 		String[] children = {};
 		try {
 			path = request.getParameter("path");
@@ -40,6 +43,9 @@
 		}
 	%>
 	<ul>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=/'>/</a></li>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=logsPath%>'>LOGS</a></li>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=libsPath%>'>LIBS</a></li>
 		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=parentPath(pageContext)%>'>..</a></li>
 		<c:forEach items="${children}" var="child">
 			<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=childPath(pageContext)%>'>${child}</a></li>
