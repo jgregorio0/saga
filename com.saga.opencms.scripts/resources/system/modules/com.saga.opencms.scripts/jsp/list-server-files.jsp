@@ -4,6 +4,8 @@
 <%@ page import="org.opencms.util.CmsStringUtil" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="java.io.BufferedInputStream" %>
+<%@ page import="java.io.FileInputStream" %>
 <%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -27,14 +29,32 @@
 	<%
 		String path = "/";
 		String logsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("logs/");
-		String libsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("libs/");
+		String libsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("lib/");
+		String ocmsPath = OpenCms.getSystemInfo().getAbsoluteRfsPathRelativeToWebInf("");
 		String[] children = {};
 		try {
 			path = request.getParameter("path");
 			path = path == null ? "/" : path;
 			File f = new File(path);
-			children = f.list();
-			Arrays.sort(children);
+			if (f.isDirectory()) {
+				children = f.list();
+				Arrays.sort(children);
+			} else {
+				String mimeType = "application/zip";
+				response.setContentType(mimeType);
+				response.setHeader("Content-Disposition","attachment; filename=\"" + f.getName() + "\"");
+
+				byte[] buf = new byte[1024];
+				long length = f.length();
+				BufferedInputStream in = new BufferedInputStream(new FileInputStream(f));
+				ServletOutputStream os = response.getOutputStream();
+				response.setContentLength((int) length);
+				while ((in != null) && ((length = in.read(buf)) != -1)) {
+					os.write(buf, 0, (int) length);
+				}
+				in.close();
+				os.close();
+			}
 		} catch (Exception e) {
 			out.println(CmsException.getStackTraceAsString(e));
 		} finally {
@@ -44,8 +64,9 @@
 	%>
 	<ul>
 		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=/'>/</a></li>
-		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=logsPath%>'>LOGS</a></li>
-		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=libsPath%>'>LIBS</a></li>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=logsPath%>'>LOG</a></li>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=libsPath%>'>LIB</a></li>
+		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=ocmsPath%>'>OCMS</a></li>
 		<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=parentPath(pageContext)%>'>..</a></li>
 		<c:forEach items="${children}" var="child">
 			<li><a href='<cms:link>${cms.template.uri}</cms:link>?path=<%=childPath(pageContext)%>'>${child}</a></li>
