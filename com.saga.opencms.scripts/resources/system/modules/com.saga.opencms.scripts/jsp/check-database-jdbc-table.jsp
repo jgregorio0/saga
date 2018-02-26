@@ -6,71 +6,81 @@
 
 <div>
 
-  <%--MYSQL--%>
-  <%
-    String url =
-    String user =
-    String pass =
+    <%
+        String QUERY_ASIGNATURAS_EQ_TIT_DIFF_CENTRO =
+                "select DISTINCT p.*, a.NOMBRE_AREA, a.ID_DEPARTAMENTO"
+                        + " from PROFESOR p"
+                        + " INNER JOIN AREA a on a.ID_AREA = p.ID_AREA"
+                        + " INNER JOIN ASIGN_PROFE asig on asig.ID_PROFESOR = p.ID_PROFESOR"
+//                        + " where p.ID_PROFESOR=?";
+                        + " GROUP BY p.ID_PROFESOR";
 
-    String QUERY = "SELECT * FROM pim_db.view_products WHERE HOUR(TIMEDIFF(NOW(), date_lastupdate)) <= 26;";
+        // TODO modify conection data
+        String url = "jdbc:oracle:thin:@{URL}:{PORT}/{SCHEMA}";
+        String user = "USER";
+        String pass = "PASS";
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = DriverManager.getConnection(url, user, pass);
+            out.println("<p>Establecida conexion</p>");
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(QUERY_ASIGNATURAS_EQ_TIT_DIFF_CENTRO);
 
-    Connection con = null;
-    Statement stmt = null;
-    ResultSet rs = null;
-    try {
-      con = DriverManager.getConnection(url, user, pass);
-      out.println("<p>Establecida conexion</p>");
-      stmt = con.createStatement();
-      rs = stmt.executeQuery(QUERY);
+//            METADATA
+            HashMap<String, Integer> colNameType = new HashMap<String, Integer>();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnCount = rsmd.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                String columnName = rsmd.getColumnName(i);
+                int columnType = rsmd.getColumnType(i);
+                colNameType.put(columnName, columnType);
+            }
 
-      // Column names
-//    out.println("<h1>Cabecera</h1>");
-      out.println("<table style=\"width:100%\">");
-      out.println("<tr>");
-      HashMap<String, Integer> colNameType = new HashMap<String, Integer>();
-      ResultSetMetaData rsmd = rs.getMetaData();
-      int columnCount = rsmd.getColumnCount();
-      out.println("<th>Num</th>");
-      for (int i = 1; i <= columnCount; i++) {
-        out.println("<th>");
-        String columnName = rsmd.getColumnName(i);
-        int columnType = rsmd.getColumnType(i);
-        colNameType.put(columnName, columnType);
-        out.println(columnName + "(" + columnType + ")");
-        out.println("</th>");
-      }
-      out.println("</tr>");
-
-      // Dynamic Content
-//    out.println("<h1>Contenido</h1>");
-      int count = 0;
-      while (rs.next()) {
-        out.println("<tr>");
-        count++;
-        out.println("<td>" + count + "</td>");
-        Iterator<String> it = colNameType.keySet().iterator();
-        while (it.hasNext()){
-          String colName = it.next();
-          String colValue = rs.getString(colName);
+//            TABLE HEADER
+            out.println("<table style=\"width:100%\">");
+            out.println("<tr>");
+            out.println("<th>Num</th>");
+            Iterator<String> it = colNameType.keySet().iterator();
+            while (it.hasNext()) {
+                String colName = it.next();
+                Integer colType = colNameType.get(colName);
 //        out.println("<p>" + colName + ": " + colValue + "</p>");
-          out.println("<td>" + colValue + "</td>");
+                out.println("<th>" + colName + "(" + colType + ")" + "</th>");
+            }
+
+            out.println("</tr>");
+
+//            TABLE BODY
+            int count = 0;
+            while (rs.next()) {
+                out.println("<tr>");
+                count++;
+                out.println("<td>" + count + "</td>");
+                it = colNameType.keySet().iterator();
+                while (it.hasNext()) {
+                    String colName = it.next();
+                    String colValue = rs.getString(colName);
+//        out.println("<p>" + colName + ": " + colValue + "</p>");
+                    out.println("<td>" + colValue + "</td>");
+                }
+                out.println("</tr>");
+            }
+            out.println("</table>");
+        } catch (Exception e) {
+            out.println("ERROR");
+            out.println(e.getMessage());
+        } finally {
+            if (con != null) {
+                con.close();
+            }
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
         }
-        out.println("</tr>");
-      }
-      out.println("</table>");
-    } catch (Exception e) {
-      out.println("ERROR");
-      out.println(e.getMessage());
-    } finally {
-      if (con != null) {
-        con.close();
-      }
-      if (stmt != null) {
-        stmt.close();
-      }
-      if (rs != null) {
-        rs.close();
-      }
-    }
-  %>
+    %>
 </div>

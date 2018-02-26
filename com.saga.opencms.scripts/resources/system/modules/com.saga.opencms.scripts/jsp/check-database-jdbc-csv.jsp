@@ -7,7 +7,7 @@
 
 <%--MYSQL--%>
 <%
-  String url = "jdbc:mysql://wordpress-rds.cq90jkt2ggmk.eu-west-1.rds.amazonaws.com:3306/pim_db";
+  String url = "jdbc:mysql://{URL}:{PORT}/{SCHEMA}";
   String user = "pim_ro_user";
   String pass = "23nfaHA/-m";
 
