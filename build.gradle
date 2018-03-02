@@ -7,7 +7,7 @@ allprojects {
     group = group_saga
 
     repositories {
-        mavenLocal()
+//        mavenLocal()
         mavenCentral()
     }
 
