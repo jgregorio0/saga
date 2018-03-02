@@ -1,7 +1,10 @@
 package com.saga.opencms.util
 
 import com.mitchellbosecke.pebble.error.PebbleException
-import org.apache.commons.mail.*;
+import org.apache.commons.mail.*
+import org.opencms.mail.CmsMailHost
+import org.opencms.main.OpenCms
+import org.opencms.site.CmsSite;
 
 public class SgEmail {
 
@@ -22,6 +25,49 @@ public class SgEmail {
 		setAuth(new DefaultAuthenticator(user, pass));
 		setSSL(isSSL);
 		setEncoding(encoding);
+		setBase(base)
+	}
+
+
+
+	public SgEmail(boolean isSSL, String encoding, String siteRoot) {
+		CmsMailHost defaultMailHost = OpenCms.getSystemInfo().getMailSettings().getDefaultMailHost();
+		String baseUrl = getBaseUrl(siteRoot);
+		initSgEmail(defaultMailHost.getHostname(), defaultMailHost.getPort(), defaultMailHost.getUsername(), defaultMailHost.getPassword(), isSSL, encoding, baseUrl);
+	}
+
+	/**
+	 * Find base url for siteRoot from the given path
+	 * @param path
+	 * @return
+	 */
+	public static String getBaseUrl(String path) {
+		String urlBase = null;
+		String siteRoot = path;
+		CmsSite siteForSiteRoot = OpenCms.getSiteManager().getSiteForSiteRoot(siteRoot);
+
+		if (siteForSiteRoot != null) {
+			urlBase = siteForSiteRoot.getUrl();
+		} else {
+			int iLastSlash = siteRoot.lastIndexOf("/");
+			if (iLastSlash > 0) {
+				siteRoot = siteRoot.substring(0, iLastSlash);
+				urlBase = getBaseUrl(siteRoot);
+			}
+		}
+
+		return urlBase;
+	}
+
+	private void initSgEmail(String host, Integer port,
+							 String user, String pass,
+							 boolean isSSL, String encoding, String base){
+		setHost(host);
+		setPort(port);
+		setAuth(new DefaultAuthenticator(user, pass));
+		setSSL(isSSL);
+		setEncoding(encoding);
+		setBase(base)
 	}
 
 	private void initEmail(Email email) {
@@ -70,6 +116,14 @@ public class SgEmail {
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	String getBase() {
+		return base
+	}
+
+	void setBase(String base) {
+		this.base = base
 	}
 
 	public void sendHtmlEmail(String from, List<String> to, String subject, String html) throws EmailException {
