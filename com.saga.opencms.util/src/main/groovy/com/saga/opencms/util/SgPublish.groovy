@@ -89,6 +89,24 @@ public class SgPublish {
     }
 
     /**
+     * Publish with class generated report //TODO test if report show publishing resources
+     * @param cmso
+     * @param clazz
+     * @param resourcename
+     * @param sibilings
+     * @throws CmsException
+     */
+    public void publish(CmsObject cmso, Class clazz, String resourcename, boolean sibilings) throws CmsException {
+        I_CmsReport report = new CmsLogReport(
+                cmso.getRequestContext().getLocale(),
+                clazz);
+        CmsPublishManager publishManager = OpenCms.getPublishManager();
+        CmsResource resource = cmso.readResource(resourcename, CmsResourceFilter.ALL);
+        publishManager.publishProject(cmso, report, resource, sibilings);
+//        publishManager.waitWhileRunning();
+    }
+
+    /**
      * Add resource to publish list
      * @param resource
      */
