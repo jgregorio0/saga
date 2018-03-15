@@ -28,4 +28,4 @@ com.saga.opencms.fileupload/com.saga.opencms.fileupload.iml
 /com.saga.opencms.shopping/com.saga.opencms.shopping.iml
 /com.saga.opencms.shopping/shopping.iml
 
-saga.iml
+*.iml
