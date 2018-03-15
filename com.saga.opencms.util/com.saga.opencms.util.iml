@@ -24,24 +24,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="Gradle: SagaSuiteScriptJsp-1.5">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/SagaSuiteScriptJsp-1.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="Gradle: com.alkacon.opencms.v8.formgenerator">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/com.alkacon.opencms.v8.formgenerator.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="Gradle: org.opencms:opencms-core:9.5.3" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpclient:4.5.2" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.8.5" level="project" />
@@ -167,6 +149,24 @@
     <orderEntry type="library" name="Gradle: org.apache.httpcomponents:httpcore:4.4.4" level="project" />
     <orderEntry type="library" name="Gradle: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Gradle: commons-codec:commons-codec:1.9" level="project" />
+    <orderEntry type="module-library">
+      <library name="Gradle: SagaSuiteScriptJsp-1.5">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/SagaSuiteScriptJsp-1.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Gradle: com.alkacon.opencms.v8.formgenerator">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/com.alkacon.opencms.v8.formgenerator.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="library" scope="TEST" name="Gradle: junit:junit:4.11" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
   </component>
