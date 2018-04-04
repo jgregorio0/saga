@@ -533,6 +533,7 @@ public class SgCnt {
 			throws CmsException {
 		SgCms.lock(cmso, this.path);
 		file.setContents(xmlContent.marshal());
+		repair()
 		cmso.writeFile(file);
 		SgCms.unlock(cmso, this.path);
 		return this;
