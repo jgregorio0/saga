@@ -20,7 +20,7 @@ public class SgMustache {
 
 	private CmsObject cmso;
 
-	public MustacheUtil(CmsObject cmso) {
+	public SgMustache(CmsObject cmso) {
 		this.cmso = cmso;
 	}
 

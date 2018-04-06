@@ -2,7 +2,9 @@ package com.saga.opencms.util
 
 import com.mitchellbosecke.pebble.error.PebbleException
 import org.apache.commons.mail.*
+import org.opencms.file.CmsObject
 import org.opencms.mail.CmsMailHost
+import org.opencms.main.CmsException
 import org.opencms.main.OpenCms
 import org.opencms.site.CmsSite;
 
@@ -164,4 +166,30 @@ public class SgEmail {
 		return new SgPebble().process(template, context);
 	}
 
+
+	/**
+	 * Send email searching template in VFS
+	 * @param cmso
+	 * @param from
+	 * @param to
+	 * @param subject
+	 * @param template
+	 * @param context
+	 * @throws IOException
+	 * @throws EmailException
+	 */
+	public void sendMustacheTemplateMail(
+			CmsObject cmso,
+			String from, List<String> to, String subject,
+			String template, Map<String, Object> context)
+			throws IOException, EmailException, CmsException {
+		String htmlContent = initMustacheTemplate(cmso, template, context);
+		sendHtmlEmail(from, to, subject, htmlContent);
+	}
+
+	private String initMustacheTemplate(CmsObject cmso, String template, Map<String, Object> context)
+			throws IOException, CmsException {
+		context.put("base", base);
+		return new SgMustache(cmso).process(template, context);
+	}
 }
