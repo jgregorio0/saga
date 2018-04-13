@@ -6,7 +6,9 @@ import org.opencms.file.CmsObject
 import org.opencms.mail.CmsMailHost
 import org.opencms.main.CmsException
 import org.opencms.main.OpenCms
-import org.opencms.site.CmsSite;
+import org.opencms.site.CmsSite
+
+import javax.annotation.Nullable;
 
 public class SgEmail {
 
@@ -129,14 +131,32 @@ public class SgEmail {
 	}
 
 	public void sendHtmlEmail(String from, List<String> to, String subject, String html) throws EmailException {
+		sendHtmlEmail(from, to, null, subject, html);
+	}
+
+	public void sendHtmlEmail(String from, List<String> to, @Nullable List<String> bcc, String subject, String html) throws EmailException {
+		if (to == null || to.isEmpty()) {
+			throw new IllegalArgumentException("HtmlEmail must be sent to a recipient, thus 'to' must not be empty");
+		}
+
 		HtmlEmail htmlEmail = new HtmlEmail();
 		initEmail(htmlEmail);
 		htmlEmail.setSSL(isSSL());
 		htmlEmail.setFrom(from);
 		htmlEmail.setSubject(subject);
+
+		// to
 		for (int i = 0; i < to.size(); i++) {
 			htmlEmail.addTo(to.get(i));
 		}
+
+		// bcc
+		if (bcc != null) {
+			for (int i = 0; i < bcc.size(); i++) {
+				htmlEmail.addBcc(bcc.get(i));
+			}
+		}
+
 		htmlEmail.setHtmlMsg(html);
 		htmlEmail.send();
 	}
@@ -169,6 +189,7 @@ public class SgEmail {
 
 	/**
 	 * Send email searching template in VFS
+	 *
 	 * @param cmso
 	 * @param from
 	 * @param to
@@ -180,11 +201,36 @@ public class SgEmail {
 	 */
 	public void sendMustacheTemplateMail(
 			CmsObject cmso,
-			String from, List<String> to, String subject,
+			String from, List<String> to, @Nullable List<String> bcc, String subject,
 			String template, Map<String, Object> context)
 			throws IOException, EmailException, CmsException {
 		String htmlContent = initMustacheTemplate(cmso, template, context);
-		sendHtmlEmail(from, to, subject, htmlContent);
+		sendHtmlEmail(from, to, bcc, subject, htmlContent);
+	}
+
+	/**
+	 * Send email searching template in VFS
+	 *
+	 * @param cmso
+	 * @param from
+	 * @param to
+	 * @param subject
+	 * @param template
+	 * @param context
+	 * @throws IOException
+	 * @throws EmailException
+	 */
+	public void sendOneMailForEachToMustacheTemplate(
+			CmsObject cmso,
+			String from, List<String> to, @Nullable List<String> bcc, String subject,
+			String template, Map<String, Object> context)
+			throws IOException, EmailException, CmsException {
+		String htmlContent = initMustacheTemplate(cmso, template, context);
+		for (String recipient : to) {
+			ArrayList<String> recipients = new ArrayList<String>();
+			recipients.add(recipient);
+			sendHtmlEmail(from, recipients, bcc, subject, htmlContent);
+		}
 	}
 
 	private String initMustacheTemplate(CmsObject cmso, String template, Map<String, Object> context)
