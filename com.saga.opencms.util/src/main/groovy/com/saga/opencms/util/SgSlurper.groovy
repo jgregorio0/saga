@@ -78,4 +78,9 @@ public class SgSlurper {
 		result = new XmlSlurper(false, true, true).parseText(text)
 		return result;
 	}
+
+	public slurpTagSoup(){
+		result = new XmlSlurper(new org.ccil.cowan.tagsoup.Parser()).parseText(text)
+		return result
+	}
 }

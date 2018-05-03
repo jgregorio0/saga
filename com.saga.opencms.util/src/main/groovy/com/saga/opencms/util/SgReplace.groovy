@@ -503,4 +503,31 @@ public class SgReplace {
 		}
 		return null
 	}
+
+
+	public static List<String> findAllHref(String content){
+		def xml = new SgSlurper(content).slurpTagSoup();
+
+		List<String> hrefs = xml.depthFirst().inject([]) { list, node ->
+			if (node.@href != ""){
+				list.add(node.@href.text())
+			}
+			list
+		}
+
+		return hrefs;
+	}
+
+	public static List<String> findAllSrc(String content){
+		def xml = new SgSlurper(content).slurpTagSoup();
+
+		List<String> srcs = xml.depthFirst().inject([]) { list, node ->
+			if (node.@src != ""){
+				list.add(node.@src.text())
+			}
+			list
+		}
+
+		return srcs;
+	}
 }
