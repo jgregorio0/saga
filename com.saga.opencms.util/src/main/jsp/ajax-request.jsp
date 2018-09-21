@@ -1,34 +1,67 @@
-<%--Contenedor de elementos--%>
-<div id="proveedoresTabproveedores"></div>
+<div class="reinscripcion-container">
+    <%--FORM--%>
+    <form id="reinscripcion-form" class="form-inline" method="post"
+          data-controller="<cms:link>/system/modules/com.saga.cedinox/functions/f-reinscripcion-revista-datos-usuario-by-codigo-unico.jsp</cms:link>"
+          data-locale="${cms.locale}"
+          data-uri="${cms.requestContext.uri}">
+        <div class="form-group">
+            <label for="codigo-unico"><fmt:message key="reinscripcion.revista.codigo.unico.label"/></label>
+            <input type="text" class="form-control" id="codigo-unico"
+                   placeholder="<fmt:message key="reinscripcion.revista.codigo.unico.placeholder"/>">
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <fmt:message key="reinscripcion.revista.codigo.unico.validate"/></button>
+    </form>
 
-<%--Botón ver mas elementos--%>
-<a href="#" id="verMasProveedores"
-   title="Ver más"
-   class="verMasProveedores botones acciones destacados has-tip tip-top"
-   data-start="0"
-   data-rows="5"
-   data-container="proveedoresTabproveedores"
-   data-url="<cms:link>/system/modules/com.saga.bcieproveedores.frontend/formatters/site-saai/proceso-compra-proveedores-paginando-ajax.jsp</cms:link>"
-   data-loading="verMasProveedoresLoading"
-   data-params='{"uuid": "${param.uuid}"}'>
-    <i class="foundicon-plus text-32"></i>
-</a>
+    <%--LOADING OVERLAY--%>
+    <div id="reinscripcion-loading" class="fade" style="
+                                    background: rgba(255,255,255,0.4);
+                                    position: absolute;
+                                    left: 0;
+                                    right: 0;
+                                    top: 0;
+                                    bottom: 0;
+                                    width: 100%;
+                                    height: 100%;
+                                    -webkit-transition: all 0.3s ease;
+                                    -moz-transition: all 0.3s ease;
+                                    -ms-transition: all 0.3s ease;
+                                    -o-transition: all 0.3s ease;
+                                    transition: all 0.3s ease;
+                                    z-index: -1;">
+            <span class="fa fa-spinner fa-spin fa-3x fa-fw" style="
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                margin: -39px 0 0 -39px;
+                display: block;
+                color: #222;
+                /* z-index: 10000; */
+                "></span>
+        <span class="sr-only"><fmt:message key="reinscripcion.revista.loading"/></span>
+    </div>
+</div>
 
-<%--JS carga por AJAX --%>
 <script>
 
-    // Evento onclick para el botón ver mas elementos
-    $(document).ready(function () {
-        $('#verMasProveedores').on('click', verMasProveedores)
+    var _id = '#reinscripcion';
+    var _idContainer = _id + '-container';
+    var _idForm = _id + '-form';
+    var _idCodigoUnico = '#codigo-unico';
+    var _idLoading = _id + '-loading';
+
+    // Evento onclick para comprobar el codigo unico
+    $(function () {
+        $(_idForm).on('submit', loadDataByCodigoRevista)
     });
 
     // controlador carga de mas elementos
-    function verMasProveedores(e) {
-//        console.log('verMasProveedores', e);
+    function loadDataByCodigoRevista(e) {
+        console.log('verMasProveedores', e);
         e.preventDefault();
 
         try {
-            var ctxt = {id: 'verMasProveedores'};
+            var ctxt = {};
             load(ctxt);
             if (validate(ctxt)) {
                 execute(ctxt);
@@ -39,85 +72,74 @@
     }
 
     function load(ctxt) {
-//        console.log('load', ctxt);
+        console.log('load');
+        var $form = $(_idForm);
+        var codigoUnico = $form.find(_idCodigoUnico).val();
 
-        var btn = $('#' + ctxt.id);
-        var datas = btn.data();
-//        console.log('datas', datas);
-        ctxt.start = datas.start + 1;
-        ctxt.rows = datas.rows;
-        ctxt.container = datas.container;
-        ctxt.url = datas.url;
-        ctxt.loading = datas.loading;
-        ctxt.params = datas.params;
+        console.log('codigoUnico', codigoUnico);
+        ctxt.codigoUnico = codigoUnico;
+
+        var datas = $form.data();
+        ctxt.controller = datas.controller;
+        ctxt.locale = datas.locale;
+        ctxt.uri = datas.uri;
     }
 
     function validate(ctxt) {
-//        console.log('validate', ctxt);
-        if (ctxt.start === undefined || ctxt.start < 0) {
-            throw new Error('validate start data must not be undefined or less than 0: ' + ctxt.start)
+        console.log('validate', ctxt);
+        if (ctxt.codigoUnico === undefined || ctxt.codigoUnico.length < 0) {
+            throw new Error('codigoUnico must not be empty: ' + ctxt.codigoUnico)
         }
-        if (ctxt.rows === undefined || ctxt.rows < 1) {
-            throw new Error('validate rows data must not be undefined or less than 1: ' + ctxt.rows)
+        if (ctxt.controller === undefined || ctxt.controller.length < 0) {
+            throw new Error('controller must not be empty: ' + ctxt.controller)
         }
-        if (ctxt.container === undefined) {
-            throw new Error('validate container data must not be undefined: ' + ctxt.container)
+        if (ctxt.locale === undefined || ctxt.locale.length < 0) {
+            throw new Error('locale must not be empty: ' + ctxt.locale)
         }
-        if (ctxt.url === undefined) {
-            throw new Error('validate url data must not be undefined: ' + ctxt.url)
-        }
-        if (ctxt.loading === undefined) {
-            throw new Error('validate loading data must not be undefined: ' + ctxt.loading)
+        if (ctxt.uri === undefined || ctxt.uri.length < 0) {
+            throw new Error('uri must not be empty: ' + ctxt.uri)
         }
         return true;
     }
 
     function execute(ctxt) {
-//        console.log('execute', ctxt);
+        console.log('execute', ctxt);
 
-        loading(ctxt);
+        showLoading(ctxt);
+        var params = loadParams(ctxt);
 
-        var params = params(ctxt);
-
-        $.post(ctxt.url, params)
-                .done(function (data) {
-//                    console.log('done execute - append data to container', ctxt, data);
-                    updateData(ctxt, data)
-                })
-                .fail(function (err) {
-                    console.error("ERROR execute", ctxt, err);
-                })
-                .always(function () {
+        $.post(ctxt.controller, params)
+            .done(function (data) {
+                console.log('done execute', ctxt, data);
+                // updateData(ctxt, data)
+            })
+            .fail(function (err) {
+                console.error("ERROR execute", ctxt, err);
+            })
+            .always(function () {
 //                    console.log('always update')
-                    update(ctxt);
-                })
+                update(ctxt);
+            })
     }
 
-    function loading(ctxt) {
-//        console.log('loading', ctxt);
-        $('#' + ctxt.id).hide();
-        $('#' + ctxt.loading).show();
+    function showLoading() {
+        var $loading = $(_idLoading);
+        $loading.addClass('in');
+        $loading.css('z-index', 0);
     }
 
-    function params(ctxt){
-        return {start: ctxt.start, rows: ctxt.rows}
+    function hideLoading() {
+        var $loading = $(_idLoading);
+        $loading.removeClass('in');
+        $loading.css('z-index', -1);
     }
 
-    function updateData(ctxt, data){
-        if (data.trim() === "") {
-//                        console.log('no more results');
-            $('#' + ctxt.id).html('No hay más resultados').unbind('click');
-        } else {
-            $('#' + ctxt.container).append(data);
-        }
+    function loadParams(ctxt) {
+        return {locale: ctxt.locale, uri: ctxt.uri, codigoUnico: ctxt.codigoUnico}
     }
 
     function update(ctxt) {
 //        console.log('update', ctxt);
-        var btn = $('#' + ctxt.id)
-        btn.data('start', ctxt.start + 1);
-
-        $('#' + ctxt.loading).hide();
-        $('#' + ctxt.id).show();
+        hideLoading();
     }
 </script>

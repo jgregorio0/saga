@@ -717,7 +717,7 @@ public class SgSolrJson {
 		try {
 			jResult = new JSONObject(jsonStr);
 		} catch (Exception e) {
-			LOG.debug("parsing json resutls", e);
+			LOG.debug("parsing json results", e);
 		}
 		return jResult;
 	}
