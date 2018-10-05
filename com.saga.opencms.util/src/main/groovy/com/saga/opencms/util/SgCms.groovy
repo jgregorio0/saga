@@ -572,11 +572,16 @@ class SgCms {
      * @param pathTo
      * @return
      */
-    def copyResource(String pathFrom, String pathTo) {
+    def copyResource(String pathFrom, String pathTo, boolean ensureParentFolder) {
 
         // Comprobamos si ya existe
-        if (cmso.existsResource(pathTo)) {
+        if (cmso.existsResource(pathTo, CmsResourceFilter.ALL)) {
             throw new IllegalArgumentException("ERROR: resource $pathTo already exists")
+        }
+
+        if (ensureParentFolder) {
+            String parentFolder = CmsResource.getParentFolder(pathTo)
+            ensureResource(parentFolder, FOLDER_TYPE)
         }
 
         // Copiamos el recurso
