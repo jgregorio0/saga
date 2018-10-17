@@ -46,6 +46,7 @@ public class SgSolr {
     public static final String Q_ROWS = "rows=";
     public static final String Q_START = "start=";
     public static final String Q_FACET = "facet=true";
+    public static final String Q_FACET_LIMIT = "facet.limit=";
     public static final String Q_FACET_FIELD = "facet.field=";
     public static final String Q_FACET_MIN_COUNT = "facet.mincount=";
     public static final String Q_SEP = "&";
