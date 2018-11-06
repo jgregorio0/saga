@@ -73,11 +73,12 @@
 
     function load(ctxt) {
         console.log('load');
-        var $form = $(_idForm);
+        ctxt.inputs = $(_idForm).serializeArray();
+        /*var $form = $(_idForm);
         var codigoUnico = $form.find(_idCodigoUnico).val();
 
         console.log('codigoUnico', codigoUnico);
-        ctxt.codigoUnico = codigoUnico;
+        ctxt.codigoUnico = codigoUnico;*/
 
         var datas = $form.data();
         ctxt.controller = datas.controller;

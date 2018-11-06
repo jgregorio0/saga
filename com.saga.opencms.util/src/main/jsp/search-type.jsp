@@ -9,13 +9,14 @@
 
 <%
     String type = request.getParameter("type");
+    String path = request.getParameter("path");
     CmsObject cmso = CmsFlexController.getCmsObject(request);
     CmsResourceFilter filter = CmsResourceFilter.ALL.addRequireFile();
     out.print("<div>");
     if (!StringUtils.isEmpty(type)) {
         filter = filter.addRequireType(
                 OpenCms.getResourceManager().getResourceType(type));
-        List<CmsResource> resources = cmso.readResources("/", filter, true);
+        List<CmsResource> resources = cmso.readResources(path != null ? path : "/", filter, true);
         out.print("<ul>");
         for (int i = 0; i < resources.size(); i++) {
             CmsResource res = resources.get(i);
