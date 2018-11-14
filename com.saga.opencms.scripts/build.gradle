@@ -11,3 +11,11 @@ repositories {
 dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.7'
 }
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["resources/system/modules", "src/main/java"]
+        }
+    }
+}
