@@ -79,8 +79,10 @@ public class SgSlurper {
 		return result;
 	}
 
+	/*     compile group: 'org.ccil.cowan.tagsoup', name: 'tagsoup', version: '1.2.1'
+
 	public slurpTagSoup(){
 		result = new XmlSlurper(new org.ccil.cowan.tagsoup.Parser()).parseText(text)
 		return result
-	}
+	}*/
 }
