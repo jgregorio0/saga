@@ -19,6 +19,88 @@ public class SgCntMap {
         this.cmso = cmso;
     }
 
+    //TODO revisar
+    /**
+     * Parse each parent node recursively
+     * @param xml
+     * @return
+     */
+    def toMapNode2(GPathResult node) {
+        if (node.children().size() == 0) {
+
+            // nodo final
+            return [(toMapName2(node)): toMapValue2(node)]
+        } else {
+
+            // nodo padre
+            def children = node.children().inject([:]) { map, child ->
+                map << toMapChild2(map, child)
+                return map
+            }
+            return [(toMapName2(node)): children]
+        }
+    }
+
+    /**
+     * Chech if it has brother and parse child node
+     * @param map
+     * @param child
+     * @return
+     */
+    def toMapChild2(def map, def child) {
+        def name = toMapName2(child);
+        def brother = map.get(name);
+        if (!brother) {
+            // No brother
+            return toMapNode2(child)
+        } else {
+            if (!(brother instanceof List)) {
+                // Create list with brother
+                def list = [brother]
+                list.addAll(toMapNode2(child).values())
+                return [(toMapName2(child)): list]
+            } else {
+                // Add brother to list
+                brother.addAll(toMapNode2(child).values())
+                return [(toMapName2(child)): brother]
+            }
+        }
+    }
+
+    def toMapValue2(def child) {
+        def tag = child.name();
+        switch (tag) {
+            case "documento":
+                String url = child.@url.text()
+                String text = child.text()
+                return [url: "$url", text: "$text"]
+            case "enlace":
+                String url = child.@url.text()
+                String text = child.text()
+                return [url: "$url", text: "$text"]
+            case "imagen":
+                String url = child.@url.text()
+                String text = child.text()
+                return [url: "$url", text: "$text"]
+            default:
+                return child.text()
+        }
+    }
+
+    def toMapName2(def child) {
+        def tag = child.name();
+        switch (tag) {
+            case "resource":
+                return child.@resourceId.text() + "@" + child.@rootPath.text()
+            case "propertiesIndividual":
+                return "properties"
+            case "propertiesInherited":
+                return "propertiesHeritance"
+            default:
+                return tag
+        }
+    }
+
     /**
      * Parse control code xml to json
      * @param strContent
@@ -62,7 +144,7 @@ public class SgCntMap {
 //			println("map: " + map)
             def lang = child.@language.text();
             if (lang) {
-                map << [ "$lang" : toMapChild(map, child) ]
+                map << ["$lang": toMapChild(map, child)]
             } else {
                 map << toMapChild(map, child)
             }
@@ -76,21 +158,21 @@ public class SgCntMap {
      * @param child
      * @return
      */
-    public static def toMapChild(def map, def child){
+    public static def toMapChild(def map, def child) {
         def name = child.name();
         def brother = map.get(name);
         if (brother) {
             // Has brother
-            if (brother instanceof List){
+            if (brother instanceof List) {
                 // Add to list brother
-                [ (child.name()) : (brother) << toMapChild(child) ]
+                [(child.name()): (brother) << toMapChild(child)]
             } else {
                 // Create list with brother
-                [ (child.name()) : [brother, toMapChild(child)]]
+                [(child.name()): [brother, toMapChild(child)]]
             }
         } else {
             // No brother
-            [ (child.name()) : toMapChild(child)]
+            [(child.name()): toMapChild(child)]
         }
 
     }
@@ -100,23 +182,17 @@ public class SgCntMap {
      * @param child
      * @return
      */
-    public static def toMapChild(def child){
+    public static def toMapChild(def child) {
         (child.children().size() > 0 ? toMapParent(child) : child.text())
     }
 
     /**
      * Map content (Stringify JSON) and properties (Map) to resource
      *
-     * {
-     *  locale -> "en": {
-     *   rootnode -> "Profesor":{
-     *    string -> "Nombre":"PEREZ GARCÍA, LUIS",
+     *{*  locale -> "en": {*   rootnode -> "Profesor":{*    string -> "Nombre":"PEREZ GARCÍA, LUIS",
      *    map -> "Departamento":{"link":{"target":"/sites/facultad/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
      *    list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":"Google"},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":"Wikipedia"},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":"Saga"}]
-     *   }
-     *  }
-     * }
-     *
+     *}*}*}*
      * @param cmso
      * @param path
      * @param type
@@ -124,23 +200,17 @@ public class SgCntMap {
      * @param props Map properties [propName : propValue]
      * @return
      */
-    public void mapResource(String path, String type, String jsonStr){
+    public void mapResource(String path, String type, String jsonStr) {
         mapResource(path, type, jsonStr, [:])
     }
 
     /**
      * Map content (Stringify JSON) and properties (Map) to resource
      *
-     * {
-     *  locale -> "en": {
-     *   rootnode -> "Profesor":{
-     *    string -> "Nombre":"PEREZ GARCÍA, LUIS",
+     *{*  locale -> "en": {*   rootnode -> "Profesor":{*    string -> "Nombre":"PEREZ GARCÍA, LUIS",
      *    map -> "Departamento":{"link":{"target":"/sites/facultad/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
      *    list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":"Google"},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":"Wikipedia"},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":"Saga"}]
-     *   }
-     *  }
-     * }
-     *
+     *}*}*}*
      * @param cmso
      * @param path
      * @param type
@@ -150,7 +220,7 @@ public class SgCntMap {
      */
     public void mapResource(
             String path, String type,
-            String jsonStrCnt, Map<String, String> props){
+            String jsonStrCnt, Map<String, String> props) {
         // create resource
         SgCms sgCms = new SgCms(cmso);
         sgCms.createResource(path, type);
@@ -167,25 +237,19 @@ public class SgCntMap {
 
     /**
      * Add content to resource given by map
-     * {
-     *   locale -> "en": {
-     *    rootnode -> "Profesor":{
-     *     string -> "Nombre":"PÉREZ GARCÍA, LUIS",
+     *{*   locale -> "en": {*    rootnode -> "Profesor":{*     string -> "Nombre":"PÉREZ GARCÍA, LUIS",
      *     map -> "Departamento":{"link":{"target":"/sites/facultad/.content/departamento/dpu.xml","uuid":"2b378fe2-20e5-11e6-aef9-7fb253176922"}},
      *     list -> "LinkInteres":[{"Href":{"link":{"target":"https://www.google.es"}},"Title":""},{"Href":{"link":{"target":"https://www.wikipedia.es"}},"Title":""},{"Href":{"link":{"target":"https://www.saga.es"}},"Title":""},"\n        Hola\n    "]
-     *    }
-     *   }
-     *  }
-     * @param cmso
+     *}*}*}* @param cmso
      * @param path
-     * @param map {"en":{"Profesor":{"Nombre":"PÉREZ GARCÍA, LUIS", ...}}, "es":{...}}
+     * @param map{"en":{"Profesor":{"Nombre":"PÉREZ GARCÍA, LUIS", ...}}, "es":{...}}
      */
-    public void addContent(String path, Map map){
+    public void addContent(String path, Map map) {
         // content
         SgCnt sgCnt = new SgCnt(cmso, path);
 
         // each locale
-        map.each {k,v ->
+        map.each { k, v ->
 
             // init locale
             sgCnt.initLocale(k);
@@ -207,9 +271,9 @@ public class SgCntMap {
      * @param xmlPath
      * @param map
      */
-    public static void addContentMap(SgCnt sgCnt, String xmlPath, Map map){
+    public static void addContentMap(SgCnt sgCnt, String xmlPath, Map map) {
         // For each entry add content
-        map.each { k,v ->
+        map.each { k, v ->
             addJsonContent(sgCnt, xmlPath, k, v, 1);
         }
     }
@@ -224,7 +288,7 @@ public class SgCntMap {
      */
     public static void addJsonContent(
             SgCnt sgCnt, String xmlPath,
-            String k, def v, int pos){
+            String k, def v, int pos) {
         // next xmlPath
         xmlPath = nextXmlPath(xmlPath, k, pos);
         // Link
@@ -266,7 +330,7 @@ public class SgCntMap {
      * @param xmlPath
      * @param map
      */
-    public static void addContentLink(SgCnt sgCnt, String xmlPath, Map map){
+    public static void addContentLink(SgCnt sgCnt, String xmlPath, Map map) {
         String parentXmlPath = getParentXmlPath(xmlPath);
         addContentString(sgCnt, parentXmlPath, map.get(TARGET));
     }
@@ -277,7 +341,7 @@ public class SgCntMap {
      * @param xmlPath
      * @param value
      */
-    public static void addContentString(SgCnt sgCnt, String xmlPath, String value){
+    public static void addContentString(SgCnt sgCnt, String xmlPath, String value) {
         sgCnt.setStringValue(xmlPath, value);
     }
 
@@ -287,10 +351,10 @@ public class SgCntMap {
      * @param xmlPath
      * @param list
      */
-    public static void addContentList(SgCnt sgCnt, String xmlPath, List list){
+    public static void addContentList(SgCnt sgCnt, String xmlPath, List list) {
         String k = getLastElemPath(xmlPath);
         list.eachWithIndex { v, i ->
-            addJsonContent(sgCnt, xmlPath, k, v, i+1);
+            addJsonContent(sgCnt, xmlPath, k, v, i + 1);
         }
     }
 
@@ -299,7 +363,7 @@ public class SgCntMap {
      * @param xmlPath
      * @return
      */
-    public static String getLastElemPath(String xmlPath){
+    public static String getLastElemPath(String xmlPath) {
         return xmlPath.substring(xmlPath.lastIndexOf("/") + 1);
     }
 
@@ -308,7 +372,7 @@ public class SgCntMap {
      * @param xmlPath
      * @return
      */
-    public static String getParentXmlPath(String xmlPath){
+    public static String getParentXmlPath(String xmlPath) {
         return xmlPath.substring(0, xmlPath.lastIndexOf("/"));
     }
 }

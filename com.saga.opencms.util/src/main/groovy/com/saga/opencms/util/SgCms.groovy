@@ -43,6 +43,9 @@ class SgCms {
     public static String BINARY_TYPE = "binary";
     public static String FOLDER_TYPE = "folder";
     public static String PLAIN_TYPE = "plain";
+    public static String JSP_TYPE = "jsp";
+    public static String CONTAINERPAGE_TYPE = "containerpage";
+    public static String HTML_REDIRECT_TYPE = "htmlredirect";
     public static String IMAGE_GALLERY_TYPE = "imagegallery";
     public static String DOWNLOAD_GALLERY_TYPE = "downloadgallery";
     public static String LINK_GALLERY_TYPE = "linkgallery";
