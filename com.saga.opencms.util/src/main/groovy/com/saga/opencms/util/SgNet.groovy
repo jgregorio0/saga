@@ -34,12 +34,17 @@ public class SgNet {
     BasicCookieStore cookieStore;
     RequestConfig requestConfig;
 
+    Exception exception;
     int resCode;
     String resStr;
 
     public SgNet(){
     }
 
+    /**
+     *
+     * @param timeout milliseconds
+     */
     public SgNet(int timeout){
         this.requestConfig = initRequestConfig(timeout);
     }
@@ -181,19 +186,33 @@ public class SgNet {
     /**
      * Execute get to url
      * @param url
-     * @throws IOException
+     * @param charset
+     * @param close
      */
-    public void get(String url) throws IOException {
-        initClient();
-        HttpGet httpGet = new HttpGet(url);
-        CloseableHttpResponse res = client.execute(httpGet);
-//        EntityUtils.consume(res.getEntity());
-        resCode = res.getStatusLine().getStatusCode();
-        HttpEntity resEntity = res.getEntity();
-        if (resEntity != null)
-            resStr = EntityUtils.toString(resEntity);
-        LOG.debug("check service " + url + " (" + resCode + "): " + resStr);
-        client.close();
+    public void get(String url, String charset, boolean close) {
+        resCode = null;
+        resStr = null;
+        try {
+            if (close) {
+                initClient()
+            }
+            HttpGet httpGet = new HttpGet(url);
+            CloseableHttpResponse res = client.execute(httpGet);
+            resCode = res.getStatusLine().getStatusCode();
+            HttpEntity resEntity = res.getEntity();
+            if (resEntity != null)
+                resStr = EntityUtils.toString(resEntity, charset);
+            LOG.debug("check service " + url + " (" + resCode + "): " + resStr);
+
+        } catch (Exception e) {
+            LOG.error(e)
+            exception = e;
+        } finally {
+            if (close && client != null) {
+                client.close();
+            }
+        }
+
     }
 
     public void getAuth(String url, String user, String pass)

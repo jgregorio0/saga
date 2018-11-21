@@ -1018,6 +1018,28 @@ class SgCms {
      * @param fileInfo
      * @return
      */
+    public CmsResource uploadFile(String url, String path, String resourceType) {
+        uploadFile(cmso, url, path, resType(resourceType))
+    }
+
+    /**
+     * Upload file to opencms given by url
+     * @param cmso
+     * @param url
+     * @param fileInfo
+     * @return
+     */
+    public static CmsResource uploadFile(CmsObject cmso, String url, String path, String resourceType) {
+        uploadFile(cmso, url, path, resType(resourceType))
+    }
+
+    /**
+     * Upload file to opencms given by url
+     * @param cmso
+     * @param url
+     * @param fileInfo
+     * @return
+     */
     public static CmsResource uploadFile(CmsObject cmso, String url, String path, I_CmsResourceType resourceType) {
         CmsResource res = null;
 
@@ -1078,18 +1100,30 @@ class SgCms {
     public static byte[] downloadFile(String url) {
         byte[] f = null;
 
-        CloseableHttpClient httpclient = HttpClients.custom()
-                .setRedirectStrategy(new LaxRedirectStrategy())
-                .build();
-        CloseableHttpResponse response = httpclient.execute(new HttpGet(new URIBuilder(url).build()))
-        int code = response.getStatusLine().getStatusCode();
-
-        if (code == 200) {
-            f = EntityUtils.toByteArray(response.getEntity());
+        // force http
+        String remoteURL = url;
+        if (url.startsWith("https")) {
+            remoteURL = remoteURL.replace("https", "http")
         }
-        httpclient.close();
-        return f;
+        CloseableHttpClient httpclient = null;
+        try {
+            // http client to remote server
+            httpclient = HttpClients.custom()
+                    .setRedirectStrategy(new LaxRedirectStrategy())
+                    .build();
+            CloseableHttpResponse response = httpclient.execute(new HttpGet(new URIBuilder(remoteURL).build()))
+            int code = response.getStatusLine().getStatusCode();
 
+            if (code == 200) {
+                f = EntityUtils.toByteArray(response.getEntity());
+            }
+        } catch (Exception e) {
+            if (httpclient != null) {
+                httpclient.close();
+            }
+        }
+
+        return f;
     }
 
     /**
