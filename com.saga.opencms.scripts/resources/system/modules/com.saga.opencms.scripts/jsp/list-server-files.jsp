@@ -6,7 +6,7 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.io.BufferedInputStream" %>
 <%@ page import="java.io.FileInputStream" %>
-<%@page buffer="none" session="false" trimDirectiveWhitespaces="true" %>
+<%@page buffer="none" session="false"  %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
