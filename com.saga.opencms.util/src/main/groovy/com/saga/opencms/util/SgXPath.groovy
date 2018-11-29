@@ -13,6 +13,14 @@ class SgXPath {
         return CmsXmlUtils.removeXpath(xPathWithIdxs);
     }
 
+    static int getXPathPos(String xPathWithIdx){
+        return CmsXmlUtils.getXpathIndexInt(xPathWithIdx);
+    }
+
+    static String getXPath(List<String> xPathsWithIdx){
+        return xPathsWithIdx.join("/")
+    }
+
     static List<String> slicePath (String path) {
         return path.split("/").toList()
     }
@@ -91,5 +99,36 @@ class SgXPath {
                             targetRepetitionIndexes, index + 1))
         }
         return res
+    }
+
+    static String getParentXPath(String xPath) {
+        if (!StringUtils.isBlank(xPath) && xPath.contains("/")) {
+            String parent = xPath.substring(0, xPath.length() - 1);
+            return parent.substring(0, parent.lastIndexOf(47) + 1);
+        } else {
+            return null;
+        }
+    }
+
+    static String getLastFullName(String xPath) {
+        if (!StringUtils.isBlank(xPath) && xPath.contains("/")) {
+            String parent = xPath.substring(0, xPath.length() - 1);
+            return xPath.substring(parent.lastIndexOf(47) + 1);
+        }
+        return xPath;
+    }
+
+    static String setLastPos(String xPathFull, int pos) {
+        String xPathParent = SgXPath.getParentXPath(xPathFull)
+        String xPathName = getLastSimpleName(xPathFull)
+        return xPathParent +
+                xPathName +
+                "[" + pos + "]"
+    }
+
+    static String getLastSimpleName(String xPathFull) {
+        String xPathName = SgXPath.getLastFullName(xPathFull)
+        xPathName = SgXPath.removeIndexes(xPathName);
+        xPathName
     }
 }
