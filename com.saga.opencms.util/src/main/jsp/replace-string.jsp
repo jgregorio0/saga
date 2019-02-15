@@ -50,7 +50,7 @@
     }
 %>
 <%
-    String rootPath = "/sites/centroformacion/.content/sglayoutrow/";
+    String rootPath = "/";
     String type = "sglayoutrow";
     String origin = "/system/modules/com.saga.sagasuite.core/schemas/sglayoutrow.xsd";
     String target = "/system/modules/com.saga.sagasuite.layout/schemas/sglayoutrow.xsd";
