@@ -81,19 +81,30 @@
 %>
 
 <%
+    String exe = request.getParameter("exe");
+    String path = request.getParameter("path");
     String error = null;
-    try {
-        CmsObject cmso = CmsJspStandardContextBean.getInstance(request).getVfs().getCmsObject();
+    if (exe != null && path != null) {
+        try {
+            CmsObject cmso = CmsJspStandardContextBean.getInstance(request).getVfs().getCmsObject();
 //        publish(cmso, "/shared/.content/sgtechnicaldocumentation");
 //        I_CmsReport report = initPublishing(cmso);
 //        EXECUTE CODE
 
-        publish(cmso, this.getClass(), "/shared/.content/sgtechnicaldocumentation");
-    } catch (Exception e) {
-        error = CmsException.getStackTraceAsString(e);
+            publish(cmso, this.getClass(), path);
+        } catch (Exception e) {
+            error = CmsException.getStackTraceAsString(e);
+        }
     }
 %>
 <c:choose>
+    <c:when test="<%=exe == null%>">
+        <form style="width: 100%">
+            <input type="hidden" id="exe" name="exe" value="exe">
+            <input type="text" id="path" name="path" placeholder="/sites/ayto-antequera/noticias/.content/antnoticia/2005/" style="width: 100%">
+            <button type="submit">Ejecutar</button>
+        </form>
+    </c:when>
     <c:when test="<%=error != null%>">
         <h1>ERROR</h1>
         <p><%=error%></p>
