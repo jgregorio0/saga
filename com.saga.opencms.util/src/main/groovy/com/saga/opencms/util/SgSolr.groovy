@@ -3,6 +3,7 @@ package com.saga.opencms.util
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.logging.Log
 import org.opencms.file.CmsObject
+import org.opencms.main.CmsException
 import org.opencms.main.CmsLog
 import org.opencms.main.OpenCms
 import org.opencms.search.CmsSearchException
@@ -68,8 +69,42 @@ public class SgSolr {
     }
 
     public SgSolr(CmsObject cmso, String solrIndex) {
-        this.cmso = cmso;
+        this(cmso, solrIndex, null, null, null)
+    }
+
+    public SgSolr(CmsObject cmso, String index, String locale, String uri, String site) {
+        this.cmso = customCmsObject(cmso, locale, uri, site);
         initSolrIndex(solrIndex);
+    }
+
+    /**
+     * Customize a new initialized copy of CmsObject
+     * @param baseCms
+     * @param uri
+     * @param site
+     * @return
+     * @throws org.opencms.main.CmsException
+     */
+    public static CmsObject customCmsObject(
+            CmsObject baseCms, String locale, String uri, String site)
+            throws CmsException {
+        CmsObject cmso = baseCms;
+        boolean isLocale = StringUtils.isNotBlank(locale);
+        boolean isCustomSite = StringUtils.isNotBlank(site);
+        boolean isCustomUri = StringUtils.isNotBlank(uri);
+        if (isLocale || isCustomSite || isCustomUri) {
+            cmso = OpenCms.initCmsObject(baseCms);
+            if (isLocale) {
+                cmso.getRequestContext().setLocale(new Locale(locale));
+            }
+            if (isCustomSite) {
+                cmso.getRequestContext().setSiteRoot(site);
+            }
+            if (isCustomUri) {
+                cmso.getRequestContext().setUri(uri);
+            }
+        }
+        return cmso;
     }
 
     private void initSolrIndex(String customSolrIndex) {
