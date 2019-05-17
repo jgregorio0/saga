@@ -1,7 +1,8 @@
 <%@ tag import="org.apache.commons.logging.Log" %>
 <%@ tag import="org.opencms.file.CmsObject" %>
-<%@ tag import="org.opencms.flex.CmsFlexController" %>
 <%@ tag import="org.opencms.i18n.CmsMessages" %>
+<%@ tag import="org.opencms.jsp.CmsJspTagLink" %>
+<%@ tag import="org.opencms.jsp.util.CmsJspStandardContextBean" %>
 <%@ tag import="org.opencms.main.CmsLog" %>
 <%@ tag import="org.opencms.util.CmsStringUtil" %>
 <%@ tag import="java.util.ArrayList" %>
@@ -19,13 +20,23 @@
 
 <%!
     final Log LOG = CmsLog.getLog(this.getClass());
+
+
+    private String getTargetForDetailPage(
+            HttpServletRequest request, CmsJspStandardContextBean controller, CmsObject cmso, String targetHref) {
+        String sitePath = cmso.getSitePath(controller.getDetailContent());
+        targetHref = CmsJspTagLink.linkTagAction(sitePath, request, targetHref);
+        LOG.debug("pagina de detalle del recurso " + sitePath + " en " + targetHref);
+        return targetHref;
+    }
 %>
 <%
     List<Map> results = new ArrayList<Map>();
     try {
         String[] localesArray = locales.split("\\|");
 
-        CmsObject cmso = CmsFlexController.getCmsObject(request);
+        CmsJspStandardContextBean controller = CmsJspStandardContextBean.getInstance(request);
+        CmsObject cmso = controller.getVfs().getCmsObject();
         String uri = cmso.getRequestContext().getUri();
         String localeCurrent = cmso.getRequestContext().getLocale().getLanguage();
 
@@ -39,17 +50,20 @@
                 CmsMessages messages = new CmsMessages("com.saga.udl.formacioncontinua.messages", localeTarget);
 
                 Map<String, Object> fields = new HashMap<String, Object>();
-
-                // href
+                // obtenemos enlace sustituyendo locale
                 String targetHref = CmsStringUtil.joinPaths("/", localeTarget, relPath);
-                if (!cmso.existsResource(targetHref)) {
+                LOG.debug("obtenemos enlace sustituyendo locale " + targetHref);
+                if (controller.isDetailRequest()) {
+                    // 1- Obtenemos enlace a pagina de detalle con target al sitePath del recurso y baseUri como uri en idioma destino
+                    targetHref = getTargetForDetailPage(request, controller, cmso, targetHref);
+                } else if (!cmso.existsResource(targetHref)) {
+                    // 2- no es pagina de detalle y no existe enlace sustituyendo locale, enviamos a la home
                     targetHref = CmsStringUtil.joinPaths("/", localeTarget, "/");
+                    LOG.debug("no es pagina de detalle y no existe enlace sustituyendo locale, enviamos a la home " + targetHref);
                 }
+                // href and locale result
                 fields.put("href", targetHref);
-
-                // text
-                fields.put("text", messages.key("header.locale.link.text"));
-
+                fields.put("locale", localeTarget);
                 results.add(fields);
             }
         }
