@@ -1,6 +1,6 @@
+<%@ tag import="org.apache.commons.lang3.StringUtils" %>
 <%@ tag import="org.apache.commons.logging.Log" %>
 <%@ tag import="org.opencms.file.CmsObject" %>
-<%@ tag import="org.opencms.i18n.CmsMessages" %>
 <%@ tag import="org.opencms.jsp.CmsJspTagLink" %>
 <%@ tag import="org.opencms.jsp.util.CmsJspStandardContextBean" %>
 <%@ tag import="org.opencms.main.CmsLog" %>
@@ -21,7 +21,6 @@
 <%!
     final Log LOG = CmsLog.getLog(this.getClass());
 
-
     private String getTargetForDetailPage(
             HttpServletRequest request, CmsJspStandardContextBean controller, CmsObject cmso, String targetHref) {
         String sitePath = cmso.getSitePath(controller.getDetailContent());
@@ -38,7 +37,9 @@
         CmsJspStandardContextBean controller = CmsJspStandardContextBean.getInstance(request);
         CmsObject cmso = controller.getVfs().getCmsObject();
         String uri = cmso.getRequestContext().getUri();
+        String queryString = request.getQueryString();
         String localeCurrent = cmso.getRequestContext().getLocale().getLanguage();
+
 
         String localePath = "/" + localeCurrent + "/";
         String relPath = uri.substring(uri.indexOf(localePath) + localePath.length() - 1);
@@ -47,8 +48,6 @@
         for (int i = 0; i < localesArray.length; i++) {
             String localeTarget = localesArray[i];
             if (!localeTarget.equals(localeCurrent)) {
-                CmsMessages messages = new CmsMessages("com.saga.udl.formacioncontinua.messages", localeTarget);
-
                 Map<String, Object> fields = new HashMap<String, Object>();
                 // obtenemos enlace sustituyendo locale
                 String targetHref = CmsStringUtil.joinPaths("/", localeTarget, relPath);
@@ -60,6 +59,10 @@
                     // 2- no es pagina de detalle y no existe enlace sustituyendo locale, enviamos a la home
                     targetHref = CmsStringUtil.joinPaths("/", localeTarget, "/");
                     LOG.debug("no es pagina de detalle y no existe enlace sustituyendo locale, enviamos a la home " + targetHref);
+                }
+                // mantenemos parametros de la URL
+                if (StringUtils.isNotBlank(queryString) && StringUtils.isNotBlank(targetHref)) {
+                    targetHref += "?" + queryString;
                 }
                 // href and locale result
                 fields.put("href", targetHref);

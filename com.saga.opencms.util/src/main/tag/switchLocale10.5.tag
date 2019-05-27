@@ -1,3 +1,4 @@
+<%@ tag import="org.apache.commons.lang3.StringUtils" %>
 <%@ tag import="org.apache.commons.logging.Log" %>
 <%@ tag import="org.opencms.file.CmsObject" %>
 <%@ tag import="org.opencms.jsp.CmsJspResourceWrapper" %>
@@ -52,6 +53,7 @@
         CmsJspStandardContextBean controller = CmsJspStandardContextBean.getInstance(request);
         CmsObject cmso = controller.getVfs().getCmsObject();
         String uri = cmso.getRequestContext().getUri();
+        String queryString = request.getQueryString();
 
         // habilita multilocale
         boolean multilocaleEnabled = false;
@@ -88,6 +90,10 @@
                             // 4- no es pagina de detalle y no existe la pagina redirigimos a la home
                             targetHref = getTargetHome(localeTarget);
                         }
+                    }
+                    // mantenemos parametros de la URL
+                    if (StringUtils.isNotBlank(queryString) && StringUtils.isNotBlank(targetHref)) {
+                        targetHref += "?" + queryString;
                     }
                     // href and locale result
                     fields.put("href", targetHref);
