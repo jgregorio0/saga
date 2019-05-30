@@ -7,8 +7,16 @@
 
 <%@ tag trimDirectiveWhitespaces="true" pageEncoding="UTF-8"
         description="Permite acceder al contenido del recurso que se muestra en detalle" %>
-<%@attribute name="sitePath" type="java.lang.String" required="true" rtexprvalue="true"
+
+<%@attribute name="path" type="java.lang.String" required="true" rtexprvalue="true"
              description="Ruta absoluta al recurso" %>
+
+<%@attribute name="contentVarName" type="java.lang.String" required="false" rtexprvalue="true"
+             description="Nombre de la variable en la que guardará el CmsJspContentAccessBean en el request " %>
+<%@attribute name="valueVarName" type="java.lang.String" required="false" rtexprvalue="true"
+             description="Nombre de la variable en la que guardará el Map<String, CmsJspContentAccessValueWrapper> en el request " %>
+<%@attribute name="rdfaVarName" type="java.lang.String" required="false" rtexprvalue="true"
+             description="Nombre de la variable en la que guardará el Map<String, String> en el request " %>
 
 <%
     CmsJspContentAccessBean content = null;
@@ -16,11 +24,34 @@
     Map<String, String> rdfa = null;
     CmsJspStandardContextBean cms = CmsJspStandardContextBean.getInstance(request);
     CmsObject cmso = cms.getVfs().getCmsObject();
-    CmsResource resource = cmso.readResource(sitePath);
+
+    String resourcePath = path;
+    String siteRoot = cmso.getRequestContext().getSiteRoot();
+    if (resourcePath.contains(siteRoot)) {
+        resourcePath = resourcePath.substring(siteRoot.length());
+    }
+    CmsResource resource = cmso.readResource(resourcePath);
+
     content = new CmsJspContentAccessBean(cmso, resource);
     value = content.getValue();
     rdfa = content.getRdfa();
-    request.setAttribute("content", content);
-    request.setAttribute("value", value);
-    request.setAttribute("rdfa", rdfa);
+
+    if(contentVarName != null) {
+        request.setAttribute(contentVarName, content);
+    }
+    else{
+        request.setAttribute("content", content);
+    }
+    if(valueVarName != null) {
+        request.setAttribute(valueVarName, value);
+    }
+    else{
+        request.setAttribute("value", value);
+    }
+    if(rdfaVarName != null) {
+        request.setAttribute(rdfaVarName, rdfa);
+    }
+    else{
+        request.setAttribute("rdfa", rdfa);
+    }
 %>
