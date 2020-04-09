@@ -1,5 +1,3 @@
-#https://wiki-ebabel.herokuapp.com/index.php?title=Vagrant-nodejs-angularjs-tutorial
-
  #! /bin/bash
  if [ ! -f /home/vagrant/already-installed-flag ]
  then
@@ -25,23 +23,26 @@
    git config --global user.name "jgregorio"
    git config --global user.email gregoriojesus0@gmail.com
 
-   #echo "*********CONFIG NODE_MODULES*********"
-   #sudo -H -u vagrant bash -c 'mkdir /home/vagrant/node_modules'
-   #sudo -H -u vagrant bash -c 'ln -s /home/vagrant/node_modules /home/vagrant/project/node_modules'
+    #echo "*********CONFIG NODE_MODULES*********"
+    #mkdir /home/vagrant/node_modules
+    #ln -s /home/vagrant/node_modules /home/vagrant/project/node_modules
+    
+    #echo "*********INSTALL NVM && NODEJS && NPM*********"
+    #cd /home/vagrant
+    #git clone https://github.com/creationix/nvm.git ~/.nvm && cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`
+    #echo "source ~/.nvm/nvm.sh" >> ~/.profile
+    #source ~/.profile
+    #nvm install 8.11.3
+    #nvm alias default 8.11.3
+    #node -v
+    #npm -v
+    
+    #echo "*********INSTALL VUE CLI*********"
+    #npm install -g vue-cli
 
-   #echo "*********INSTALL NVM && NODEJS && NPM*********"
-   #TODO change to user vagrant??
-  #cd /home/vagrant
-  #git clone https://github.com/creationix/nvm.git ~/.nvm && cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`
-  #echo "source ~/.nvm/nvm.sh" >> ~/.profile
-  #source ~/.profile
-  #nvm install 8.11.2
-  #nvm alias default 8.11.3
-  #node -v
-  #npm -v
-  
-  #echo "*********INSTALL VUE CLI*********"
-  #npm install -g vue-cli
+    #echo "*********INSTALL PROJECT*********"
+    #cd /home/vagrant/project
+    #npm install
 
    echo "*********Done!*********"
  else
